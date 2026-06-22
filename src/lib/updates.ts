@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.19.0",
+    date: "2026-06-22",
+    items: [
+      "Atalhos completos: TODOS os comandos agora são atribuíveis (Configurações › Atalhos), com busca/filtro.",
+      "Paleta de comandos e atalhos unificados — a paleta mostra o atalho de cada comando.",
+      "Novos comandos: Nova nota (Ctrl+N), Nova pasta, Fechar aba (Ctrl+W), Paleta (Ctrl+K).",
+      "Marco: Configurações no nível do Obsidian concluídas (Editor, Arquivos & Links, Aparência, Plugins, Espiar página, Atalhos).",
+    ],
+  },
+  {
     version: "0.18.0",
     date: "2026-06-22",
     items: [

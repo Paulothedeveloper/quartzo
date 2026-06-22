@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import { COMMAND_DEFS, DEFAULT_SHORTCUTS } from "$lib/commands";
 
 export type EditorFont = "JetBrains Mono" | "Fira Code" | "Cascadia Code" | "Consolas";
 export type Density = "compact" | "comfortable";
@@ -72,38 +73,10 @@ export const DEFAULT_FEATURES: Record<string, boolean> = Object.fromEntries(
   FEATURE_PLUGINS.map((f) => [f.id, true])
 );
 
-/** Ações com atalho + rótulo (usado na UI de Atalhos). */
-export const SHORTCUT_ACTIONS: { id: string; label: string }[] = [
-  { id: "palette", label: "Paleta de comandos" },
-  { id: "quickSwitch", label: "Ir para nota" },
-  { id: "search", label: "Buscar nas notas" },
-  { id: "graph", label: "Abrir/fechar grafo" },
-  { id: "canvas", label: "Abrir/fechar Canvas" },
-  { id: "sketch", label: "Abrir/fechar Rascunho" },
-  { id: "outline", label: "Outline (cabeçalhos)" },
-  { id: "backlinks", label: "Backlinks" },
-  { id: "git", label: "Versões (Git)" },
-  { id: "memory", label: "Nova Memória do Claude" },
-  { id: "settings", label: "Configurações" },
-  { id: "sidebar", label: "Recolher/expandir sidebar" },
-  { id: "closeTab", label: "Fechar aba" },
-];
-
-export const DEFAULT_SHORTCUTS: Record<string, string> = {
-  palette: "ctrl+k",
-  quickSwitch: "ctrl+o",
-  search: "ctrl+shift+f",
-  graph: "ctrl+g",
-  canvas: "ctrl+shift+c",
-  sketch: "ctrl+shift+d",
-  outline: "ctrl+shift+o",
-  backlinks: "ctrl+shift+b",
-  git: "ctrl+shift+g",
-  memory: "ctrl+shift+m",
-  settings: "ctrl+,",
-  sidebar: "ctrl+\\",
-  closeTab: "ctrl+w",
-};
+/** Lista de ações para a UI de Atalhos = registro único de comandos. */
+export const SHORTCUT_ACTIONS = COMMAND_DEFS;
+/** Atalhos padrão (re-export do registro de comandos). */
+export { DEFAULT_SHORTCUTS };
 
 /** "ctrl+shift+k" -> "Ctrl+Shift+K" (exibição). */
 export function formatCombo(combo: string): string {

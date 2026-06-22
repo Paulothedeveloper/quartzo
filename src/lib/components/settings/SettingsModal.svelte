@@ -33,7 +33,7 @@
   import { checkForUpdate, CHANGELOG, GITHUB_REPO, type UpdateResult } from "$lib/updates";
   import { settings, SHORTCUT_ACTIONS, DEFAULT_SHORTCUTS, formatCombo, type Settings, type EditorFont, type Density, type ViewMode } from "$lib/stores/settings";
   import { loadNoteTypes, saveNoteTypes, DEFAULT_TYPES, type NoteType } from "$lib/types-notes";
-  import { Layers, Trash2, Pipette, Puzzle } from "@lucide/svelte";
+  import { Layers, Trash2, Pipette, Puzzle, Search } from "@lucide/svelte";
   import { FEATURE_PLUGINS } from "$lib/stores/settings";
 
   function setFeature(id: string, val: boolean) {
@@ -92,7 +92,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.18.0");
+  let appVersion = $state("0.19.0");
   $effect(() => {
     try {
       getVersion()
@@ -338,6 +338,14 @@
   ];
   // ---- Atalhos editáveis ----
   let capturing = $state<string | null>(null);
+  let shortcutFilter = $state("");
+  const filteredShortcuts = $derived(
+    shortcutFilter.trim()
+      ? SHORTCUT_ACTIONS.filter((a) =>
+          a.label.toLowerCase().includes(shortcutFilter.trim().toLowerCase())
+        )
+      : SHORTCUT_ACTIONS
+  );
   function startCapture(id: string) {
     capturing = id;
   }
@@ -1138,8 +1146,17 @@
                   Restaurar padrões
                 </button>
               </div>
+              <div class="flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5">
+                <Search size={14} class="text-text-secondary" />
+                <input
+                  bind:value={shortcutFilter}
+                  placeholder="Filtrar comandos…"
+                  class="w-full bg-transparent text-sm outline-none placeholder:text-text-secondary"
+                />
+                <span class="shrink-0 text-xs text-text-muted">{filteredShortcuts.length}</span>
+              </div>
               <div class="overflow-hidden rounded-xl border border-border">
-                {#each SHORTCUT_ACTIONS as a, i (a.id)}
+                {#each filteredShortcuts as a, i (a.id)}
                   <div class="flex items-center justify-between px-4 py-2.5 text-sm {i % 2 ? 'bg-bg/20' : ''}">
                     <span class="text-text-secondary">{a.label}</span>
                     <button

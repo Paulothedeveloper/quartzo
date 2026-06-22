@@ -41,12 +41,13 @@
     typePickerRequest,
     rightPane,
   } from "$lib/stores/ui";
-  import { settings, applySettings, getLastVault } from "$lib/stores/settings";
+  import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
+  import { COMMAND_DEFS } from "$lib/commands";
   import { graphData } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
   import { clearBacklinkCache } from "$lib/backlink-cache";
   import { saveTabs } from "$lib/tab-persist";
-  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote } from "$lib/vault-actions";
+  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir } from "$lib/vault-actions";
   import { insertAtCursor } from "$lib/stores/editor";
   import { pickColor, extractPalette, paletteToMarkdown, eyedropperSupported } from "$lib/color";
   import { printNote, exportNoteHtml } from "$lib/export";
@@ -264,25 +265,46 @@
     }
   }
 
+  // Registro único: id -> ação. Alimenta a Paleta de comandos E os atalhos.
+  const actionMap: Record<string, () => void> = {
+    palette: () => (paletteOpen = true),
+    "quick-switch": () => (quickOpen = true),
+    "global-search": () => { searchInitial = ""; searchOpen = true; },
+    "open-vault": openVault,
+    "new-note": () => {
+      if (get(currentVaultPath)) createNoteIn(newNoteDir());
+      else showToast(tr("toast.openVaultFirst"), "info");
+    },
+    "new-typed": openTypePicker,
+    "new-folder": () => {
+      const v = get(currentVaultPath);
+      if (v) createFolderIn(v);
+      else showToast(tr("toast.openVaultFirst"), "info");
+    },
+    "daily-note": openDailyNote,
+    "new-memory": () => memoryOpen.update((v) => !v),
+    "close-tab": () => closeActiveTab(),
+    "toggle-graph": () => showGraph.update((v) => !v),
+    "toggle-canvas": () => showCanvas.update((v) => !v),
+    "toggle-sketch": () => showSketch.update((v) => !v),
+    "toggle-backlinks": () => backlinksOpen.update((v) => !v),
+    "toggle-outline": () => outlineOpen.update((v) => !v),
+    "toggle-git": () => gitOpen.update((v) => !v),
+    "toggle-sidebar": () => sidebarCollapsed.update((v) => !v),
+    "pick-color": pickColorCmd,
+    "extract-palette": extractPaletteCmd,
+    "print-pdf": printNote,
+    "export-html": () => exportNoteHtml(get(activeTabPath)?.split(/[\\/]/).pop() ?? "nota"),
+    settings: () => settingsOpen.update((v) => !v),
+  };
+
   const commands = $derived<Command[]>([
-    { id: "open-vault", label: "Abrir vault…", hint: "pasta", action: openVault },
-    { id: "global-search", label: "Buscar nas notas…", hint: "Ctrl+Shift+F", action: () => { searchInitial = ""; searchOpen = true; } },
-    { id: "quick-switch", label: "Ir para nota…", hint: "Ctrl+O", action: () => (quickOpen = true) },
-    { id: "daily-note", label: "Nota do dia", hint: "Diário", action: openDailyNote },
-    { id: "new-typed", label: "Nova nota de tipo…", hint: "schema", action: openTypePicker },
-    { id: "pick-color", label: "Conta-gotas (pegar cor da tela)", hint: "cor", action: pickColorCmd },
-    { id: "extract-palette", label: "Extrair paleta de imagem…", hint: "cor", action: extractPaletteCmd },
-    { id: "print-pdf", label: "Imprimir / Salvar como PDF", hint: "exportar", action: printNote },
-    { id: "export-html", label: "Exportar nota como HTML…", hint: "exportar", action: () => exportNoteHtml(get(activeTabPath)?.split(/[\\/]/).pop() ?? "nota") },
-    { id: "toggle-graph", label: "Abrir grafo", hint: "Ctrl+G", action: () => showGraph.set(true) },
-    { id: "toggle-canvas", label: "Abrir Canvas", hint: "Ctrl+Shift+C", action: () => showCanvas.set(true) },
-    { id: "toggle-sketch", label: "Abrir Rascunho (desenho)", hint: "Ctrl+Shift+D", action: () => showSketch.set(true) },
-    { id: "toggle-backlinks", label: "Backlinks", hint: "Ctrl+Shift+B", action: () => backlinksOpen.update((v) => !v) },
-    { id: "toggle-outline", label: "Outline (cabeçalhos)", hint: "Ctrl+Shift+O", action: () => outlineOpen.update((v) => !v) },
-    { id: "toggle-git", label: "Versões (Git)", hint: "Ctrl+Shift+G", action: () => gitOpen.update((v) => !v) },
-    { id: "settings", label: "Configurações", hint: "Ctrl+,", action: () => settingsOpen.set(true) },
-    { id: "new-memory", label: "Nova Memória do Claude", hint: "Ctrl+Shift+M", action: () => memoryOpen.set(true) },
-    { id: "toggle-sidebar", label: "Recolher/expandir sidebar", action: () => sidebarCollapsed.update((v) => !v) },
+    ...COMMAND_DEFS.filter((d) => actionMap[d.id]).map((d) => ({
+      id: d.id,
+      label: d.label,
+      hint: $settings.shortcuts[d.id] ? formatCombo($settings.shortcuts[d.id]) : d.hint,
+      action: actionMap[d.id],
+    })),
     ...$openTabs.map((t) => ({
       id: `tab:${t.path}`,
       label: `Ir para: ${t.name}`,
@@ -315,22 +337,8 @@
     e.preventDefault();
   }
 
-  // Ações disparáveis por atalho (combos configuráveis em Configurações › Atalhos).
-  const shortcutActions: Record<string, () => void> = {
-    palette: () => (paletteOpen = true),
-    quickSwitch: () => (quickOpen = true),
-    search: () => { searchInitial = ""; searchOpen = true; },
-    graph: () => showGraph.update((v) => !v),
-    canvas: () => showCanvas.update((v) => !v),
-    sketch: () => showSketch.update((v) => !v),
-    outline: () => outlineOpen.update((v) => !v),
-    backlinks: () => backlinksOpen.update((v) => !v),
-    git: () => gitOpen.update((v) => !v),
-    memory: () => memoryOpen.update((v) => !v),
-    settings: () => settingsOpen.update((v) => !v),
-    sidebar: () => sidebarCollapsed.update((v) => !v),
-    closeTab: () => closeActiveTab(),
-  };
+  // Ações disparáveis por atalho = o mesmo registro da paleta.
+  const shortcutActions = actionMap;
   function comboFromEvent(e: KeyboardEvent): string {
     const parts: string[] = [];
     if (e.ctrlKey || e.metaKey) parts.push("ctrl");
