@@ -33,7 +33,12 @@
   import { checkForUpdate, CHANGELOG, GITHUB_REPO, type UpdateResult } from "$lib/updates";
   import { settings, SHORTCUT_ACTIONS, DEFAULT_SHORTCUTS, formatCombo, type Settings, type EditorFont, type Density, type ViewMode } from "$lib/stores/settings";
   import { loadNoteTypes, saveNoteTypes, DEFAULT_TYPES, type NoteType } from "$lib/types-notes";
-  import { Layers, Trash2, Pipette } from "@lucide/svelte";
+  import { Layers, Trash2, Pipette, Puzzle } from "@lucide/svelte";
+  import { FEATURE_PLUGINS } from "$lib/stores/settings";
+
+  function setFeature(id: string, val: boolean) {
+    settings.update((s) => ({ ...s, features: { ...s.features, [id]: val } }));
+  }
 
   // Presets de cor de destaque (paleta cristal + complementares).
   const ACCENTS = ["#67e8f9", "#38bdf8", "#a78bfa", "#34d399", "#fbbf24", "#f472b6", "#f87171"];
@@ -87,7 +92,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.17.0");
+  let appVersion = $state("0.18.0");
   $effect(() => {
     try {
       getVersion()
@@ -107,6 +112,7 @@
     | "markdown"
     | "tipos"
     | "aparencia"
+    | "plugins"
     | "nuvem"
     | "integracoes"
     | "atalhos"
@@ -122,6 +128,7 @@
     { id: "markdown", label: "Markdown", icon: Braces },
     { id: "tipos", label: "Tipos de nota", icon: Layers },
     { id: "aparencia", label: "Aparência", icon: Palette },
+    { id: "plugins", label: "Plugins nativos", icon: Puzzle },
     { id: "nuvem", label: "Nuvem", icon: Cloud },
     { id: "integracoes", label: "Integrações", icon: Workflow },
     { id: "atalhos", label: "Atalhos", icon: Keyboard },
@@ -501,6 +508,23 @@
                     <RefreshCw size={14} class={rebuilding ? "animate-spin" : ""} /> Reconstruir
                   </button>
                 </div>
+              </div>
+            </div>
+          {:else if section === "plugins"}
+            <div class="space-y-3">
+              <p class="px-1 text-xs text-text-secondary">
+                Ative ou desative recursos do Quartzo, como os plugins nativos do Obsidian.
+              </p>
+              <div class="card">
+                {#each FEATURE_PLUGINS as f, i (f.id)}
+                  {#if i > 0}<div class="divider"></div>{/if}
+                  {@render toggleRow(
+                    f.label,
+                    f.desc,
+                    $settings.features[f.id] ?? true,
+                    () => setFeature(f.id, !($settings.features[f.id] ?? true))
+                  )}
+                {/each}
               </div>
             </div>
           {:else if section === "editor"}

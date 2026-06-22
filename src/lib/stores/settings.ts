@@ -53,7 +53,24 @@ export interface Settings {
   confirmBeforeDelete: boolean; // confirmar antes de mandar arquivos pra lixeira
   // Atalhos (id da ação -> combo normalizado, ex.: "ctrl+shift+k")
   shortcuts: Record<string, string>;
+  // "Plugins nativos" ligados/desligados (id da feature -> bool)
+  features: Record<string, boolean>;
 }
+
+/** Features opcionais (estilo "plugins nativos" do Obsidian). */
+export const FEATURE_PLUGINS: { id: string; label: string; desc: string }[] = [
+  { id: "graph", label: "Grafo", desc: "Visualização de conexões entre as notas." },
+  { id: "canvas", label: "Canvas", desc: "Quadro infinito com cards, imagens e cores." },
+  { id: "sketch", label: "Rascunho", desc: "Desenho à mão livre (perfect-freehand)." },
+  { id: "git", label: "Versões (Git)", desc: "Versionamento local do vault." },
+  { id: "dailyNotes", label: "Nota do dia", desc: "Notas diárias em Diário/AAAA-MM-DD." },
+  { id: "memory", label: "Memórias do Claude", desc: "Salvar memórias do Claude no vault." },
+  { id: "tags", label: "Painel de tags", desc: "Lista de tags na barra lateral." },
+];
+
+export const DEFAULT_FEATURES: Record<string, boolean> = Object.fromEntries(
+  FEATURE_PLUGINS.map((f) => [f.id, true])
+);
 
 /** Ações com atalho + rótulo (usado na UI de Atalhos). */
 export const SHORTCUT_ACTIONS: { id: string; label: string }[] = [
@@ -143,6 +160,7 @@ export const DEFAULT_SETTINGS: Settings = {
   newNoteLocation: "root",
   confirmBeforeDelete: true,
   shortcuts: { ...DEFAULT_SHORTCUTS },
+  features: { ...DEFAULT_FEATURES },
 };
 
 const KEY = "quartzo:settings";
@@ -158,6 +176,7 @@ function load(): Settings {
         ...parsed,
         // mescla atalhos p/ versões antigas receberem ações novas
         shortcuts: { ...DEFAULT_SHORTCUTS, ...(parsed.shortcuts ?? {}) },
+        features: { ...DEFAULT_FEATURES, ...(parsed.features ?? {}) },
       };
     }
   } catch {

@@ -26,7 +26,7 @@
   import { currentVaultPath, fileTree } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
   import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
-  import { getRecentVaults } from "$lib/stores/settings";
+  import { getRecentVaults, settings } from "$lib/stores/settings";
   import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir } from "$lib/vault-actions";
   import type { FileNode } from "$lib/types";
   import FileTree from "./FileTree.svelte";
@@ -152,20 +152,24 @@
       </button>
     </div>
     <div class="mt-auto flex flex-col gap-2">
-      <button
-        onclick={() => memoryOpen.set(true)}
-        title="Nova Memória do Claude (Ctrl+Shift+M)"
-        class="rounded-lg p-2 text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-95"
-      >
-        <Sparkles size={18} />
-      </button>
-      <button
-        onclick={() => showGraph.update((v) => !v)}
-        title="Grafo (Ctrl+G)"
-        class="rounded-lg p-2 transition-all active:scale-95 {$showGraph ? 'bg-accent text-bg' : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-      >
-        <Share2 size={18} />
-      </button>
+      {#if $settings.features.memory}
+        <button
+          onclick={() => memoryOpen.set(true)}
+          title="Nova Memória do Claude (Ctrl+Shift+M)"
+          class="rounded-lg p-2 text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-95"
+        >
+          <Sparkles size={18} />
+        </button>
+      {/if}
+      {#if $settings.features.graph}
+        <button
+          onclick={() => showGraph.update((v) => !v)}
+          title="Grafo (Ctrl+G)"
+          class="rounded-lg p-2 transition-all active:scale-95 {$showGraph ? 'bg-accent text-bg' : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+        >
+          <Share2 size={18} />
+        </button>
+      {/if}
       <button onclick={() => settingsOpen.set(true)} title="Configurações (Ctrl+,)" class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
         <SettingsIcon size={18} />
       </button>
@@ -277,7 +281,7 @@
     </div>
 
     <!-- Tags -->
-    {#if $currentVaultPath}
+    {#if $currentVaultPath && $settings.features.tags}
       <div class="border-t border-border px-2 pt-1">
         <button
           onclick={toggleTags}
@@ -310,50 +314,62 @@
 
     <!-- Seção inferior fixa -->
     <div class="mt-auto flex flex-col gap-1 border-t border-border p-2">
-      <button
-        onclick={openDailyNote}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
-      >
-        <CalendarDays size={16} /> Nota do dia
-      </button>
-      <button
-        onclick={() => memoryOpen.set(true)}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
-      >
-        <Sparkles size={16} class="text-accent" /> Nova Memória do Claude
-      </button>
-      <button
-        onclick={() => showGraph.update((v) => !v)}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showGraph
-          ? 'bg-accent/15 text-accent-light'
-          : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-      >
-        <Share2 size={16} /> Grafo
-      </button>
-      <button
-        onclick={() => showCanvas.update((v) => !v)}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showCanvas
-          ? 'bg-accent/15 text-accent-light'
-          : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-      >
-        <Frame size={16} /> Canvas
-      </button>
-      <button
-        onclick={() => showSketch.update((v) => !v)}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showSketch
-          ? 'bg-accent/15 text-accent-light'
-          : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-      >
-        <Pencil size={16} /> Rascunho
-      </button>
-      <button
-        onclick={() => gitOpen.update((v) => !v)}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$gitOpen
-          ? 'bg-accent/15 text-accent-light'
-          : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-      >
-        <GitBranch size={16} /> Versões (Git)
-      </button>
+      {#if $settings.features.dailyNotes}
+        <button
+          onclick={openDailyNote}
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
+        >
+          <CalendarDays size={16} /> Nota do dia
+        </button>
+      {/if}
+      {#if $settings.features.memory}
+        <button
+          onclick={() => memoryOpen.set(true)}
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
+        >
+          <Sparkles size={16} class="text-accent" /> Nova Memória do Claude
+        </button>
+      {/if}
+      {#if $settings.features.graph}
+        <button
+          onclick={() => showGraph.update((v) => !v)}
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showGraph
+            ? 'bg-accent/15 text-accent-light'
+            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+        >
+          <Share2 size={16} /> Grafo
+        </button>
+      {/if}
+      {#if $settings.features.canvas}
+        <button
+          onclick={() => showCanvas.update((v) => !v)}
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showCanvas
+            ? 'bg-accent/15 text-accent-light'
+            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+        >
+          <Frame size={16} /> Canvas
+        </button>
+      {/if}
+      {#if $settings.features.sketch}
+        <button
+          onclick={() => showSketch.update((v) => !v)}
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showSketch
+            ? 'bg-accent/15 text-accent-light'
+            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+        >
+          <Pencil size={16} /> Rascunho
+        </button>
+      {/if}
+      {#if $settings.features.git}
+        <button
+          onclick={() => gitOpen.update((v) => !v)}
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$gitOpen
+            ? 'bg-accent/15 text-accent-light'
+            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+        >
+          <GitBranch size={16} /> Versões (Git)
+        </button>
+      {/if}
       <button
         onclick={() => settingsOpen.set(true)}
         class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"

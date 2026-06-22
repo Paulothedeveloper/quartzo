@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.18.0",
+    date: "2026-06-22",
+    items: [
+      "Nova aba Configurações › Plugins nativos: ligue/desligue recursos como no Obsidian.",
+      "Dá para esconder Grafo, Canvas, Rascunho, Versões (Git), Nota do dia, Memórias do Claude e Painel de tags.",
+    ],
+  },
+  {
     version: "0.17.0",
     date: "2026-06-22",
     items: [
