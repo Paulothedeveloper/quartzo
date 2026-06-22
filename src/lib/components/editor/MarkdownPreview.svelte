@@ -24,10 +24,31 @@
   import cpp from "highlight.js/lib/languages/cpp";
   import csharp from "highlight.js/lib/languages/csharp";
   import php from "highlight.js/lib/languages/php";
+  import kotlin from "highlight.js/lib/languages/kotlin";
+  import swift from "highlight.js/lib/languages/swift";
+  import dart from "highlight.js/lib/languages/dart";
+  import ruby from "highlight.js/lib/languages/ruby";
+  import lua from "highlight.js/lib/languages/lua";
+  import dockerfile from "highlight.js/lib/languages/dockerfile";
+  import ini from "highlight.js/lib/languages/ini";
+  import diff from "highlight.js/lib/languages/diff";
+  import graphql from "highlight.js/lib/languages/graphql";
+  import scss from "highlight.js/lib/languages/scss";
+  import powershell from "highlight.js/lib/languages/powershell";
+  import makefile from "highlight.js/lib/languages/makefile";
+  import objectivec from "highlight.js/lib/languages/objectivec";
+  import perl from "highlight.js/lib/languages/perl";
+  import r from "highlight.js/lib/languages/r";
+  import scala from "highlight.js/lib/languages/scala";
+  import haskell from "highlight.js/lib/languages/haskell";
+  import elixir from "highlight.js/lib/languages/elixir";
+  import plaintext from "highlight.js/lib/languages/plaintext";
 
   for (const [name, lang] of Object.entries({
     javascript, typescript, python, rust, bash, json, yaml, xml, css, markdown,
-    sql, go, java, cpp, csharp, php,
+    sql, go, java, cpp, csharp, php, kotlin, swift, dart, ruby, lua, dockerfile,
+    ini, diff, graphql, scss, powershell, makefile, objectivec, perl, r, scala,
+    haskell, elixir, plaintext,
   })) {
     hljs.registerLanguage(name, lang as any);
   }
@@ -35,10 +56,16 @@
   hljs.registerAliases(["ts"], { languageName: "typescript" });
   hljs.registerAliases(["py"], { languageName: "python" });
   hljs.registerAliases(["sh", "shell", "zsh"], { languageName: "bash" });
-  hljs.registerAliases(["html"], { languageName: "xml" });
+  hljs.registerAliases(["html", "svelte", "vue"], { languageName: "xml" });
   hljs.registerAliases(["yml"], { languageName: "yaml" });
-  hljs.registerAliases(["c++"], { languageName: "cpp" });
+  hljs.registerAliases(["c++", "c"], { languageName: "cpp" });
   hljs.registerAliases(["cs"], { languageName: "csharp" });
+  hljs.registerAliases(["kt"], { languageName: "kotlin" });
+  hljs.registerAliases(["rb"], { languageName: "ruby" });
+  hljs.registerAliases(["ps1"], { languageName: "powershell" });
+  hljs.registerAliases(["dockerfile"], { languageName: "dockerfile" });
+  hljs.registerAliases(["toml"], { languageName: "ini" });
+  hljs.registerAliases(["text", "txt"], { languageName: "plaintext" });
 
   function escapeHtml(s: string): string {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -399,6 +426,7 @@
   import { activeVideoSeek, parseTC } from "$lib/video";
   import VideoReview from "./VideoReview.svelte";
   import { get } from "svelte/store";
+  import { untrack } from "svelte";
 
   let {
     content = "",
@@ -498,7 +526,16 @@
     if (rootEl) onScroller?.(rootEl);
   });
 
-  const parsed = $derived.by(() => parseFrontmatter(content));
+  // Debounce do conteúdo p/ o preview pesado (Mermaid/query/math) não re-renderizar a cada tecla.
+  let rendered = $state(content);
+  $effect(() => {
+    const c = content;
+    if (c === untrack(() => rendered)) return;
+    const t = setTimeout(() => (rendered = c), 160);
+    return () => clearTimeout(t);
+  });
+
+  const parsed = $derived.by(() => parseFrontmatter(rendered));
   const html = $derived.by(() => {
     if (!parsed.body.trim()) return "";
     try {

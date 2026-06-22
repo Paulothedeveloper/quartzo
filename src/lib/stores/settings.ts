@@ -38,6 +38,56 @@ export interface Settings {
   // Geral
   autoOpenVault: boolean;
   sidebarWidth: number; // largura da barra lateral (px), arrastável
+  // Atalhos (id da ação -> combo normalizado, ex.: "ctrl+shift+k")
+  shortcuts: Record<string, string>;
+}
+
+/** Ações com atalho + rótulo (usado na UI de Atalhos). */
+export const SHORTCUT_ACTIONS: { id: string; label: string }[] = [
+  { id: "palette", label: "Paleta de comandos" },
+  { id: "quickSwitch", label: "Ir para nota" },
+  { id: "search", label: "Buscar nas notas" },
+  { id: "graph", label: "Abrir/fechar grafo" },
+  { id: "canvas", label: "Abrir/fechar Canvas" },
+  { id: "sketch", label: "Abrir/fechar Rascunho" },
+  { id: "outline", label: "Outline (cabeçalhos)" },
+  { id: "backlinks", label: "Backlinks" },
+  { id: "git", label: "Versões (Git)" },
+  { id: "memory", label: "Nova Memória do Claude" },
+  { id: "settings", label: "Configurações" },
+  { id: "sidebar", label: "Recolher/expandir sidebar" },
+  { id: "closeTab", label: "Fechar aba" },
+];
+
+export const DEFAULT_SHORTCUTS: Record<string, string> = {
+  palette: "ctrl+k",
+  quickSwitch: "ctrl+o",
+  search: "ctrl+shift+f",
+  graph: "ctrl+g",
+  canvas: "ctrl+shift+c",
+  sketch: "ctrl+shift+d",
+  outline: "ctrl+shift+o",
+  backlinks: "ctrl+shift+b",
+  git: "ctrl+shift+g",
+  memory: "ctrl+shift+m",
+  settings: "ctrl+,",
+  sidebar: "ctrl+\\",
+  closeTab: "ctrl+w",
+};
+
+/** "ctrl+shift+k" -> "Ctrl+Shift+K" (exibição). */
+export function formatCombo(combo: string): string {
+  return combo
+    .split("+")
+    .map((p) => {
+      if (p === "ctrl") return "Ctrl";
+      if (p === "shift") return "Shift";
+      if (p === "alt") return "Alt";
+      if (p === "\\") return "\\";
+      if (p === ",") return ",";
+      return p.toUpperCase();
+    })
+    .join("+");
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -67,6 +117,7 @@ export const DEFAULT_SETTINGS: Settings = {
   enabledSnippets: [],
   autoOpenVault: true,
   sidebarWidth: 280,
+  shortcuts: { ...DEFAULT_SHORTCUTS },
 };
 
 const KEY = "quartzo:settings";
@@ -75,7 +126,15 @@ function load(): Settings {
   if (typeof localStorage === "undefined") return { ...DEFAULT_SETTINGS };
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        // mescla atalhos p/ versões antigas receberem ações novas
+        shortcuts: { ...DEFAULT_SHORTCUTS, ...(parsed.shortcuts ?? {}) },
+      };
+    }
   } catch {
     /* ignora */
   }

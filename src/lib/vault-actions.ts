@@ -7,6 +7,7 @@ import { showToast } from "$lib/stores/toast";
 import { rememberVault, addRecentVault } from "$lib/stores/settings";
 import { renamingPath, rightPane, backlinksOpen, showGraph, showCanvas, showSketch } from "$lib/stores/ui";
 import { graphData } from "$lib/stores/graph";
+import { loadTabs } from "$lib/tab-persist";
 import type { FileNode } from "$lib/types";
 
 /** Cria uma nota nova numa pasta e já entra em modo renomear (não abre no editor
@@ -96,6 +97,27 @@ export async function setVault(path: string): Promise<void> {
     await invoke("start_vault_watch", { path });
   } catch {
     /* sem watcher (ex.: navegador) — segue normal */
+  }
+  // Restaura as abas da última sessão deste vault.
+  const saved = loadTabs(path);
+  if (saved.paths.length) {
+    const tabs = [];
+    for (const p of saved.paths) {
+      try {
+        const content = await invoke<string>("read_file", { path: p });
+        tabs.push({ path: p, name: baseName(p), content, dirty: false });
+      } catch {
+        /* arquivo sumiu — ignora */
+      }
+    }
+    if (tabs.length) {
+      openTabs.set(tabs);
+      activeTabPath.set(
+        saved.active && tabs.some((t) => t.path === saved.active)
+          ? saved.active
+          : tabs[tabs.length - 1].path
+      );
+    }
   }
 }
 

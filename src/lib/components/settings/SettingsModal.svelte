@@ -31,7 +31,7 @@
   import { untrack } from "svelte";
   import { RefreshCw, FolderInput } from "@lucide/svelte";
   import { checkForUpdate, CHANGELOG, GITHUB_REPO, type UpdateResult } from "$lib/updates";
-  import { settings, type Settings, type EditorFont, type Density, type ViewMode } from "$lib/stores/settings";
+  import { settings, SHORTCUT_ACTIONS, DEFAULT_SHORTCUTS, formatCombo, type Settings, type EditorFont, type Density, type ViewMode } from "$lib/stores/settings";
   import { loadNoteTypes, saveNoteTypes, DEFAULT_TYPES, type NoteType } from "$lib/types-notes";
   import { Layers, Trash2 } from "@lucide/svelte";
   import { currentVaultPath } from "$lib/stores/vault";
@@ -81,7 +81,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.11.0");
+  let appVersion = $state("0.12.0");
   $effect(() => {
     try {
       getVersion()
@@ -303,15 +303,44 @@
     { v: 800, label: "Relaxado (800ms)" },
     { v: 1500, label: "Lento (1500ms)" },
   ];
-  const shortcuts = [
-    ["Paleta de comandos", "Ctrl + K"],
-    ["Abrir/fechar grafo", "Ctrl + G"],
-    ["Configurações", "Ctrl + ,"],
-    ["Salvar nota", "Ctrl + S"],
-    ["Seguir wikilink (editor)", "Ctrl + clique"],
-    ["Nova nota", "botão na sidebar"],
-  ];
+  // ---- Atalhos editáveis ----
+  let capturing = $state<string | null>(null);
+  function startCapture(id: string) {
+    capturing = id;
+  }
+  function onCaptureKey(e: KeyboardEvent) {
+    if (!capturing) return;
+    e.preventDefault();
+    if (e.key === "Escape") {
+      capturing = null;
+      return;
+    }
+    // ignora teclas modificadoras sozinhas
+    if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) return;
+    if (!(e.ctrlKey || e.metaKey)) return; // exige Ctrl/Cmd para evitar conflito
+    const parts: string[] = [];
+    if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+    if (e.shiftKey) parts.push("shift");
+    if (e.altKey) parts.push("alt");
+    parts.push(e.key.toLowerCase());
+    const combo = parts.join("+");
+    const id = capturing;
+    capturing = null;
+    settings.update((s) => {
+      const next = { ...s.shortcuts };
+      // se outro já usa esse combo, libera o antigo
+      for (const k of Object.keys(next)) if (next[k] === combo) next[k] = "";
+      next[id] = combo;
+      return { ...s, shortcuts: next };
+    });
+  }
+  function resetShortcuts() {
+    settings.update((s) => ({ ...s, shortcuts: { ...DEFAULT_SHORTCUTS } }));
+    showToast("Atalhos restaurados", "success");
+  }
 </script>
+
+<svelte:window onkeydown={onCaptureKey} />
 
 {#if open}
   <div
@@ -876,19 +905,32 @@
               </div>
             </div>
           {:else if section === "atalhos"}
-            <div class="overflow-hidden rounded-xl border border-border">
-              {#each shortcuts as [name, key], i (name)}
-                <div
-                  class="flex items-center justify-between px-4 py-2.5 text-sm {i % 2
-                    ? 'bg-bg/20'
-                    : ''}"
-                >
-                  <span class="text-text-secondary">{name}</span>
-                  <kbd class="rounded bg-elevated px-2 py-0.5 font-mono text-xs text-text-primary"
-                    >{key}</kbd
-                  >
-                </div>
-              {/each}
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-text-secondary">Clique no atalho e pressione a nova combinação (com Ctrl).</span>
+                <button onclick={resetShortcuts} class="rounded-lg px-2.5 py-1 text-xs text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
+                  Restaurar padrões
+                </button>
+              </div>
+              <div class="overflow-hidden rounded-xl border border-border">
+                {#each SHORTCUT_ACTIONS as a, i (a.id)}
+                  <div class="flex items-center justify-between px-4 py-2.5 text-sm {i % 2 ? 'bg-bg/20' : ''}">
+                    <span class="text-text-secondary">{a.label}</span>
+                    <button
+                      onclick={() => startCapture(a.id)}
+                      class="min-w-[96px] rounded-md border px-2 py-0.5 text-center font-mono text-xs transition-colors {capturing ===
+                      a.id
+                        ? 'border-accent bg-accent/15 text-accent-light'
+                        : 'border-border bg-elevated text-text-primary hover:border-accent/50'}"
+                    >
+                      {capturing === a.id ? "pressione…" : $settings.shortcuts[a.id] ? formatCombo($settings.shortcuts[a.id]) : "—"}
+                    </button>
+                  </div>
+                {/each}
+              </div>
+              <div class="px-1 text-[11px] text-text-muted">
+                Fixos: <kbd class="font-mono">Ctrl+S</kbd> salvar · <kbd class="font-mono">Ctrl/Cmd+clique</kbd> seguir wikilink · <kbd class="font-mono">Esc</kbd> cancela a captura.
+              </div>
             </div>
           {:else if section === "atualizacoes"}
             <div class="space-y-3">

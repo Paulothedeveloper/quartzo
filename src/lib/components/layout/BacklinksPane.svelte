@@ -7,6 +7,7 @@
   import { currentVaultPath } from "$lib/stores/vault";
   import { backlinksOpen } from "$lib/stores/ui";
   import { openNote } from "$lib/vault-actions";
+  import { getBacklinkCache, setBacklinkCache } from "$lib/backlink-cache";
 
   interface Backlink {
     path: string;
@@ -27,6 +28,13 @@
       mentions = [];
       return;
     }
+    const hit = getBacklinkCache(vault, target);
+    if (hit) {
+      links = hit.links;
+      mentions = hit.mentions;
+      loading = false;
+      return;
+    }
     untrack(async () => {
       loading = true;
       try {
@@ -36,6 +44,7 @@
         ]);
         links = bl;
         mentions = um;
+        setBacklinkCache(vault, target, { links: bl, mentions: um });
       } catch {
         links = [];
         mentions = [];

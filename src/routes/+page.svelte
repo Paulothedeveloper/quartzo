@@ -42,6 +42,8 @@
   import { settings, applySettings, getLastVault } from "$lib/stores/settings";
   import { graphData } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
+  import { clearBacklinkCache } from "$lib/backlink-cache";
+  import { saveTabs } from "$lib/tab-persist";
   import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote } from "$lib/vault-actions";
   import { insertAtCursor } from "$lib/stores/editor";
   import { pickColor, extractPalette, paletteToMarkdown, eyedropperSupported } from "$lib/color";
@@ -79,7 +81,6 @@
   let searchOpen = $state(false);
   let searchInitial = $state("");
   let quickOpen = $state(false);
-  let templatesOpen = $state(false);
   let typedOpen = $state(false);
   let noteTypes = $state<NoteType[]>([]);
 
@@ -108,43 +109,6 @@
       untrack(openTypePicker);
     }
   });
-
-  // Templates: arquivos dentro de uma pasta "Templates" no vault.
-  function applyTemplateVars(s: string): string {
-    const now = new Date();
-    const date = now.toISOString().slice(0, 10);
-    const time = now.toTimeString().slice(0, 5);
-    const title = (get(activeTabPath)?.split(/[\\/]/).pop() ?? "").replace(/\.md$/i, "");
-    return s
-      .replace(/\{\{\s*date\s*\}\}/gi, date)
-      .replace(/\{\{\s*time\s*\}\}/gi, time)
-      .replace(/\{\{\s*title\s*\}\}/gi, title);
-  }
-  const templateCommands = $derived.by<Command[]>(() => {
-    const tf = $fileTree.find((n) => n.is_dir && n.name.toLowerCase() === "templates");
-    return (tf?.children ?? [])
-      .filter((c) => !c.is_dir && c.name.toLowerCase().endsWith(".md"))
-      .map((f) => ({
-        id: f.path,
-        label: f.name.replace(/\.md$/i, ""),
-        action: async () => {
-          try {
-            const raw = await invoke<string>("read_file", { path: f.path });
-            if (!insertAtCursor(applyTemplateVars(raw)))
-              showToast("Abra uma nota para inserir o template", "info");
-          } catch (e) {
-            showToast(`Erro no template: ${e}`, "error");
-          }
-        },
-      }));
-  });
-  function openTemplates() {
-    if (templateCommands.length === 0) {
-      showToast('Crie uma pasta "Templates" no vault com seus modelos .md', "info");
-      return;
-    }
-    templatesOpen = true;
-  }
 
   // Busca pré-preenchida (ex.: clicar numa tag na sidebar).
   $effect(() => {
@@ -200,6 +164,7 @@
         refreshTree();
         graphData.set(null); // força reindexar o grafo
         loadQueryIndex(get(currentVaultPath), true); // atualiza as views ```query
+        clearBacklinkCache(); // invalida cache de backlinks (arquivos mudaram)
       }, 300);
     }).then((u) => (unlisten = u));
     return () => unlisten?.();
@@ -212,6 +177,14 @@
       openNote(path);
       selectedFile.set(null);
     }
+  });
+
+  // Salva as abas abertas (caminhos + ativa) por vault, p/ restaurar a sessão.
+  $effect(() => {
+    const v = $currentVaultPath;
+    const tabs = $openTabs;
+    const active = $activeTabPath;
+    if (v) saveTabs(v, tabs.map((t) => t.path), active);
   });
 
   // Grafo, Canvas e Rascunho são mutuamente exclusivos (abrir um fecha os outros).
@@ -294,7 +267,6 @@
     { id: "quick-switch", label: "Ir para nota…", hint: "Ctrl+O", action: () => (quickOpen = true) },
     { id: "daily-note", label: "Nota do dia", hint: "Diário", action: openDailyNote },
     { id: "new-typed", label: "Nova nota de tipo…", hint: "schema", action: openTypePicker },
-    { id: "insert-template", label: "Inserir template…", hint: "Templates", action: openTemplates },
     { id: "pick-color", label: "Conta-gotas (pegar cor da tela)", hint: "cor", action: pickColorCmd },
     { id: "extract-palette", label: "Extrair paleta de imagem…", hint: "cor", action: extractPaletteCmd },
     { id: "print-pdf", label: "Imprimir / Salvar como PDF", hint: "exportar", action: printNote },
@@ -340,50 +312,41 @@
     e.preventDefault();
   }
 
+  // Ações disparáveis por atalho (combos configuráveis em Configurações › Atalhos).
+  const shortcutActions: Record<string, () => void> = {
+    palette: () => (paletteOpen = true),
+    quickSwitch: () => (quickOpen = true),
+    search: () => { searchInitial = ""; searchOpen = true; },
+    graph: () => showGraph.update((v) => !v),
+    canvas: () => showCanvas.update((v) => !v),
+    sketch: () => showSketch.update((v) => !v),
+    outline: () => outlineOpen.update((v) => !v),
+    backlinks: () => backlinksOpen.update((v) => !v),
+    git: () => gitOpen.update((v) => !v),
+    memory: () => memoryOpen.update((v) => !v),
+    settings: () => settingsOpen.update((v) => !v),
+    sidebar: () => sidebarCollapsed.update((v) => !v),
+    closeTab: () => closeActiveTab(),
+  };
+  function comboFromEvent(e: KeyboardEvent): string {
+    const parts: string[] = [];
+    if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+    if (e.shiftKey) parts.push("shift");
+    if (e.altKey) parts.push("alt");
+    parts.push(e.key.toLowerCase());
+    return parts.join("+");
+  }
   function onGlobalKeydown(e: KeyboardEvent) {
-    const mod = e.ctrlKey || e.metaKey;
-    if (!mod) return;
-    const k = e.key.toLowerCase();
-    if (k === "k") {
-      e.preventDefault();
-      paletteOpen = true;
-    } else if (k === "o" && !e.shiftKey) {
-      e.preventDefault();
-      quickOpen = true;
-    } else if (k === "w") {
-      e.preventDefault();
-      closeActiveTab();
-    } else if (e.shiftKey && k === "f") {
-      e.preventDefault();
-      searchInitial = "";
-      searchOpen = true;
-    } else if (e.shiftKey && k === "c") {
-      e.preventDefault();
-      showCanvas.update((v) => !v);
-    } else if (e.shiftKey && k === "d") {
-      e.preventDefault();
-      showSketch.update((v) => !v);
-    } else if (e.shiftKey && k === "b") {
-      e.preventDefault();
-      backlinksOpen.update((v) => !v);
-    } else if (e.shiftKey && k === "o") {
-      e.preventDefault();
-      outlineOpen.update((v) => !v);
-    } else if (e.shiftKey && k === "g") {
-      e.preventDefault();
-      gitOpen.update((v) => !v);
-    } else if (e.shiftKey && k === "m") {
-      e.preventDefault();
-      memoryOpen.update((v) => !v);
-    } else if (k === "g") {
-      e.preventDefault();
-      showGraph.update((v) => !v);
-    } else if (e.key === ",") {
-      e.preventDefault();
-      settingsOpen.update((v) => !v);
-    } else if (e.key === "\\") {
-      e.preventDefault();
-      sidebarCollapsed.update((v) => !v);
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (get(settingsOpen)) return; // não dispara enquanto edita atalhos nas Configurações
+    const combo = comboFromEvent(e);
+    const map = get(settings).shortcuts;
+    for (const id of Object.keys(map)) {
+      if (map[id] === combo && shortcutActions[id]) {
+        e.preventDefault();
+        shortcutActions[id]();
+        return;
+      }
     }
   }
 </script>
@@ -496,7 +459,6 @@
   createLabel="Criar nota"
   placeholder="Ir para nota ou digite para criar…"
 />
-<CommandPalette bind:open={templatesOpen} commands={templateCommands} />
 <CommandPalette
   bind:open={typedOpen}
   commands={typeCommands}

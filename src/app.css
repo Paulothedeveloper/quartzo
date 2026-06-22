@@ -135,6 +135,54 @@ html.theme-light .q-prose pre {
   background: #f1f5f9;
   border-color: #e2e8f0;
 }
+/* Realce de sintaxe no tema claro (paleta GitHub light) */
+html.theme-light .q-prose .hljs {
+  color: #1f2328;
+}
+html.theme-light .q-prose .hljs-comment,
+html.theme-light .q-prose .hljs-quote {
+  color: #6e7781;
+}
+html.theme-light .q-prose .hljs-keyword,
+html.theme-light .q-prose .hljs-selector-tag,
+html.theme-light .q-prose .hljs-literal,
+html.theme-light .q-prose .hljs-type,
+html.theme-light .q-prose .hljs-built_in,
+html.theme-light .q-prose .hljs-symbol,
+html.theme-light .q-prose .hljs-bullet {
+  color: #cf222e;
+}
+html.theme-light .q-prose .hljs-string,
+html.theme-light .q-prose .hljs-attr,
+html.theme-light .q-prose .hljs-meta-string,
+html.theme-light .q-prose .hljs-regexp {
+  color: #0a3069;
+}
+html.theme-light .q-prose .hljs-number,
+html.theme-light .q-prose .hljs-variable,
+html.theme-light .q-prose .hljs-template-variable,
+html.theme-light .q-prose .hljs-attribute,
+html.theme-light .q-prose .hljs-meta {
+  color: #0550ae;
+}
+html.theme-light .q-prose .hljs-title,
+html.theme-light .q-prose .hljs-section,
+html.theme-light .q-prose .hljs-name,
+html.theme-light .q-prose .hljs-selector-id,
+html.theme-light .q-prose .hljs-selector-class {
+  color: #8250df;
+}
+html.theme-light .q-prose .hljs-tag {
+  color: #116329;
+}
+html.theme-light .q-prose .hljs-deletion {
+  color: #82071e;
+  background: #ffebe9;
+}
+html.theme-light .q-prose .hljs-addition {
+  color: #116329;
+  background: #dafbe1;
+}
 html.theme-light .q-prose blockquote {
   color: #475569;
   border-left-color: #cbd5e1;

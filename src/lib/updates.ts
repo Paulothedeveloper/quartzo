@@ -12,6 +12,17 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.12.0",
+    date: "2026-06-22",
+    items: [
+      "Realce de código no tema claro + muito mais linguagens (Kotlin, Swift, Ruby, Dart, etc.).",
+      "Atalhos editáveis: clique e pressione a nova combinação (Configurações › Atalhos).",
+      "As abas abertas são restauradas ao reabrir o vault.",
+      "Preview mais leve (Mermaid/views/math com debounce) e backlinks em cache.",
+      "Templates antigos unificados nos Tipos de nota.",
+    ],
+  },
+  {
     version: "0.11.0",
     date: "2026-06-22",
     items: [
