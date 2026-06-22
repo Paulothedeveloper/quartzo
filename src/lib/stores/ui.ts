@@ -49,6 +49,14 @@ export const searchRequest = writable<string | null>(null);
 /** Pedido de abrir o seletor de "nova nota de tipo" (disparado pelo + Adicionar). */
 export const typePickerRequest = writable(false);
 
+/** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
+export interface HoverPreviewState {
+  path: string;
+  x: number;
+  y: number;
+}
+export const hoverPreviewTarget = writable<HoverPreviewState | null>(null);
+
 /** Diálogo de confirmação (promessa). null = fechado. */
 export interface ConfirmRequest {
   title: string;

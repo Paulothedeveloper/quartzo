@@ -15,6 +15,7 @@
   import CommandPalette, { type Command } from "$lib/components/ui/CommandPalette.svelte";
   import ContextMenu from "$lib/components/ui/ContextMenu.svelte";
   import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
+  import HoverPreview from "$lib/components/ui/HoverPreview.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -472,3 +473,4 @@
 <SnippetInjector />
 <MemoryModal bind:open={$memoryOpen} />
 <ConfirmDialog />
+<HoverPreview />

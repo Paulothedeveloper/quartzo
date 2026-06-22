@@ -23,6 +23,8 @@ export interface Settings {
   rtl: boolean; // direção do texto da direita para a esquerda
   closeBrackets: boolean; // cria pares de parênteses/aspas/markdown
   spellcheck: boolean; // verificação ortográfica do navegador no editor
+  hoverPreview: boolean; // espiar página: pré-visualizar nota ao passar o mouse no [[wikilink]]
+  hoverPreviewCtrl: boolean; // exigir Ctrl para acionar o espiar página
   // Preview / renderização
   renderMermaid: boolean; // diagramas ```mermaid
   renderQueries: boolean; // views dinâmicas ```query (tabela/kanban/tarefas)
@@ -117,6 +119,8 @@ export const DEFAULT_SETTINGS: Settings = {
   rtl: false,
   closeBrackets: true,
   spellcheck: false,
+  hoverPreview: true,
+  hoverPreviewCtrl: false,
   renderMermaid: true,
   renderQueries: true,
   renderVideo: true,

@@ -424,6 +424,7 @@
   import { currentVaultPath } from "$lib/stores/vault";
   import { queryIndex, loadQueryIndex, buildQueryView } from "$lib/query";
   import { activeVideoSeek, parseTC } from "$lib/video";
+  import { hoverWikilink, clearHoverPreview } from "$lib/hover-preview";
   import VideoReview from "./VideoReview.svelte";
   import { get } from "svelte/store";
   import { untrack } from "svelte";
@@ -596,9 +597,27 @@
   });
 
   // Action: anexa o handler de clique sem onclick inline (evita falso-positivo de a11y).
+  function onOver(e: MouseEvent) {
+    const wl = (e.target as HTMLElement).closest<HTMLElement>(".wikilink");
+    if (wl?.dataset.target) {
+      const r = wl.getBoundingClientRect();
+      hoverWikilink(wl.dataset.target, r.left, r.bottom, e.ctrlKey || e.metaKey);
+    }
+  }
+  function onOut(e: MouseEvent) {
+    if ((e.target as HTMLElement).closest?.(".wikilink")) clearHoverPreview();
+  }
   function delegateClick(node: HTMLElement) {
     node.addEventListener("click", onClick);
-    return { destroy: () => node.removeEventListener("click", onClick) };
+    node.addEventListener("mouseover", onOver);
+    node.addEventListener("mouseout", onOut);
+    return {
+      destroy: () => {
+        node.removeEventListener("click", onClick);
+        node.removeEventListener("mouseover", onOver);
+        node.removeEventListener("mouseout", onOut);
+      },
+    };
   }
 
   async function onClick(e: MouseEvent) {

@@ -29,6 +29,7 @@
   import { settings, FONT_STACK, type Settings } from "$lib/stores/settings";
   import { activeEditorView } from "$lib/stores/editor";
   import { pickColor } from "$lib/color";
+  import { hoverWikilink, clearHoverPreview } from "$lib/hover-preview";
 
   let {
     doc = "",
@@ -223,6 +224,17 @@
       fontComp.of(fontTheme(s)),
       keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       EditorView.domEventHandlers({
+        mouseover(e) {
+          const wl = (e.target as HTMLElement).closest?.(".cm-wikilink");
+          if (wl) {
+            const target = (wl.textContent ?? "").replace(/^\[\[|\]\]$/g, "").split("|")[0].trim();
+            const r = wl.getBoundingClientRect();
+            if (target) hoverWikilink(target, r.left, r.bottom, e.ctrlKey || e.metaKey);
+          }
+        },
+        mouseout(e) {
+          if ((e.target as HTMLElement).closest?.(".cm-wikilink")) clearHoverPreview();
+        },
         mousedown(e, v) {
           if (!(e.metaKey || e.ctrlKey)) return false;
           const pos = v.posAtCoords({ x: e.clientX, y: e.clientY });

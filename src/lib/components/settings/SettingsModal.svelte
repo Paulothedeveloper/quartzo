@@ -87,7 +87,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.16.0");
+  let appVersion = $state("0.17.0");
   $effect(() => {
     try {
       getVersion()
@@ -594,6 +594,24 @@
                   $settings.statusBar,
                   () => set("statusBar", !$settings.statusBar)
                 )}
+              </div>
+
+              <div class="card">
+                {@render toggleRow(
+                  "Espiar página (pré-visualizar ao passar o mouse)",
+                  "Mostra um cartão com o conteúdo da nota ao passar o mouse num [[wikilink]].",
+                  $settings.hoverPreview,
+                  () => set("hoverPreview", !$settings.hoverPreview)
+                )}
+                {#if $settings.hoverPreview}
+                  <div class="divider"></div>
+                  {@render toggleRow(
+                    "Exigir Ctrl para espiar",
+                    "Só pré-visualiza quando o Ctrl estiver pressionado.",
+                    $settings.hoverPreviewCtrl,
+                    () => set("hoverPreviewCtrl", !$settings.hoverPreviewCtrl)
+                  )}
+                {/if}
               </div>
 
               <div class="card">

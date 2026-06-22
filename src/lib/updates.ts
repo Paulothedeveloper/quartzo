@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.17.0",
+    date: "2026-06-22",
+    items: [
+      "Espiar página: passe o mouse num [[wikilink]] e veja um cartão com a pré-visualização da nota — no editor e na leitura.",
+      "Opção de exigir Ctrl para acionar a pré-visualização (Configurações › Editor).",
+    ],
+  },
+  {
     version: "0.16.0",
     date: "2026-06-22",
     items: [
