@@ -4,10 +4,13 @@
     SvelteFlow,
     Background,
     Controls,
+    Panel,
     type Node,
     type Edge,
   } from "@xyflow/svelte";
   import "@xyflow/svelte/dist/style.css";
+  import { Maximize2 } from "@lucide/svelte";
+  import { t } from "$lib/i18n";
   import {
     forceSimulation,
     forceManyBody,
@@ -17,6 +20,8 @@
     forceY,
   } from "d3-force";
   import GraphNode from "./GraphNode.svelte";
+  import RegionNode from "./RegionNode.svelte";
+  import GraphFocus from "./GraphFocus.svelte";
   import { GRAPH_CTX, type GraphCtx, type GraphState } from "./context";
   import type { RawGraphNode, RawGraphEdge } from "$lib/stores/graph";
 
@@ -49,8 +54,23 @@
   let baseEdges: Edge[] = [];
   let neighbors = new Map<string, Set<string>>();
   let firstDraw = true; // anima o "draw" das arestas só na entrada
+  let groupNodeIds = new Map<string, string[]>(); // pasta -> ids das notas (p/ zoom)
 
   const gview = $state<GraphState>({ hoveredId: null, matched: null });
+  let activeGroup = $state<string | null>(null);
+  let focusTarget = $state<{ ids: string[] | null; nonce: number }>({ ids: null, nonce: 0 });
+
+  function focusGroup(group: string) {
+    const ids = groupNodeIds.get(group) ?? [];
+    activeGroup = group;
+    gview.matched = new Set(ids);
+    focusTarget = { ids, nonce: focusTarget.nonce + 1 };
+  }
+  function resetFocus() {
+    activeGroup = null;
+    gview.matched = null;
+    focusTarget = { ids: null, nonce: focusTarget.nonce + 1 };
+  }
 
   setContext<GraphCtx>(GRAPH_CTX, {
     state: gview,
@@ -60,9 +80,10 @@
     open: (p) => onOpenNote?.(p),
     enter: (id) => (gview.hoveredId = id),
     leave: () => (gview.hoveredId = null),
+    focusGroup,
   });
 
-  const nodeTypes = { note: GraphNode };
+  const nodeTypes = { note: GraphNode, region: RegionNode };
 
   function applyEdgeStyles() {
     const h = gview.hoveredId;
@@ -161,7 +182,7 @@
     const pos = new Map<string, { x: number; y: number }>();
     for (const s of simNodes) pos.set(s.id, { x: s.x ?? 0, y: s.y ?? 0 });
 
-    nodes = rNodes.map((n, i) => {
+    const noteNodes: Node[] = rNodes.map((n, i) => {
       const deg = degree.get(n.id) ?? 0;
       const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
       const p = pos.get(n.id)!;
@@ -169,9 +190,50 @@
         id: n.id,
         type: "note",
         position: { x: p.x, y: p.y },
+        zIndex: 2,
         data: { label: n.label, color: colorFor(n.group), size, path: n.path, group: n.group, index: i },
       } satisfies Node;
     });
+
+    // ----- Lobos/regiões: um "halo" rotulado por pasta (cérebro / facetas do cristal) -----
+    groupNodeIds = new Map();
+    const bbox = new Map<string, { minX: number; minY: number; maxX: number; maxY: number; n: number }>();
+    rNodes.forEach((n) => {
+      const p = pos.get(n.id)!;
+      const deg = degree.get(n.id) ?? 0;
+      const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
+      if (!groupNodeIds.has(n.group)) groupNodeIds.set(n.group, []);
+      groupNodeIds.get(n.group)!.push(n.id);
+      const b = bbox.get(n.group) ?? { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, n: 0 };
+      b.minX = Math.min(b.minX, p.x);
+      b.minY = Math.min(b.minY, p.y);
+      b.maxX = Math.max(b.maxX, p.x + size);
+      b.maxY = Math.max(b.maxY, p.y + size);
+      b.n += 1;
+      bbox.set(n.group, b);
+    });
+    const PAD = 70;
+    const regionNodes: Node[] = [...bbox.entries()]
+      .filter(([, b]) => b.n >= 2) // ignora pastas com 1 nota (sem lobo)
+      .map(([group, b]) => ({
+        id: `region:${group}`,
+        type: "region",
+        position: { x: b.minX - PAD, y: b.minY - PAD },
+        draggable: false,
+        selectable: false,
+        connectable: false,
+        zIndex: 0,
+        data: {
+          label: group || "/",
+          color: colorFor(group),
+          w: b.maxX - b.minX + PAD * 2,
+          h: b.maxY - b.minY + PAD * 2,
+          count: b.n,
+          group,
+        },
+      })) satisfies Node[];
+
+    nodes = [...regionNodes, ...noteNodes];
 
     baseEdges = valid.map((e) => ({ id: e.id, source: e.source, target: e.target, type: "bezier" }));
     applyEdgeStyles();
@@ -207,6 +269,15 @@
     gview.matched;
     untrack(() => applyEdgeStyles());
   });
+
+  // Dropdown de pasta também dá zoom no lobo correspondente.
+  $effect(() => {
+    const f = folder;
+    untrack(() => {
+      if (f) focusGroup(f);
+      else if (activeGroup !== null) resetFocus();
+    });
+  });
 </script>
 
 <div class="graph-wrap h-full w-full">
@@ -221,15 +292,51 @@
     nodesConnectable={false}
     elementsSelectable={true}
     defaultEdgeOptions={{ type: "bezier" }}
+    onnodeclick={({ node }) => {
+      if (node.type === "region") focusGroup((node.data as any).group as string);
+    }}
   >
     <Background bgColor="#0a0f1c" patternColor="#16223a" gap={28} size={1.2} />
     <Controls showLock={false} />
+    <GraphFocus target={focusTarget} />
+    {#if activeGroup !== null}
+      <Panel position="top-left">
+        <button class="region-back" onclick={resetFocus}>
+          <Maximize2 size={13} />
+          {$t("graph.seeAll")}
+        </button>
+      </Panel>
+    {/if}
   </SvelteFlow>
 </div>
 
 <style>
   .graph-wrap {
     position: relative;
+  }
+  .region-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(28, 37, 54, 0.78);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    transition: all 0.15s var(--ease-out, ease);
+  }
+  .region-back:hover {
+    background: var(--color-accent);
+    color: #06121a;
+    border-color: transparent;
+  }
+  .region-back:active {
+    transform: scale(0.97);
   }
   /* atmosfera cristalina: glow ciano sutil sobre o canvas */
   .graph-wrap::after {

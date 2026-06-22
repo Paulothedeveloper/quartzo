@@ -13,6 +13,7 @@
   import { settings } from "$lib/stores/settings";
   import { backlinksOpen, outlineOpen } from "$lib/stores/ui";
   import { openWikilink, openNote } from "$lib/vault-actions";
+  import { t, tr } from "$lib/i18n";
   import CodeMirror from "./CodeMirror.svelte";
   import MarkdownPreview from "./MarkdownPreview.svelte";
 
@@ -33,7 +34,7 @@
       await invoke("write_file", { path, content });
       markContent(path, content, false);
     } catch (e) {
-      showToast(`Erro ao salvar: ${e}`, "error");
+      showToast(tr("editor.saveError", { error: String(e) }), "error");
     } finally {
       saving = false;
     }
@@ -55,8 +56,8 @@
   async function insertImage() {
     const sel = await openDialog({
       multiple: false,
-      title: "Inserir imagem",
-      filters: [{ name: "Imagens", extensions: ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"] }],
+      title: tr("editor.insertImageTitle"),
+      filters: [{ name: tr("editor.imagesFilter"), extensions: ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"] }],
     });
     if (typeof sel !== "string") return;
     const name = sel.split(/[\\/]/).pop() ?? "";
@@ -64,32 +65,32 @@
   }
 
   // Ferramentas de criação/formatação (atuam na seleção do editor).
-  const tools = [
-    { icon: Heading1, title: "Título 1", run: () => toggleLinePrefix("# ") },
-    { icon: Heading2, title: "Título 2", run: () => toggleLinePrefix("## ") },
+  const tools = $derived([
+    { icon: Heading1, title: $t("editor.heading1"), run: () => toggleLinePrefix("# ") },
+    { icon: Heading2, title: $t("editor.heading2"), run: () => toggleLinePrefix("## ") },
     { sep: true },
-    { icon: Bold, title: "Negrito", run: () => wrapSelection("**") },
-    { icon: Italic, title: "Itálico", run: () => wrapSelection("*") },
-    { icon: Strikethrough, title: "Tachado", run: () => wrapSelection("~~") },
-    { icon: Code, title: "Código inline", run: () => wrapSelection("`") },
+    { icon: Bold, title: $t("editor.bold"), run: () => wrapSelection("**") },
+    { icon: Italic, title: $t("editor.italic"), run: () => wrapSelection("*") },
+    { icon: Strikethrough, title: $t("editor.strikethrough"), run: () => wrapSelection("~~") },
+    { icon: Code, title: $t("editor.inlineCode"), run: () => wrapSelection("`") },
     { sep: true },
-    { icon: List, title: "Lista", run: () => toggleLinePrefix("- ") },
-    { icon: ListOrdered, title: "Lista numerada", run: () => toggleLinePrefix("1. ") },
-    { icon: ListChecks, title: "Tarefa", run: () => toggleLinePrefix("- [ ] ") },
-    { icon: Quote, title: "Citação", run: () => toggleLinePrefix("> ") },
+    { icon: List, title: $t("editor.list"), run: () => toggleLinePrefix("- ") },
+    { icon: ListOrdered, title: $t("editor.orderedList"), run: () => toggleLinePrefix("1. ") },
+    { icon: ListChecks, title: $t("editor.task"), run: () => toggleLinePrefix("- [ ] ") },
+    { icon: Quote, title: $t("editor.quote"), run: () => toggleLinePrefix("> ") },
     { sep: true },
-    { icon: LinkIcon, title: "Link", run: () => wrapSelection("[", "](url)") },
-    { icon: ImageIcon, title: "Imagem", run: insertImage },
-    { icon: Table, title: "Tabela", run: () => insertAtCursor("\n| Coluna | Coluna |\n| --- | --- |\n|  |  |\n") },
-    { icon: SquareCode, title: "Bloco de código", run: () => insertAtCursor("\n```\n\n```\n") },
-    { icon: Lightbulb, title: "Destaque (callout)", run: () => insertAtCursor("\n> [!note] Título\n> conteúdo\n") },
-    { icon: Minus, title: "Linha divisória", run: () => insertAtCursor("\n---\n") },
-  ];
+    { icon: LinkIcon, title: $t("editor.link"), run: () => wrapSelection("[", "](url)") },
+    { icon: ImageIcon, title: $t("editor.image"), run: insertImage },
+    { icon: Table, title: $t("editor.table"), run: () => insertAtCursor("\n| Coluna | Coluna |\n| --- | --- |\n|  |  |\n") },
+    { icon: SquareCode, title: $t("editor.codeBlock"), run: () => insertAtCursor("\n```\n\n```\n") },
+    { icon: Lightbulb, title: $t("editor.callout"), run: () => insertAtCursor("\n> [!note] Título\n> conteúdo\n") },
+    { icon: Minus, title: $t("editor.divider"), run: () => insertAtCursor("\n---\n") },
+  ]);
 
-  const modes: { id: Mode; icon: typeof PenLine; label: string }[] = [
-    { id: "edit", icon: PenLine, label: "Editor" },
-    { id: "split", icon: Columns2, label: "Dividido" },
-    { id: "read", icon: BookOpen, label: "Leitura" },
+  const modes: { id: Mode; icon: typeof PenLine; labelKey: string }[] = [
+    { id: "edit", icon: PenLine, labelKey: "editor.modeEdit" },
+    { id: "split", icon: Columns2, labelKey: "editor.modeSplit" },
+    { id: "read", icon: BookOpen, labelKey: "editor.modeRead" },
   ];
 
   // ---- Scroll sincronizado (modo dividido) ----
@@ -139,18 +140,18 @@
       <!-- Status -->
       <span class="flex items-center gap-1.5 text-xs text-text-muted">
         {#if saving}
-          <Loader2 size={13} class="animate-spin" /> Salvando…
+          <Loader2 size={13} class="animate-spin" /> {$t("editor.saving")}
         {:else if activeTab.dirty}
-          <span class="h-1.5 w-1.5 rounded-full bg-accent"></span> Não salvo
+          <span class="h-1.5 w-1.5 rounded-full bg-accent"></span> {$t("editor.unsaved")}
         {:else}
-          <Check size={13} class="text-success" /> Salvo
+          <Check size={13} class="text-success" /> {$t("editor.saved")}
         {/if}
       </span>
 
       <!-- Exportar / imprimir (PDF) -->
       <button
         onclick={printNote}
-        title="Imprimir / Salvar como PDF"
+        title={$t("editor.printPdf")}
         class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
       >
         <Printer size={15} />
@@ -185,7 +186,7 @@
             class="rounded-md px-2 py-1 transition-colors {mode === m.id
               ? 'bg-accent text-bg'
               : 'text-text-secondary hover:text-text-primary'}"
-            title={m.label}
+            title={$t(m.labelKey)}
             onclick={() => (mode = m.id)}
           >
             <m.icon size={15} />

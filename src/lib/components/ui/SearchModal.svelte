@@ -7,6 +7,7 @@
   import { currentVaultPath } from "$lib/stores/vault";
   import { openNote } from "$lib/vault-actions";
   import { debounce } from "$lib/utils/debounce";
+  import { t } from "$lib/i18n";
 
   interface SearchHit {
     path: string;
@@ -83,7 +84,7 @@
       transition:fly={{ y: -16, duration: 220, easing: cubicOut }}
       role="dialog"
       aria-modal="true"
-      aria-label="Busca global"
+      aria-label={$t("search.ariaLabel")}
       tabindex="-1"
     >
       <div class="flex items-center gap-3 border-b border-border px-4 py-3">
@@ -92,7 +93,7 @@
           bind:this={inputEl}
           bind:value={q}
           oninput={onInput}
-          placeholder="Buscar em todas as notas…"
+          placeholder={$t("search.placeholder")}
           class="w-full bg-transparent text-lg outline-none placeholder:text-text-secondary"
         />
         {#if loading}<Loader2 size={16} class="animate-spin text-text-muted" />{/if}
@@ -101,15 +102,15 @@
       <div class="flex-1 overflow-auto p-2">
         {#if q.trim().length < 2}
           <div class="px-3 py-8 text-center text-sm text-text-secondary">
-            Digite ao menos 2 letras para buscar dentro das notas.
+            {$t("search.minChars")}
           </div>
         {:else if !loading && hits.length === 0}
           <div class="px-3 py-8 text-center text-sm text-text-secondary">
-            Nenhum resultado para “{q.trim()}”.
+            {$t("search.noResults", { query: q.trim() })}
           </div>
         {:else}
           {#if hits.length}
-            <div class="px-3 pb-1 pt-1 text-xs text-text-muted">{hits.length} resultados</div>
+            <div class="px-3 pb-1 pt-1 text-xs text-text-muted">{$t("search.resultsCount", { count: hits.length })}</div>
           {/if}
           {#each hits as h, i (h.path + ":" + h.line + ":" + i)}
             <button

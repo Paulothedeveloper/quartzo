@@ -50,6 +50,7 @@
   import { printNote, exportNoteHtml } from "$lib/export";
   import { createTypedNote, loadNoteTypes, type NoteType } from "$lib/types-notes";
   import { sfx } from "$lib/sfx";
+  import { t, tr } from "$lib/i18n";
   import { untrack } from "svelte";
   import { get } from "svelte/store";
   import { fly } from "svelte/transition";
@@ -87,7 +88,7 @@
   async function openTypePicker() {
     const v = get(currentVaultPath);
     if (!v) {
-      showToast("Abra um vault primeiro", "info");
+      showToast(tr("toast.openVaultFirst"), "info");
       return;
     }
     noteTypes = await loadNoteTypes(v);
@@ -208,10 +209,10 @@
   });
 
   async function openVault() {
-    const sel = await openDialog({ directory: true, multiple: false, title: "Abrir Vault" });
+    const sel = await openDialog({ directory: true, multiple: false, title: tr("dialog.openVault") });
     if (typeof sel !== "string") return;
     await setVault(sel);
-    showToast("Vault aberto", "success");
+    showToast(tr("toast.vaultOpened"), "success");
   }
 
   function openFromGraph(path: string) {
@@ -222,7 +223,7 @@
   // ---- Cor (designer): conta-gotas + extração de paleta ----
   async function pickColorCmd() {
     if (!eyedropperSupported()) {
-      showToast("Conta-gotas não suportado neste sistema", "info");
+      showToast(tr("toast.eyedropperUnsupported"), "info");
       return;
     }
     const hex = await pickColor();
@@ -232,8 +233,8 @@
     } catch {
       /* ignora */
     }
-    if (!insertAtCursor(hex)) showToast(`Cor copiada: ${hex}`, "success");
-    else showToast(`Cor inserida: ${hex}`, "success");
+    if (!insertAtCursor(hex)) showToast(tr("toast.colorCopied", { hex }), "success");
+    else showToast(tr("toast.colorInserted", { hex }), "success");
   }
 
   async function extractPaletteCmd() {

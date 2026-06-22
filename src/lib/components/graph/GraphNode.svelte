@@ -51,11 +51,12 @@
       <span class="gicon" style="font-size:{Math.max(data.size * 0.55, 6)}px">{icon}</span>
     {/if}
   </span>
-  <span class="glabel" style="max-width:{Math.max(data.size * 5, 120)}px">{data.label}</span>
+  <span class="glabel">{data.label}</span>
 </div>
 
 <style>
   .gnode {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -102,24 +103,39 @@
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
   }
 
-  /* rótulos ESCONDIDOS por padrão (cérebro limpo); aparecem ao focar/hover */
+  /* rótulo flutuante: aparece SÓ no nó sob o cursor, como um pill limpo
+     (antes apareciam todos os vizinhos e o texto se sobrepunha) */
   .glabel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(2px);
+    z-index: 20;
+    pointer-events: none;
     font-family: var(--font-sans);
-    font-size: 8px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     letter-spacing: -0.01em;
-    color: rgba(203, 213, 225, 0.85);
+    line-height: 1;
+    color: #eaf6ff;
     white-space: nowrap;
+    max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(10, 15, 28, 0.82);
+    border: 1px solid color-mix(in srgb, var(--c) 50%, transparent);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
     opacity: 0;
-    transition: opacity 0.18s var(--ease-out, ease);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    transition:
+      opacity 0.16s var(--ease-out, ease),
+      transform 0.16s var(--ease-out, ease);
   }
-  .gnode.hovered .glabel,
-  .gnode.focused .glabel {
+  .gnode.hovered .glabel {
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
   .gnode.dim {

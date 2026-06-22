@@ -39,6 +39,7 @@
   import { setVault } from "$lib/vault-actions";
   import { getVersion } from "@tauri-apps/api/app";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
+  import { t, tr, locale, setLocale, LOCALES } from "$lib/i18n";
 
   interface CssSnippet {
     name: string;
@@ -71,7 +72,7 @@
     try {
       await revealItemInDir(`${v}/.quartzo/snippets`);
     } catch {
-      showToast("Não foi possível abrir a pasta", "error");
+      showToast(tr("settings.toast.openFolderFail"), "error");
     }
   }
 
@@ -81,7 +82,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.12.0");
+  let appVersion = $state("0.13.0");
   $effect(() => {
     try {
       getVersion()
@@ -138,7 +139,7 @@
   async function openPrisma() {
     try {
       await invoke("launch_prisma");
-      showToast("Abrindo o PRISMA…", "success");
+      showToast(tr("settings.toast.openingPrisma"), "success");
     } catch (e) {
       showToast(`${e}`, "error");
     }
@@ -148,9 +149,9 @@
     if (!v) return;
     try {
       await navigator.clipboard.writeText(v);
-      showToast("Caminho do vault copiado", "success");
+      showToast(tr("settings.toast.pathCopied"), "success");
     } catch {
-      showToast("Não foi possível copiar", "error");
+      showToast(tr("settings.toast.copyFail"), "error");
     }
   }
 
@@ -186,7 +187,7 @@
   function addType() {
     types = [
       ...types,
-      { id: `tipo-${Date.now()}`, name: "Novo tipo", emoji: "📄", folder: "", frontmatter: { tipo: "" }, body: "" },
+      { id: `tipo-${Date.now()}`, name: tr("settings.types.newType"), emoji: "📄", folder: "", frontmatter: { tipo: "" }, body: "" },
     ];
     typesDirty = true;
   }
@@ -200,9 +201,9 @@
     try {
       await saveNoteTypes(v, types);
       typesDirty = false;
-      showToast("Tipos salvos", "success");
+      showToast(tr("settings.toast.typesSaved"), "success");
     } catch (e) {
-      showToast(`Erro ao salvar tipos: ${e}`, "error");
+      showToast(tr("settings.toast.typesSaveFail", { error: `${e}` }), "error");
     }
   }
   function restoreTypes() {
@@ -240,7 +241,7 @@
     try {
       const dest = await invoke<string>("copy_vault_to_cloud", { vault: v, cloudParent: f.path });
       await setVault(dest);
-      showToast("Vault movido para a nuvem — sincroniza automático", "success");
+      showToast(tr("settings.toast.movedToCloud"), "success");
     } catch (e) {
       showToast(`${e}`, "error");
     } finally {
@@ -267,7 +268,7 @@
     try {
       await openUrl(url ?? `https://github.com/${GITHUB_REPO}/releases`);
     } catch {
-      showToast("Não foi possível abrir o navegador", "error");
+      showToast(tr("settings.toast.browserFail"), "error");
     }
   }
 
@@ -415,6 +416,25 @@
                   $settings.autoOpenVault,
                   () => set("autoOpenVault", !$settings.autoOpenVault)
                 )}
+              </div>
+
+              <div class="card">
+                <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
+                  {$t("settings.language")} · Language · Idioma
+                </div>
+                <div class="mt-2 flex gap-2">
+                  {#each LOCALES as l (l.id)}
+                    <button
+                      onclick={() => setLocale(l.id)}
+                      class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all active:scale-[0.97] {$locale === l.id
+                        ? 'border-accent bg-accent/15 text-text-primary'
+                        : 'border-border bg-elevated text-text-secondary hover:text-text-primary'}"
+                    >
+                      <span class="text-base leading-none">{l.flag}</span>
+                      {l.label}
+                    </button>
+                  {/each}
+                </div>
               </div>
             </div>
           {:else if section === "editor"}

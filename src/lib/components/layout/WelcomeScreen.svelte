@@ -1,6 +1,7 @@
 <script lang="ts">
   import { FolderOpen } from "@lucide/svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
+  import { t } from "$lib/i18n";
 
   let { onOpenVault }: { onOpenVault?: () => void } = $props();
 
@@ -41,13 +42,13 @@
       <div class="prism prism2"></div>
       <CrystalIllustration size={224} glow={0.85} />
     </div>
-    <h1>Bem-vindo ao <span class="grad">Quartzo</span></h1>
-    <p class="sub">Seu conhecimento, em cristal.<br />Abra um vault e comece a conectar ideias.</p>
+    <h1>{$t("welcome.titlePrefix")} <span class="grad">Quartzo</span></h1>
+    <p class="sub">{$t("welcome.subtitleLine1")}<br />{$t("welcome.subtitleLine2")}</p>
     <button class="cta" onclick={() => onOpenVault?.()}>
-      <FolderOpen size={19} /> Abrir vault
+      <FolderOpen size={19} /> {$t("welcome.openVault")}
     </button>
     <p class="hint">
-      ou <kbd>Ctrl</kbd><kbd>K</kbd> para a paleta de comandos
+      {$t("welcome.hintBefore")} <kbd>Ctrl</kbd><kbd>K</kbd> {$t("welcome.hintAfter")}
     </p>
   </div>
 </div>

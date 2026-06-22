@@ -11,6 +11,8 @@ export interface GraphCtx {
   open: (path: string) => void;
   enter: (id: string) => void;
   leave: () => void;
+  /** Foca (zoom + destaque) uma região/pasta. */
+  focusGroup: (group: string) => void;
 }
 
 export const GRAPH_CTX = Symbol("lumina-graph");

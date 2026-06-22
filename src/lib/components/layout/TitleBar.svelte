@@ -18,6 +18,7 @@
   import { createNoteIn, createFolderIn, openDailyNote } from "$lib/vault-actions";
   import { showToast } from "$lib/stores/toast";
   import { sfx } from "$lib/sfx";
+  import { t, tr } from "$lib/i18n";
 
   function appWindow() {
     try {
@@ -43,21 +44,21 @@
     } catch {
       /* ignora */
     }
-    showToast(pinned ? "Janela sempre no topo" : "Sempre no topo desligado", "info");
+    showToast(pinned ? tr("titlebar.pinOn") : tr("titlebar.pinOff"), "info");
   }
 
   function openAdd(e: MouseEvent) {
     e.stopPropagation();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const vault = $currentVaultPath;
-    const needVault = () => showToast("Abra um vault primeiro", "info");
+    const needVault = () => showToast(tr("titlebar.openVaultFirst"), "info");
     const items: CtxMenuItem[] = [
-      { label: "Nova nota", icon: FilePlus, action: () => (vault ? createNoteIn(vault) : needVault()) },
-      { label: "Nova de tipo…", icon: Layers, action: () => (vault ? typePickerRequest.set(true) : needVault()) },
-      { label: "Nova pasta", icon: FolderPlus, action: () => (vault ? createFolderIn(vault) : needVault()) },
-      { label: "Nota do dia", icon: CalendarDays, action: openDailyNote },
+      { label: tr("titlebar.newNote"), icon: FilePlus, action: () => (vault ? createNoteIn(vault) : needVault()) },
+      { label: tr("titlebar.newOfType"), icon: Layers, action: () => (vault ? typePickerRequest.set(true) : needVault()) },
+      { label: tr("titlebar.newFolder"), icon: FolderPlus, action: () => (vault ? createFolderIn(vault) : needVault()) },
+      { label: tr("titlebar.dailyNote"), icon: CalendarDays, action: openDailyNote },
       { separator: true },
-      { label: "Memória do Claude", icon: Sparkles, action: () => memoryOpen.set(true) },
+      { label: tr("titlebar.claudeMemory"), icon: Sparkles, action: () => memoryOpen.set(true) },
     ];
     ctxMenu.set({ x: Math.max(8, rect.right - 210), y: rect.bottom + 6, items });
   }
@@ -66,9 +67,9 @@
 <div class="qtitlebar" data-tauri-drag-region>
   <!-- Semáforo (fechar / minimizar / maximizar) -->
   <div class="qtraffic">
-    <button class="tl tl-close" onclick={() => win("close")} title="Fechar" aria-label="Fechar"></button>
-    <button class="tl tl-min" onclick={() => win("minimize")} title="Minimizar" aria-label="Minimizar"></button>
-    <button class="tl tl-max" onclick={() => win("toggleMaximize")} title="Maximizar" aria-label="Maximizar"></button>
+    <button class="tl tl-close" onclick={() => win("close")} title={$t("titlebar.close")} aria-label={$t("titlebar.close")}></button>
+    <button class="tl tl-min" onclick={() => win("minimize")} title={$t("titlebar.minimize")} aria-label={$t("titlebar.minimize")}></button>
+    <button class="tl tl-max" onclick={() => win("toggleMaximize")} title={$t("titlebar.maximize")} aria-label={$t("titlebar.maximize")}></button>
   </div>
 
   <!-- Marca -->
@@ -78,22 +79,22 @@
   </div>
 
   <!-- Busca central -->
-  <button class="qsearch" onclick={() => searchRequest.set("")} title="Buscar (Ctrl+Shift+F)">
+  <button class="qsearch" onclick={() => searchRequest.set("")} title={$t("titlebar.searchTooltip")}>
     <Search size={15} />
-    <span>Buscar…</span>
+    <span>{$t("titlebar.searchPlaceholder")}</span>
   </button>
 
   <!-- Ações à direita -->
   <div class="qactions">
-    <button class="qicon" class:on={pinned} onclick={togglePin} title="Manter janela sempre no topo">
+    <button class="qicon" class:on={pinned} onclick={togglePin} title={$t("titlebar.alwaysOnTop")}>
       <Pin size={16} />
     </button>
-    <button class="qicon" onclick={() => settingsOpen.set(true)} title="Configurações (Ctrl+,)">
+    <button class="qicon" onclick={() => settingsOpen.set(true)} title={$t("titlebar.settingsTooltip")}>
       <SlidersHorizontal size={16} />
     </button>
-    <button class="qadd" onclick={openAdd} title="Adicionar">
+    <button class="qadd" onclick={openAdd} title={$t("titlebar.add")}>
       <Plus size={16} />
-      <span>Adicionar</span>
+      <span>{$t("titlebar.add")}</span>
       <ChevronDown size={14} class="opacity-70" />
     </button>
   </div>

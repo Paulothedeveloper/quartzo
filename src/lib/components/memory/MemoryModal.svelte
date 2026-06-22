@@ -7,6 +7,7 @@
   import { showToast } from "$lib/stores/toast";
   import { openNote } from "$lib/vault-actions";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
+  import { t, tr } from "$lib/i18n";
   import type { FileNode } from "$lib/types";
 
   let { open = $bindable(false) }: { open?: boolean } = $props();
@@ -25,7 +26,7 @@
     const line = content.split("\n").map((l) => l.trim()).find(Boolean) ?? "";
     return line.replace(/^#+\s*/, "").slice(0, 60);
   });
-  const effectiveTitle = $derived(title.trim() || suggested || "Memória");
+  const effectiveTitle = $derived(title.trim() || suggested || tr("memory.defaultTitle"));
 
   // Foca o conteúdo ao abrir; limpa ao fechar.
   $effect(() => {
@@ -59,11 +60,11 @@
   async function save() {
     const vault = $currentVaultPath;
     if (!vault) {
-      showToast("Abra um vault primeiro", "info");
+      showToast(tr("memory.noVault"), "info");
       return;
     }
     if (!content.trim()) {
-      showToast("Cole ou escreva o conteúdo da memória", "info");
+      showToast(tr("memory.noContent"), "info");
       return;
     }
     if (tagInput.trim()) addTag();
@@ -78,11 +79,11 @@
       });
       fileTree.set(await invoke<FileNode[]>("read_directory", { path: vault }));
       await openNote(path);
-      showToast("Memória salva no Quartzo ✦", "success");
+      showToast(tr("memory.saved"), "success");
       reset();
       open = false;
     } catch (e) {
-      showToast(`Erro ao salvar: ${e}`, "error");
+      showToast(tr("memory.saveError", { error: String(e) }), "error");
     } finally {
       saving = false;
     }
@@ -102,7 +103,7 @@
       transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
       role="dialog"
       aria-modal="true"
-      aria-label="Nova memória do Claude"
+      aria-label={$t("memory.title")}
       tabindex="-1"
     >
       <!-- Header -->

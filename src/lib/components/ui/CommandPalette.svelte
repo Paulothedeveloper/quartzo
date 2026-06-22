@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade, fly } from "svelte/transition";
+  import { t, tr } from "$lib/i18n";
 
   export interface Command {
     id: string;
@@ -12,8 +13,8 @@
     open = $bindable(false),
     commands = [],
     onCreate,
-    createLabel = "Criar nota",
-    placeholder = "Digite um comando...",
+    createLabel = tr("palette.createNote"),
+    placeholder = tr("palette.placeholder"),
   }: {
     open?: boolean;
     commands?: Command[];
@@ -117,7 +118,7 @@
             </button>
           {:else}
             <div class="px-4 py-6 text-center text-sm text-text-secondary">
-              Nenhum comando encontrado
+              {$t("palette.empty")}
             </div>
           {/if}
         {/each}

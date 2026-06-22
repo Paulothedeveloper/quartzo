@@ -31,6 +31,7 @@
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import QuartzIcon from "$lib/components/ui/QuartzIcon.svelte";
   import { slide, fly } from "svelte/transition";
+  import { t, tr } from "$lib/i18n";
 
   let search = $state("");
   const vaultName = $derived(
@@ -41,11 +42,11 @@
     const selected = await openDialog({
       directory: true,
       multiple: false,
-      title: "Selecione sua pasta de notas (Vault)",
+      title: tr("sidebar.selectVaultFolder"),
     });
     if (typeof selected !== "string") return;
     await setVault(selected);
-    showToast("Vault aberto", "success");
+    showToast(tr("sidebar.vaultOpened"), "success");
   }
 
   // Menu com os vaults conhecidos (igual ao seletor do Obsidian).

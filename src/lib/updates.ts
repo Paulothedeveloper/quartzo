@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.13.0",
+    date: "2026-06-22",
+    items: [
+      "Grafo — regiões clicáveis (cérebro/cristal): cada pasta vira um lobo colorido e rotulado; clique nele para mergulhar (zoom) naquela parte do mapa.",
+      "Grafo — rótulo limpo: ao passar o mouse aparece só o nome do nó sob o cursor, num cartão elegante (acabou a sobreposição de textos).",
+      "Botão 'Ver tudo' para voltar à visão geral; o seletor de pasta também dá zoom no lobo.",
+      "Idiomas: Português, English e Español (Configurações › Geral › Idioma), com detecção automática.",
+    ],
+  },
+  {
     version: "0.12.0",
     date: "2026-06-22",
     items: [
