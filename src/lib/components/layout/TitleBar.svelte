@@ -15,7 +15,7 @@
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { currentVaultPath } from "$lib/stores/vault";
   import { settingsOpen, searchRequest, memoryOpen, typePickerRequest, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
-  import { createNoteIn, createFolderIn, openDailyNote } from "$lib/vault-actions";
+  import { createNoteIn, createFolderIn, openDailyNote, newNoteDir } from "$lib/vault-actions";
   import { showToast } from "$lib/stores/toast";
   import { sfx } from "$lib/sfx";
   import { t, tr } from "$lib/i18n";
@@ -53,7 +53,7 @@
     const vault = $currentVaultPath;
     const needVault = () => showToast(tr("titlebar.openVaultFirst"), "info");
     const items: CtxMenuItem[] = [
-      { label: tr("titlebar.newNote"), icon: FilePlus, action: () => (vault ? createNoteIn(vault) : needVault()) },
+      { label: tr("titlebar.newNote"), icon: FilePlus, action: () => (vault ? createNoteIn(newNoteDir()) : needVault()) },
       { label: tr("titlebar.newOfType"), icon: Layers, action: () => (vault ? typePickerRequest.set(true) : needVault()) },
       { label: tr("titlebar.newFolder"), icon: FolderPlus, action: () => (vault ? createFolderIn(vault) : needVault()) },
       { label: tr("titlebar.dailyNote"), icon: CalendarDays, action: openDailyNote },

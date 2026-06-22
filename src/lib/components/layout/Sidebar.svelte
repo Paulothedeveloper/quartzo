@@ -27,7 +27,7 @@
   import { showToast } from "$lib/stores/toast";
   import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
   import { getRecentVaults } from "$lib/stores/settings";
-  import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote } from "$lib/vault-actions";
+  import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir } from "$lib/vault-actions";
   import type { FileNode } from "$lib/types";
   import FileTree from "./FileTree.svelte";
   import EmptyState from "$lib/components/ui/EmptyState.svelte";
@@ -98,8 +98,8 @@
   }
 
   function newNote() {
-    if (!$currentVaultPath) return showToast("Abra um vault primeiro", "info");
-    createNoteIn($currentVaultPath);
+    if (!$currentVaultPath) return showToast(tr("titlebar.openVaultFirst"), "info");
+    createNoteIn(newNoteDir());
   }
   function newFolder() {
     if (!$currentVaultPath) return showToast("Abra um vault primeiro", "info");

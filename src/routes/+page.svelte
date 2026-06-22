@@ -14,6 +14,7 @@
   import Toast from "$lib/components/ui/Toast.svelte";
   import CommandPalette, { type Command } from "$lib/components/ui/CommandPalette.svelte";
   import ContextMenu from "$lib/components/ui/ContextMenu.svelte";
+  import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -470,3 +471,4 @@
 <SettingsModal bind:open={$settingsOpen} />
 <SnippetInjector />
 <MemoryModal bind:open={$memoryOpen} />
+<ConfirmDialog />

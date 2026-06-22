@@ -39,7 +39,9 @@
   const ACCENTS = ["#67e8f9", "#38bdf8", "#a78bfa", "#34d399", "#fbbf24", "#f472b6", "#f87171"];
   import { currentVaultPath } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
-  import { setVault } from "$lib/vault-actions";
+  import { setVault, refreshTree } from "$lib/vault-actions";
+  import { loadGraph } from "$lib/stores/graph";
+  import { loadQueryIndex } from "$lib/query";
   import { getVersion } from "@tauri-apps/api/app";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { t, tr, locale, setLocale, LOCALES } from "$lib/i18n";
@@ -85,7 +87,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.15.0");
+  let appVersion = $state("0.16.0");
   $effect(() => {
     try {
       getVersion()
@@ -100,6 +102,7 @@
 
   type Section =
     | "geral"
+    | "arquivos"
     | "editor"
     | "markdown"
     | "tipos"
@@ -114,6 +117,7 @@
 
   const tabs: { id: Section; label: string; icon: typeof Info }[] = [
     { id: "geral", label: "Geral", icon: Settings2 },
+    { id: "arquivos", label: "Arquivos & Links", icon: FolderInput },
     { id: "editor", label: "Editor", icon: FileEdit },
     { id: "markdown", label: "Markdown", icon: Braces },
     { id: "tipos", label: "Tipos de nota", icon: Layers },
@@ -300,6 +304,24 @@
     showToast("Vault aberto", "success");
   }
 
+  // Reconstruir cache do vault (reindexa grafo + views + árvore).
+  let rebuilding = $state(false);
+  async function rebuildCache() {
+    const v = $currentVaultPath;
+    if (!v || rebuilding) return;
+    rebuilding = true;
+    try {
+      await refreshTree();
+      await loadGraph(v);
+      await loadQueryIndex(v, true);
+      showToast("Cache do vault reconstruído", "success");
+    } catch (e) {
+      showToast(`Erro ao reconstruir: ${e}`, "error");
+    } finally {
+      rebuilding = false;
+    }
+  }
+
   const fonts: EditorFont[] = ["JetBrains Mono", "Fira Code", "Cascadia Code", "Consolas"];
   const delays = [
     { v: 500, label: "Rápido (500ms)" },
@@ -437,6 +459,47 @@
                       {l.label}
                     </button>
                   {/each}
+                </div>
+              </div>
+            </div>
+          {:else if section === "arquivos"}
+            <div class="space-y-3">
+              <div class="card">
+                {@render segmentRow(
+                  "Local padrão para novas notas",
+                  $settings.newNoteLocation,
+                  [
+                    { v: "root", label: "Raiz do vault" },
+                    { v: "current", label: "Pasta da nota atual" },
+                  ],
+                  (v) => set("newNoteLocation", v as "root" | "current")
+                )}
+              </div>
+
+              <div class="card">
+                {@render toggleRow(
+                  "Confirmar antes de excluir",
+                  "Pede confirmação antes de mover arquivos para a lixeira.",
+                  $settings.confirmBeforeDelete,
+                  () => set("confirmBeforeDelete", !$settings.confirmBeforeDelete)
+                )}
+              </div>
+
+              <div class="card">
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <div class="text-sm">Reconstruir cache do vault</div>
+                    <div class="text-xs text-text-secondary">
+                      Reindexa o grafo, as views por front-matter e a árvore de arquivos.
+                    </div>
+                  </div>
+                  <button
+                    onclick={rebuildCache}
+                    disabled={rebuilding || !$currentVaultPath}
+                    class="inline-flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5 text-sm font-medium transition-all hover:bg-accent hover:text-bg active:scale-[0.97] disabled:opacity-50"
+                  >
+                    <RefreshCw size={14} class={rebuilding ? "animate-spin" : ""} /> Reconstruir
+                  </button>
                 </div>
               </div>
             </div>

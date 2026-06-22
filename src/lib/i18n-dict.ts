@@ -151,6 +151,8 @@ export const dict: Record<Locale, Record<string, string>> = {
     "toast.colorCopied": "Cor copiada: {hex}",
     "toast.colorInserted": "Cor inserida: {hex}",
     "dialog.openVault": "Abrir Vault",
+    "dialog.deleteTitle": "Mover para a lixeira?",
+    "dialog.deleteMsg": "“{name}” será movido para a lixeira do sistema. Você pode restaurar de lá.",
   },
   en: {
     "common.cancel": "Cancel",
@@ -283,6 +285,8 @@ export const dict: Record<Locale, Record<string, string>> = {
     "toast.colorCopied": "Color copied: {hex}",
     "toast.colorInserted": "Color inserted: {hex}",
     "dialog.openVault": "Open Vault",
+    "dialog.deleteTitle": "Move to trash?",
+    "dialog.deleteMsg": "“{name}” will be moved to the system trash. You can restore it from there.",
   },
   es: {
     "common.cancel": "Cancelar",
@@ -415,5 +419,7 @@ export const dict: Record<Locale, Record<string, string>> = {
     "toast.colorCopied": "Color copiado: {hex}",
     "toast.colorInserted": "Color insertado: {hex}",
     "dialog.openVault": "Abrir Vault",
+    "dialog.deleteTitle": "¿Mover a la papelera?",
+    "dialog.deleteMsg": "«{name}» se moverá a la papelera del sistema. Puedes restaurarlo desde allí.",
   },
 };

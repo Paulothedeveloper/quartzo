@@ -5,10 +5,27 @@ import { fileTree, currentVaultPath } from "$lib/stores/vault";
 import { openTabs, activeTabPath } from "$lib/stores/tabs";
 import { showToast } from "$lib/stores/toast";
 import { rememberVault, addRecentVault } from "$lib/stores/settings";
-import { renamingPath, rightPane, backlinksOpen, showGraph, showCanvas, showSketch } from "$lib/stores/ui";
+import { renamingPath, rightPane, backlinksOpen, showGraph, showCanvas, showSketch, askConfirm } from "$lib/stores/ui";
 import { graphData } from "$lib/stores/graph";
+import { settings } from "$lib/stores/settings";
 import { loadTabs } from "$lib/tab-persist";
+import { tr } from "$lib/i18n";
 import type { FileNode } from "$lib/types";
+
+/** Pasta-alvo para uma nota nova, conforme a config "local padrão de novas notas". */
+export function newNoteDir(): string {
+  const vault = get(currentVaultPath);
+  if (!vault) return "";
+  if (get(settings).newNoteLocation === "current") {
+    const active = get(activeTabPath);
+    if (active) {
+      const sep = active.includes("\\") ? "\\" : "/";
+      const dir = active.slice(0, active.lastIndexOf(sep));
+      if (dir) return dir;
+    }
+  }
+  return vault;
+}
 
 /** Cria uma nota nova numa pasta e já entra em modo renomear (não abre no editor
  * pra não roubar o foco do campo de nome). Abre ao confirmar o nome. */
@@ -30,7 +47,7 @@ export async function createNamedNote(name: string): Promise<void> {
     return;
   }
   try {
-    const path = await invoke<string>("create_note", { dir: vault, baseName: name });
+    const path = await invoke<string>("create_note", { dir: newNoteDir() || vault, baseName: name });
     await refreshTree();
     await openNote(path);
   } catch (e) {
@@ -197,8 +214,17 @@ export async function renameEntry(path: string, newName: string): Promise<void> 
   }
 }
 
-/** Move pra lixeira e fecha abas afetadas. */
+/** Move pra lixeira e fecha abas afetadas. Confirma antes, se a config pedir. */
 export async function deleteEntry(path: string): Promise<void> {
+  if (get(settings).confirmBeforeDelete) {
+    const ok = await askConfirm({
+      title: tr("dialog.deleteTitle"),
+      message: tr("dialog.deleteMsg", { name: baseName(path) }),
+      confirmLabel: tr("common.delete"),
+      danger: true,
+    });
+    if (!ok) return;
+  }
   try {
     await invoke("delete_to_trash", { path });
     const sep = path.includes("\\") ? "\\" : "/";

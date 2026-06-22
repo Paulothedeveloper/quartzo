@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.16.0",
+    date: "2026-06-22",
+    items: [
+      "Nova aba Configurações › Arquivos & Links (estilo Obsidian).",
+      "Local padrão para novas notas: raiz do vault ou pasta da nota atual.",
+      "Confirmar antes de excluir — diálogo de confirmação ao mover para a lixeira.",
+      "Reconstruir cache do vault (reindexa grafo, views e árvore de arquivos).",
+    ],
+  },
+  {
     version: "0.15.0",
     date: "2026-06-22",
     items: [

@@ -44,9 +44,11 @@ export interface Settings {
   sfxVolume: number; // 0–1
   // CSS Snippets habilitados (nomes dos arquivos sem .css)
   enabledSnippets: string[];
-  // Geral
+  // Geral / Arquivos & Links
   autoOpenVault: boolean;
   sidebarWidth: number; // largura da barra lateral (px), arrastável
+  newNoteLocation: "root" | "current"; // onde criar novas notas (raiz do vault ou pasta da nota atual)
+  confirmBeforeDelete: boolean; // confirmar antes de mandar arquivos pra lixeira
   // Atalhos (id da ação -> combo normalizado, ex.: "ctrl+shift+k")
   shortcuts: Record<string, string>;
 }
@@ -134,6 +136,8 @@ export const DEFAULT_SETTINGS: Settings = {
   enabledSnippets: [],
   autoOpenVault: true,
   sidebarWidth: 280,
+  newNoteLocation: "root",
+  confirmBeforeDelete: true,
   shortcuts: { ...DEFAULT_SHORTCUTS },
 };
 

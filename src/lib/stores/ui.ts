@@ -48,3 +48,23 @@ export const searchRequest = writable<string | null>(null);
 
 /** Pedido de abrir o seletor de "nova nota de tipo" (disparado pelo + Adicionar). */
 export const typePickerRequest = writable(false);
+
+/** Diálogo de confirmação (promessa). null = fechado. */
+export interface ConfirmRequest {
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  danger?: boolean;
+  resolve: (ok: boolean) => void;
+}
+export const confirmRequest = writable<ConfirmRequest | null>(null);
+
+/** Abre um diálogo de confirmação e resolve true/false. */
+export function askConfirm(opts: {
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  danger?: boolean;
+}): Promise<boolean> {
+  return new Promise((resolve) => confirmRequest.set({ ...opts, resolve }));
+}
