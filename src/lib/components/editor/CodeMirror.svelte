@@ -13,7 +13,13 @@
     type DecorationSet,
   } from "@codemirror/view";
   import { EditorState, Annotation, Compartment } from "@codemirror/state";
-  import { autocompletion, type CompletionContext, type Completion } from "@codemirror/autocomplete";
+  import {
+    autocompletion,
+    closeBrackets,
+    closeBracketsKeymap,
+    type CompletionContext,
+    type Completion,
+  } from "@codemirror/autocomplete";
   import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
   import { syntaxHighlighting, HighlightStyle, bracketMatching, indentUnit } from "@codemirror/language";
   import { markdown } from "@codemirror/lang-markdown";
@@ -66,7 +72,7 @@
   const lumTheme = EditorView.theme({
     "&": { height: "100%", backgroundColor: "transparent", color: "var(--cm-text)" },
     ".cm-scroller": { lineHeight: "1.75", overflow: "auto" },
-    ".cm-content": { padding: "28px 40px", maxWidth: "920px", caretColor: "var(--cm-caret)" },
+    ".cm-content": { padding: "28px 40px", caretColor: "var(--cm-caret)" },
     "&.cm-focused": { outline: "none" },
     ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--cm-caret)", borderLeftWidth: "2px" },
     "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
@@ -160,6 +166,9 @@
   const tabComp = new Compartment();
   const vimComp = new Compartment();
   const slashComp = new Compartment();
+  const bracketsComp = new Compartment();
+  const contentAttrComp = new Compartment();
+  const contentMaxComp = new Compartment();
 
   function fontTheme(s: Settings) {
     return EditorView.theme({
@@ -177,6 +186,21 @@
     indentUnit.of(" ".repeat(s.tabSize)),
   ];
   const vimExt = (s: Settings) => (s.vimMode ? vim() : []);
+  // S1 Editor: pares de símbolos, ortografia + RTL, largura legível (margens confortáveis)
+  const bracketsExt = (s: Settings) =>
+    s.closeBrackets ? [closeBrackets(), keymap.of(closeBracketsKeymap)] : [];
+  const contentAttrExt = (s: Settings) =>
+    EditorView.contentAttributes.of({
+      spellcheck: s.spellcheck ? "true" : "false",
+      ...(s.rtl ? { dir: "rtl" } : {}),
+    });
+  const contentMaxExt = (s: Settings) =>
+    EditorView.theme({
+      ".cm-content": {
+        maxWidth: s.readableLineLength ? "920px" : "none",
+        marginInline: s.readableLineLength ? "auto" : "0",
+      },
+    });
 
   function buildExtensions(s: Settings) {
     return [
@@ -189,10 +213,13 @@
       wrapComp.of(wrapExt(s)),
       tabComp.of(tabExt(s)),
       slashComp.of(slashExt(s)),
+      bracketsComp.of(bracketsExt(s)),
+      contentAttrComp.of(contentAttrExt(s)),
       markdown({ codeLanguages: languages }),
       syntaxHighlighting(lumHighlight),
       wikiPlugin,
       lumTheme,
+      contentMaxComp.of(contentMaxExt(s)),
       fontComp.of(fontTheme(s)),
       keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       EditorView.domEventHandlers({
@@ -250,6 +277,9 @@
         tabComp.reconfigure(tabExt(s)),
         vimComp.reconfigure(vimExt(s)),
         slashComp.reconfigure(slashExt(s)),
+        bracketsComp.reconfigure(bracketsExt(s)),
+        contentAttrComp.reconfigure(contentAttrExt(s)),
+        contentMaxComp.reconfigure(contentMaxExt(s)),
       ],
     });
   });

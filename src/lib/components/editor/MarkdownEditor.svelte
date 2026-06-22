@@ -138,15 +138,17 @@
 
     <div class="flex items-center gap-4">
       <!-- Status -->
-      <span class="flex items-center gap-1.5 text-xs text-text-muted">
-        {#if saving}
-          <Loader2 size={13} class="animate-spin" /> {$t("editor.saving")}
-        {:else if activeTab.dirty}
-          <span class="h-1.5 w-1.5 rounded-full bg-accent"></span> {$t("editor.unsaved")}
-        {:else}
-          <Check size={13} class="text-success" /> {$t("editor.saved")}
-        {/if}
-      </span>
+      {#if $settings.statusBar}
+        <span class="flex items-center gap-1.5 text-xs text-text-muted">
+          {#if saving}
+            <Loader2 size={13} class="animate-spin" /> {$t("editor.saving")}
+          {:else if activeTab.dirty}
+            <span class="h-1.5 w-1.5 rounded-full bg-accent"></span> {$t("editor.unsaved")}
+          {:else}
+            <Check size={13} class="text-success" /> {$t("editor.saved")}
+          {/if}
+        </span>
+      {/if}
 
       <!-- Exportar / imprimir (PDF) -->
       <button
@@ -230,7 +232,7 @@
       </div>
     {/if}
     {#if mode !== "edit"}
-      <div class="min-w-0 flex-1 bg-bg">
+      <div class="min-w-0 flex-1 bg-bg" class:pv-readable={$settings.readableLineLength} dir={$settings.rtl ? "rtl" : "ltr"}>
         <MarkdownPreview
           content={activeTab.content}
           notePath={activeTab.path}
@@ -266,5 +268,10 @@
   }
   :global(html.no-anim .tab-switch) {
     animation: none;
+  }
+  /* Margens de tamanho confortável (largura legível) no preview */
+  .pv-readable :global(.q-prose) {
+    max-width: 920px;
+    margin-inline: auto;
   }
 </style>

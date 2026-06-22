@@ -85,7 +85,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.14.0");
+  let appVersion = $state("0.15.0");
   $effect(() => {
     try {
       getVersion()
@@ -493,6 +493,43 @@
                   "Digite / no editor para inserir título, tabela, código, etc.",
                   $settings.slashMenu,
                   () => set("slashMenu", !$settings.slashMenu)
+                )}
+              </div>
+
+              <div class="card">
+                {@render toggleRow(
+                  "Margens de tamanho confortável",
+                  "Limita a largura do texto para leitura mais confortável.",
+                  $settings.readableLineLength,
+                  () => set("readableLineLength", !$settings.readableLineLength)
+                )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  "Criação em pares de símbolos",
+                  "Fecha automaticamente parênteses, aspas, ** e _ .",
+                  $settings.closeBrackets,
+                  () => set("closeBrackets", !$settings.closeBrackets)
+                )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  "Verificação ortográfica",
+                  "Sublinha possíveis erros no editor (usa o corretor do sistema).",
+                  $settings.spellcheck,
+                  () => set("spellcheck", !$settings.spellcheck)
+                )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  "Direita para esquerda (RTL)",
+                  "Direção do texto da direita para a esquerda.",
+                  $settings.rtl,
+                  () => set("rtl", !$settings.rtl)
+                )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  "Mostrar status do editor",
+                  "Indicador de Salvando / Não salvo / Salvo na barra do editor.",
+                  $settings.statusBar,
+                  () => set("statusBar", !$settings.statusBar)
                 )}
               </div>
 

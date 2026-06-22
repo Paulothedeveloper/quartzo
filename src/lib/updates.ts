@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.15.0",
+    date: "2026-06-22",
+    items: [
+      "Configurações › Editor (estilo Obsidian): margens de tamanho confortável (largura legível) no editor e na leitura.",
+      "Criação em pares de símbolos (fecha parênteses, aspas, ** e _ automaticamente).",
+      "Verificação ortográfica no editor (corretor do sistema).",
+      "Direita para esquerda (RTL) e opção de mostrar/ocultar o status do editor.",
+    ],
+  },
+  {
     version: "0.14.0",
     date: "2026-06-22",
     items: [

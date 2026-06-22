@@ -17,6 +17,12 @@ export interface Settings {
   slashMenu: boolean; // menu "/" no editor
   defaultMode: ViewMode; // modo inicial do editor (editor/dividido/leitura)
   autoSaveDelay: number; // 500 | 700 | 800 | 1500
+  // S1 Editor (estilo Obsidian)
+  statusBar: boolean; // mostra o status (Salvando/Não salvo/Salvo) na barra do editor
+  readableLineLength: boolean; // margens de tamanho confortável (limita largura)
+  rtl: boolean; // direção do texto da direita para a esquerda
+  closeBrackets: boolean; // cria pares de parênteses/aspas/markdown
+  spellcheck: boolean; // verificação ortográfica do navegador no editor
   // Preview / renderização
   renderMermaid: boolean; // diagramas ```mermaid
   renderQueries: boolean; // views dinâmicas ```query (tabela/kanban/tarefas)
@@ -104,6 +110,11 @@ export const DEFAULT_SETTINGS: Settings = {
   slashMenu: true,
   defaultMode: "split",
   autoSaveDelay: 700,
+  statusBar: true,
+  readableLineLength: true,
+  rtl: false,
+  closeBrackets: true,
+  spellcheck: false,
   renderMermaid: true,
   renderQueries: true,
   renderVideo: true,
