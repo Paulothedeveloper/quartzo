@@ -1,81 +1,150 @@
 <div align="center">
 
-# Quartzo
+# QUARTZO
 
-**Gerenciador de conhecimento pessoal local-first, em Markdown.**
-Seu conhecimento, em cristal.
+### Segundo cérebro em Markdown, feito por um editor de vídeo — para criadores.
+### A Markdown second brain, built by a video editor — for creators.
+
+**Gratuito · Funciona offline · Seus arquivos são seus (.md no seu PC).**
+**Free · Works offline · Your files stay yours (.md on your PC).**
+
+<sub>Windows · Tauri 2 (Rust) + SvelteKit/Svelte 5 + TypeScript + Tailwind v4</sub>
+
+[**⬇ Baixar / Download**](https://github.com/Paulothedeveloper/quartzo/releases/latest) · [Releases](https://github.com/Paulothedeveloper/quartzo/releases) · [Issues](https://github.com/Paulothedeveloper/quartzo/issues)
+
+**🇧🇷 [Português](#-português) · 🇺🇸 [English](#-english)**
 
 </div>
 
-O **Quartzo** é um app desktop (Windows) para escrever, conectar e organizar notas em Markdown puro — pensado para ser a ferramenta **única e completa** de quem **edita vídeo**, faz **design gráfico** e **desenvolve software**, sem precisar de mais nada instalado.
+---
 
-Feito com **Tauri 2 + SvelteKit (Svelte 5) + TypeScript + Tailwind v4 + Rust**. Local-first: seus arquivos `.md` são seus, abrem em qualquer editor, e nada fica preso na nuvem.
+## 🇧🇷 Português
 
-## Recursos
+### O que é o Quartzo
 
-**Escrita e conhecimento**
-- Editor CodeMirror 6 + preview premium (callouts, tabelas, código com cópia, **Mermaid**, **KaTeX**, cor inline `#hex`).
-- **Ferramentas completas de criação**: barra de formatação (negrito, títulos, listas, tarefas, tabela, código, callout, imagem, link…), menu `/`, e **Tipos de nota** (modelos com front-matter pronto).
-- Wikilinks `[[ ]]`, backlinks + menções não-linkadas, tags, daily notes, templates, outline.
-- **Grafo** de conexões e **Canvas** (moodboard: colar/arrastar imagens, redimensionar, swatches de cor, setas).
+O Quartzo é um **gerenciador de conhecimento pessoal (PKM)** em **Markdown puro**, local-first, pensado para quem **edita vídeo**, faz **design** e **desenvolve software** ter um lugar só para escrever, conectar e encontrar tudo — sem precisar de mais nada instalado. Seus arquivos `.md` ficam **no seu computador** e abrem em qualquer editor.
 
-**Views dinâmicas (tipo Dataview)**
-- Bloco ```query → **tabela**, **kanban** (por status), **lista** e **tarefas agregadas** do vault (checkbox marca no arquivo).
+Mais que um editor de notas: tem **grafo** de conexões (estilo cérebro), **Canvas/moodboard**, **views dinâmicas** (kanban/tabela/tarefas a partir do front-matter), **revisão de vídeo** com marcadores, ferramentas de **cor** (conta-gotas + paleta), **Git** nativo, **rascunho** à mão livre e exportação para PDF/HTML.
 
-**Por público**
-- **Vídeo:** revisão de vídeo local com **notas time-coded** e export de **marcadores (CSV)**.
-- **Design:** **conta-gotas** global e **extração de paleta** de imagem; moodboard estilo PureRef.
-- **Dev:** Mermaid, KaTeX, **Git nativo** (versões/histórico), Rascunho (desenho à mão livre).
+### Para quem é
 
-**Mais**
-- Tema claro/escuro, **SFX** e animação em tudo, barra de topo estilo Apple, sidebar redimensionável.
-- **Exportar** nota em PDF/HTML. **Nuvem** via Google Drive/OneDrive (pasta sincronizada).
-- Atualizações e tutorial dentro do app.
+- **Editores de vídeo** que querem planejar cortes, roteiros e feedback time-coded.
+- **Designers** que organizam referências, paletas e moodboards.
+- **Devs** que querem um segundo cérebro técnico (Mermaid, KaTeX, código, Git).
+- Quem quer notas **locais, privadas e sem mensalidade** — uma alternativa ao Obsidian.
 
-## Ecossistema (Quartzo + PRISMA + DaVinci)
+### Principais recursos
 
-O Quartzo conversa com o **PRISMA** (a biblioteca de mídia/DAM do mesmo autor):
+- ✍️ **Editor + preview premium** — callouts, tabelas, **Mermaid**, **KaTeX**, código com cópia, cor inline.
+- 🧰 **Criação livre** — barra de formatação completa, menu `/`, e **Tipos de nota** (modelos com front-matter).
+- 🔗 **Wikilinks, backlinks** e **menções não-linkadas**; **tags**, daily notes, templates, outline.
+- 🧠 **Grafo estilo cérebro** (neurônios + sinapses) e **Canvas/moodboard** (imagens, swatches, setas).
+- 📊 **Views dinâmicas** (` ```query `): **kanban**, **tabela**, **lista**, **tarefas agregadas**.
+- 🎬 **Vídeo:** revisão time-coded + export de marcadores. 🎨 **Design:** conta-gotas + extração de paleta.
+- 🌿 **Git nativo** (versões/histórico), ✏️ **rascunho** (desenho), 🖨️ **export** PDF/HTML.
+- ☁️ **Nuvem** via Google Drive/OneDrive (pasta sincronizada). 🌓 Tema claro/escuro, **SFX** e animações.
+- 🔗 **Ecossistema integrado:** conversa com o **PRISMA** (nossa biblioteca de mídia) e o **VELVET** (cor no DaVinci). Ver [Ecossistema](#-ecossistema--ecosystem).
 
-```
-Quartzo (você escreve o conhecimento)
-   -> PRISMA (gerencia os assets e lê este vault como Base de Conhecimento)
-      -> DaVinci Resolve (FCPXML + plano de cor citando as suas notas)
-```
+### Privacidade e segurança — pode usar sem medo
 
-- Em **Configurações › Integrações**: abra o PRISMA e use este vault como base de conhecimento dele (o PRISMA reindexa ao vivo).
-- Integração de menor atrito hoje = **pasta de vault compartilhada**. Evolução prevista: deep link `prisma://` para abertura direta entre os apps.
+- 🔒 **Roda 100% no seu computador.** Sem servidor, sem login, sem coleta, sem nuvem nossa.
+- 📄 **Seus dados são seus.** Notas são arquivos `.md` no seu disco; abrem em qualquer editor.
+- ☁️ **Sync é opcional** e usa a **sua** pasta do Google Drive/OneDrive — nada passa por nós.
+- 👀 **Código aberto.** Este repositório é público — dá pra inspecionar tudo.
 
-## Instalação
+### Como instalar
 
-Baixe o instalador `Quartzo_x.y.z_x64-setup.exe` na página de **Releases** e execute. (App não assinado → o SmartScreen pode avisar; "Mais informações" → "Executar assim mesmo".)
+1. Vá em **[Releases](https://github.com/Paulothedeveloper/quartzo/releases/latest)**.
+2. Baixe **`Quartzo_x.y.z_x64-setup.exe`**.
+3. Rode e abra o Quartzo. App não assinado → o SmartScreen pode avisar ("Mais informações" → "Executar assim mesmo").
 
-## Desenvolvimento
+---
 
-```bash
-npm install
-npm run tauri dev      # rodar em desenvolvimento
-npm run tauri build    # gerar o instalador
-npm run check          # type-check (svelte-check)
-```
+## 🇺🇸 English
 
-## Privacidade
+### What Quartzo is
 
-100% **local-first**: suas notas são arquivos `.md` no **seu** computador. O app não tem servidor, não coleta dados e não envia nada para lugar nenhum. A sincronização (opcional) usa a **sua** pasta do Google Drive/OneDrive — nada passa por nós.
+Quartzo is a **personal knowledge manager (PKM)** in **plain Markdown**, local-first, built so that people who **edit video**, do **design** and **build software** have one place to write, connect and find everything — with nothing else to install. Your `.md` files stay **on your computer** and open in any editor.
 
-## Uso e licença
+More than a note editor: it has a **connections graph** (brain-style), **Canvas/moodboard**, **dynamic views** (kanban/table/tasks from front-matter), **video review** with markers, **color** tools (eyedropper + palette), native **Git**, a freehand **sketch** pad and PDF/HTML export.
 
-Projeto **pessoal**, disponibilizado de forma **gratuita**. **Não é para venda** nem revenda — não comercialize o app nem cópias dele. Veja [LICENSE](LICENSE).
+### Who it's for
 
-## Changelog
+- **Video editors** planning cuts, scripts and time-coded feedback.
+- **Designers** organizing references, palettes and moodboards.
+- **Devs** who want a technical second brain (Mermaid, KaTeX, code, Git).
+- Anyone who wants **local, private, subscription-free** notes — an Obsidian alternative.
 
-Toda mudança — pequena ou grande — é registrada em [CHANGELOG.md](CHANGELOG.md), nas **Notas de atualização** dentro do app, e na **release** do GitHub.
+### Key features
 
-## Sobre o criador
+- ✍️ **Editor + premium preview** — callouts, tables, **Mermaid**, **KaTeX**, code with copy, inline color.
+- 🧰 **Free-form authoring** — full formatting toolbar, `/` menu, and **Note types** (front-matter templates).
+- 🔗 **Wikilinks, backlinks** and **unlinked mentions**; **tags**, daily notes, templates, outline.
+- 🧠 **Brain-style graph** (neurons + synapses) and **Canvas/moodboard** (images, swatches, arrows).
+- 📊 **Dynamic views** (` ```query `): **kanban**, **table**, **list**, **aggregated tasks**.
+- 🎬 **Video:** time-coded review + marker export. 🎨 **Design:** eyedropper + palette extraction.
+- 🌿 **Native Git** (versions/history), ✏️ **sketch**, 🖨️ **export** to PDF/HTML.
+- ☁️ **Cloud** via Google Drive/OneDrive (synced folder). 🌓 Light/dark theme, **SFX** and animations.
+- 🔗 **Integrated ecosystem:** talks to **PRISMA** (our media library) and **VELVET** (color in DaVinci). See [Ecosystem](#-ecossistema--ecosystem).
 
-Feito por **Paulo Adriel** — editor de vídeo e desenvolvedor — com Claude.
+### Privacy & security — use it with confidence
 
-- GitHub: [@Paulothedeveloper](https://github.com/Paulothedeveloper)
-- LinkedIn: [paulo-adriel](https://www.linkedin.com/in/paulo-adriel/)
-- Instagram: [@paulo.videodev](https://instagram.com/paulo.videodev)
+- 🔒 **Runs 100% on your computer.** No server, no login, no tracking, no cloud of ours.
+- 📄 **Your data is yours.** Notes are `.md` files on your disk; they open in any editor.
+- ☁️ **Sync is optional** and uses **your** Google Drive/OneDrive folder — nothing goes through us.
+- 👀 **Open source.** This repo is public — inspect everything.
 
-Faz parte de um ecossistema próprio com o **PRISMA** (biblioteca de mídia) e o fluxo do **DaVinci Resolve**.
+### Install
+
+1. Go to **[Releases](https://github.com/Paulothedeveloper/quartzo/releases/latest)**.
+2. Download **`Quartzo_x.y.z_x64-setup.exe`**.
+3. Run it and open Quartzo. Unsigned app → SmartScreen may warn ("More info" → "Run anyway").
+
+---
+
+## 🔗 Ecossistema · Ecosystem
+
+O Quartzo é o **cérebro** de um conjunto de softwares próprios. *Quartzo is the **brain** of a suite of in-house tools.*
+
+- **🗂️ PRISMA** (biblioteca de mídia / DAM) — usa este vault como **base de conhecimento** e liga assets às suas notas. *Uses this vault as a **knowledge base** and links assets to your notes.* → Configurações › Integrações.
+- **🎨 VELVET** (cor no DaVinci Resolve · color in DaVinci Resolve) — aplica a cor a partir do catálogo/planos que nascem aqui e no PRISMA. *Applies color from the catalog/plans that start here and in PRISMA.*
+- **🎬 DaVinci Resolve** — o PRISMA exporta clipes (FCPXML) e o plano de cor cita as suas notas daqui. *PRISMA exports clips (FCPXML) and the color plan cites your notes from here.*
+
+Contrato técnico da integração · Integration contract: **[docs/INTEGRATION.md](docs/INTEGRATION.md)**.
+
+> Papéis · Roles: **QUARTZO ensina COMO · PRISMA diz COM O QUÊ · a IA decide · VELVET aplica.**
+
+---
+
+## Stack
+
+- **Desktop:** [Tauri 2](https://tauri.app) (Rust) · **UI:** SvelteKit + Svelte 5 + TypeScript (Vite) + Tailwind v4
+- **Editor:** CodeMirror 6 · **Render:** marked + Mermaid + KaTeX · **Grafo:** @xyflow/svelte + d3-force
+
+## Licença · License
+
+**Uso pessoal e gratuito. Não é para venda** — não comercialize o app nem cópias/derivados.
+**Free for personal use. Not for sale** — do not sell the app or copies/derivatives. Ver · See [LICENSE](LICENSE).
+
+---
+
+<div align="center">
+
+<img src="docs/paulo.jpg" alt="Paulo Adriel" width="150" style="border-radius:16px" />
+
+### 👤 Sobre o criador · About the creator
+
+**Paulo Adriel** — produtor & editor de vídeo (Mentors Studio) e desenvolvedor indie · Porto Velho/RO, Brasil 🇧🇷
+
+Construo as ferramentas que eu mesmo uso, sempre partindo de um problema real de criação. O Quartzo é o segundo cérebro desse fluxo e melhora todo dia.
+
+*Video producer & editor and indie developer. I build the tools I use myself — Quartzo is the second brain of that workflow and improves every day.*
+
+[![Email](https://img.shields.io/badge/-paulothedeveloper@protonmail.com-8B5CF6?style=flat&logo=protonmail&logoColor=white)](mailto:paulothedeveloper@protonmail.com)
+[![Instagram](https://img.shields.io/badge/-@paulo.videodev-E4405F?style=flat&logo=instagram&logoColor=white)](https://instagram.com/paulo.videodev)
+[![LinkedIn](https://img.shields.io/badge/-Paulo%20Adriel-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/paulo-adriel/)
+[![GitHub](https://img.shields.io/badge/-Paulothedeveloper-181717?style=flat&logo=github&logoColor=white)](https://github.com/Paulothedeveloper)
+
+<sub>Feito com cuidado, por quem cria — para quem cria. · Made with care, by a creator — for creators.</sub>
+
+</div>
