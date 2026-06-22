@@ -1,0 +1,52 @@
+# Changelog — Quartzo
+
+Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
+(Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
+
+## 0.11.0 — 2026-06-22
+- **Grafo estilo cérebro:** os nós viraram **neurônios** (pontos com glow, cor por pasta) ligados por **sinapses curvas** (bezier finas e luminosas). Os rótulos ficam ocultos e aparecem ao passar o mouse — visual limpo, sem fontes grandes.
+- **Código aberto:** repositório público no GitHub. Uso **pessoal e gratuito — não à venda** (ver LICENSE). Privacidade local-first reforçada no README.
+
+## 0.10.0 — 2026-06-22
+- **Criação de notas — ferramentas completas:** barra de formatação no editor (negrito, itálico, tachado, títulos, listas, lista numerada, tarefas, citação, link, imagem, tabela, bloco de código, callout, divisor). Liberdade total para montar a nota como quiser, somada ao menu `/` e aos Tipos de nota.
+- **Integração com o PRISMA** (app de biblioteca de mídia do mesmo autor): Configurações › Integrações — abrir o PRISMA e usar este vault como **Base de Conhecimento** dele. Fluxo do ecossistema: **Quartzo (notas) → PRISMA (assets + RAG) → DaVinci Resolve (FCPXML + plano de cor citando suas notas)**. Integração de menor atrito por **pasta de vault compartilhada** (o PRISMA reindexa ao vivo); evolução futura prevista: deep link `prisma://`.
+- **Grafo:** nós (cristais) e rótulos menores, no tamanho dos ícones do Obsidian.
+- **Tutorial** atualizado (criação de notas + ecossistema PRISMA).
+
+## 0.9.1 — 2026-06-22
+- Editor visual de **Tipos de nota** nas Configurações (criar/editar/excluir/restaurar; sem mexer em JSON).
+
+## 0.9.0 — 2026-06-22
+- **Rascunho**: quadro de desenho à mão livre (Ctrl+Shift+D) com `perfect-freehand` — caneta (cores/espessura), borracha, desfazer, limpar, exportar SVG, auto-salvar.
+
+## 0.8.1 — 2026-06-22
+- **Tipos de nota**: criar notas com front-matter pronto (projeto, cliente, reunião, snippet…), via + Adicionar → Nova de tipo… (editáveis em `.quartzo/types.json`).
+
+## 0.8.0 — 2026-06-22
+- **Nuvem**: sincronizar o vault pela pasta do Google Drive/OneDrive (detecção + mover vault, com backup do original).
+
+## 0.7.1 — 2026-06-22
+- **Exportar nota**: Imprimir/Salvar como PDF + Exportar HTML autônomo.
+
+## 0.7.0 — 2026-06-21
+- **Git nativo**: painel Versões (Ctrl+Shift+G) — iniciar versionamento, salvar versões, histórico (usa o git do sistema, local).
+
+## 0.6.0–0.6.3 — 2026-06-21
+- **Revisão de vídeo** time-coded (bloco ```video): player local, marcar timecode, timecodes clicáveis, exportar marcadores (CSV).
+- **Moodboard no Canvas**: colar/arrastar imagens, redimensionar, cartão de cor (conta-gotas), organizar em grade.
+- **Animação de entrada** em todas as views/painéis/listas; **barra lateral redimensionável**.
+- Correções no grafo (troca de vault, nós, remoção do minimapa).
+
+## 0.5.0–0.5.1 — 2026-06-21
+- **Views dinâmicas por front-matter** (bloco ```query): tabela, kanban (por status), lista e **tarefas agregadas** (checkbox marca no arquivo).
+- **Cor**: conta-gotas global (eyedropper) + extração de paleta de imagem.
+
+## 0.4.0–0.4.1 — 2026-06-21
+- **Onda técnica**: Mermaid, KaTeX (math), blocos de código com copiar/linguagem/nº de linha, cor inline (`#hex`), menu `/`, "buscar = criar" no quick switcher.
+- **Barra de topo** estilo Apple (semáforo, busca central, + Adicionar) + always-on-top.
+
+## 0.3.x — 2026-06-21
+- Tema claro, SFX (efeitos sonoros), animações; correções de navegação/grafo; vault list (troca rápida de vaults).
+
+## 0.1.x–0.2.x — 2026-06-20/21
+- Base: editor CodeMirror + preview premium (callouts, tabelas, código), wikilinks/backlinks + menções não-linkadas, grafo, Canvas, busca global, tags, daily notes, templates, outline, memórias, instalador, atualizações + tutorial no app.

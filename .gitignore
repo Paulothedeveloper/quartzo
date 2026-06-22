@@ -1,0 +1,24 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Rust / Tauri (build pesado e arquivos gerados)
+/src-tauri/target
+/src-tauri/gen/schemas
+
+# screenshots/temporários de teste
+/*.png
+/shot*.mjs
+
+# docs internos de desenvolvimento (não publicar — contêm caminhos locais)
+/CLAUDE.md
+/DESIGN.md
+/PRODUCT.md
+/COMMIT_MSG.txt

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Quartzo",
+  "version": "0.11.0",
+  "identifier": "com.quartzo.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Quartzo",
+        "width": 1280,
+        "height": 832,
+        "minWidth": 900,
+        "minHeight": 600,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Paulo",
+    "copyright": "© 2026 Paulo · Quartzo",
+    "category": "Productivity",
+    "shortDescription": "Gerenciador de conhecimento pessoal",
+    "longDescription": "Quartzo — gerenciador de conhecimento pessoal local-first em Markdown, com grafo, canvas e backlinks.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "installer/header.bmp",
+        "sidebarImage": "installer/sidebar.bmp",
+        "displayLanguageSelector": false,
+        "languages": ["PortugueseBR", "English"]
+      }
+    }
+  }
+}

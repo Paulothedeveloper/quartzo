@@ -1,0 +1,23 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="qx" x1="16" y1="4" x2="48" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A5F3FC"/>
+      <stop offset="0.5" stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#818CF8"/>
+    </linearGradient>
+    <linearGradient id="qx2" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0F9FF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#67E8F9" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+  <!-- facetas preenchidas (refração) -->
+  <path d="M32 5 L17 20 L32 29 Z" fill="url(#qx2)" opacity="0.9"/>
+  <path d="M32 5 L47 20 L32 29 Z" fill="#67E8F9" opacity="0.35"/>
+  <path d="M17 20 L17 51 L32 60 L32 29 Z" fill="#67E8F9" opacity="0.18"/>
+  <path d="M47 20 L47 51 L32 60 L32 29 Z" fill="#818CF8" opacity="0.22"/>
+  <!-- contorno + arestas -->
+  <g stroke="url(#qx)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" fill="none">
+    <path d="M32 5 L47 20 L47 51 L32 60 L17 51 L17 20 Z"/>
+    <path d="M32 5 L32 29 M17 20 L32 29 L47 20"/>
+  </g>
+</svg>
