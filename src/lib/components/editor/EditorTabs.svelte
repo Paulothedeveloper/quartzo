@@ -4,6 +4,7 @@
   import { flip } from "svelte/animate";
   import { openTabs, activeTabPath } from "$lib/stores/tabs";
   import { ctxMenu, rightPane } from "$lib/stores/ui";
+  import { t, tr } from "$lib/i18n";
 
   function switchTo(path: string) {
     activeTabPath.set(path);
@@ -27,11 +28,11 @@
       x: e.clientX,
       y: e.clientY,
       items: [
-        { label: "Abrir ao lado", icon: Columns2, action: () => rightPane.set(path) },
+        { label: tr("tabs.openBeside"), icon: Columns2, action: () => rightPane.set(path) },
         { separator: true },
-        { label: "Fechar", icon: X, action: () => closeTab(path) },
+        { label: tr("common.close"), icon: X, action: () => closeTab(path) },
         {
-          label: "Fechar as outras",
+          label: tr("tabs.closeOthers"),
           icon: XCircle,
           action: () => {
             openTabs.set($openTabs.filter((t) => t.path === path));
@@ -39,7 +40,7 @@
           },
         },
         {
-          label: "Fechar todas",
+          label: tr("tabs.closeAll"),
           icon: ListX,
           danger: true,
           action: () => {
@@ -66,14 +67,14 @@
     >
       <span class="truncate">{tab.name}</span>
       {#if tab.dirty}
-        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" title="Não salvo"></span>
+        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" title={$t("editor.unsaved")}></span>
       {/if}
       <span
         class="ml-auto grid h-5 w-5 shrink-0 place-items-center rounded-md text-text-muted opacity-70 transition-all hover:bg-border hover:text-text-primary hover:opacity-100"
         onclick={(e) => close(tab.path, e)}
         role="button"
         tabindex="-1"
-        title="Fechar (Ctrl+W)"
+        title={$t("tabs.closeTip")}
         onkeydown={() => {}}
       >
         <X size={13} />

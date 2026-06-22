@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.20.0",
+    date: "2026-06-22",
+    items: [
+      "Tradução (EN/ES) ampliada: barra lateral, árvore de arquivos, abas, Outline, Backlinks e estados vazios do editor.",
+      "Menus de contexto (arquivos e abas) e placeholders das paletas agora também traduzidos.",
+    ],
+  },
+  {
     version: "0.19.0",
     date: "2026-06-22",
     items: [

@@ -8,6 +8,7 @@
   import { backlinksOpen } from "$lib/stores/ui";
   import { openNote } from "$lib/vault-actions";
   import { getBacklinkCache, setBacklinkCache } from "$lib/backlink-cache";
+  import { t } from "$lib/i18n";
 
   interface Backlink {
     path: string;
@@ -58,7 +59,7 @@
 <div class="flex h-full flex-col">
   <div class="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
     <Link2 size={15} class="text-accent" />
-    <span class="text-sm font-medium">Backlinks</span>
+    <span class="text-sm font-medium">{$t("backlinks.title")}</span>
     {#if !loading}<span class="text-xs text-text-muted">{links.length}</span>{/if}
     <button
       onclick={() => backlinksOpen.set(false)}
@@ -71,13 +72,13 @@
   <div class="flex-1 overflow-auto p-2">
     {#if loading}
       <div class="flex items-center justify-center gap-2 py-8 text-sm text-text-secondary">
-        <Loader2 size={15} class="animate-spin" /> Buscando…
+        <Loader2 size={15} class="animate-spin" /> {$t("backlinks.searching")}
       </div>
     {:else}
       <!-- Links explícitos -->
       {#if links.length === 0}
         <div class="px-3 py-6 text-center text-sm text-text-secondary">
-          Nenhuma nota aponta para esta ainda.
+          {$t("backlinks.none")}
         </div>
       {:else}
         {#each links as bl, i (bl.path)}
@@ -97,7 +98,7 @@
       <!-- Menções não-linkadas -->
       {#if mentions.length > 0}
         <div class="mb-1.5 mt-4 flex items-center gap-1.5 px-1 text-xs font-medium uppercase tracking-wide text-text-muted">
-          <Unlink size={12} /> Menções não-linkadas
+          <Unlink size={12} /> {$t("backlinks.unlinked")}
           <span class="ml-auto normal-case">{mentions.length}</span>
         </div>
         {#each mentions as m, i (m.path)}

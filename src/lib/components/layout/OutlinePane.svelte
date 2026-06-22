@@ -6,6 +6,7 @@
   import { openTabs, activeTabPath } from "$lib/stores/tabs";
   import { outlineOpen } from "$lib/stores/ui";
   import { activeEditorView } from "$lib/stores/editor";
+  import { t } from "$lib/i18n";
 
   interface Heading {
     level: number;
@@ -59,7 +60,7 @@
 <div class="flex h-full flex-col">
   <div class="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
     <List size={15} class="text-accent" />
-    <span class="text-sm font-medium">Outline</span>
+    <span class="text-sm font-medium">{$t("outline.title")}</span>
     <span class="text-xs text-text-muted">{headings.length}</span>
     <button
       onclick={() => outlineOpen.set(false)}
@@ -71,7 +72,7 @@
 
   <div class="flex-1 overflow-auto p-2">
     {#if !activeTab}
-      <div class="px-3 py-8 text-center text-sm text-text-secondary">Nenhuma nota aberta.</div>
+      <div class="px-3 py-8 text-center text-sm text-text-secondary">{$t("outline.noNote")}</div>
     {:else if headings.length === 0}
       <div class="px-3 py-8 text-center text-sm text-text-secondary">
         Esta nota não tem cabeçalhos (#).

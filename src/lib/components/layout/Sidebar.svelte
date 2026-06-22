@@ -144,10 +144,10 @@
   <div class="flex h-full w-full flex-col items-center py-3">
     <CrystalIllustration size={34} glow={0.5} float={false} />
     <div class="mt-4 flex flex-col gap-2">
-      <button onclick={newNote} title="Nova nota" class="rounded-lg bg-accent p-2 text-bg transition-colors hover:bg-accent-hover">
+      <button onclick={newNote} title={$t("titlebar.newNote")} class="rounded-lg bg-accent p-2 text-bg transition-colors hover:bg-accent-hover">
         <FilePlus size={18} />
       </button>
-      <button onclick={openVault} title="Abrir vault" class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
+      <button onclick={openVault} title={$t("welcome.openVault")} class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
         <FolderOpen size={18} />
       </button>
     </div>
@@ -155,7 +155,7 @@
       {#if $settings.features.memory}
         <button
           onclick={() => memoryOpen.set(true)}
-          title="Nova Memória do Claude (Ctrl+Shift+M)"
+          title={$t("sidebar.newMemory")}
           class="rounded-lg p-2 text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-95"
         >
           <Sparkles size={18} />
@@ -164,16 +164,16 @@
       {#if $settings.features.graph}
         <button
           onclick={() => showGraph.update((v) => !v)}
-          title="Grafo (Ctrl+G)"
+          title={$t("graph.title")}
           class="rounded-lg p-2 transition-all active:scale-95 {$showGraph ? 'bg-accent text-bg' : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
         >
           <Share2 size={18} />
         </button>
       {/if}
-      <button onclick={() => settingsOpen.set(true)} title="Configurações (Ctrl+,)" class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
+      <button onclick={() => settingsOpen.set(true)} title={$t("common.settings")} class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
         <SettingsIcon size={18} />
       </button>
-      <button onclick={() => sidebarCollapsed.set(false)} title="Expandir" class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
+      <button onclick={() => sidebarCollapsed.set(false)} title={$t("sidebar.expand")} class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
         <PanelLeft size={18} />
       </button>
     </div>
@@ -183,10 +183,10 @@
   <div class="flex h-full w-full flex-col">
     <!-- Header -->
     <div class="flex items-center px-4 pb-1 pt-3">
-      <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">Explorador</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">{$t("sidebar.explorer")}</span>
       <button
         onclick={() => sidebarCollapsed.set(true)}
-        title="Recolher (Ctrl+\)"
+        title={$t("sidebar.collapse")}
         class="ml-auto rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
       >
         <PanelLeftClose size={17} />
@@ -199,18 +199,18 @@
         onclick={newNote}
         class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm font-semibold text-bg shadow-[0_2px_12px_rgba(103,232,249,0.18)] transition-all hover:bg-accent-hover active:scale-[0.98]"
       >
-        <FilePlus size={16} /> Nova nota
+        <FilePlus size={16} /> {$t("titlebar.newNote")}
       </button>
       <button
         onclick={newFolder}
-        title="Nova pasta"
+        title={$t("titlebar.newFolder")}
         class="rounded-xl px-3 py-2.5 text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.97]"
       >
         <FolderPlus size={18} />
       </button>
       <button
         onclick={openVault}
-        title="Abrir vault"
+        title={$t("welcome.openVault")}
         class="rounded-xl px-3 py-2.5 text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.97]"
       >
         <FolderOpen size={18} />
@@ -223,7 +223,7 @@
         <Search size={15} class="text-text-secondary" />
         <input
           bind:value={search}
-          placeholder="Buscar arquivos..."
+          placeholder={$t("sidebar.searchFiles")}
           class="w-full bg-transparent text-sm outline-none placeholder:text-text-secondary"
         />
       </div>
@@ -233,7 +233,7 @@
     <div class="flex items-center gap-1 px-2.5 py-1">
       <button
         onclick={openVaultMenu}
-        title="Trocar de vault"
+        title={$t("sidebar.switchVault")}
         class="group flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-1.5 py-1 text-left transition-colors hover:bg-elevated"
       >
         <span
@@ -245,7 +245,7 @@
       {#if $currentVaultPath}
         <button
           onclick={refreshTree}
-          title="Atualizar"
+          title={$t("sidebar.refresh")}
           class="shrink-0 rounded-md p-1 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
         >
           <RefreshCw size={13} />
@@ -257,8 +257,8 @@
     <div class="flex-1 overflow-auto px-2 pb-2">
       {#if !$currentVaultPath}
         <EmptyState
-          title="Nenhum vault aberto"
-          subtitle="Abra uma pasta com notas em Markdown."
+          title={$t("sidebar.noVault")}
+          subtitle={$t("sidebar.noVaultSub")}
           crystal={false}
           compact
         >
@@ -266,7 +266,7 @@
             onclick={openVault}
             class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
           >
-            Abrir vault
+            {$t("welcome.openVault")}
           </button>
         </EmptyState>
       {:else if search.trim()}
@@ -288,7 +288,7 @@
           class="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:text-text-primary"
         >
           <Hash size={13} />
-          Tags
+          {$t("sidebar.tags")}
           <span class="ml-auto text-text-muted">{tagsOpen ? "▾" : "▸"}</span>
         </button>
         {#if tagsOpen}
@@ -296,16 +296,16 @@
             class="flex max-h-40 flex-wrap gap-1.5 overflow-auto px-2 pb-2 pt-1"
             transition:slide={{ duration: 180 }}
           >
-            {#each tags as t, i (t.tag)}
+            {#each tags as tg, i (tg.tag)}
               <button
-                onclick={() => searchRequest.set("#" + t.tag)}
+                onclick={() => searchRequest.set("#" + tg.tag)}
                 in:fly={{ y: 4, duration: 160, delay: Math.min(i * 18, 220) }}
                 class="flex items-center gap-1 rounded-full bg-elevated px-2 py-0.5 text-xs text-accent-light transition-colors hover:bg-accent hover:text-bg"
               >
-                #{t.tag}<span class="opacity-60">{t.count}</span>
+                #{tg.tag}<span class="opacity-60">{tg.count}</span>
               </button>
             {:else}
-              <span class="px-1 py-1 text-xs text-text-muted">Nenhuma tag encontrada</span>
+              <span class="px-1 py-1 text-xs text-text-muted">{$t("sidebar.noTags")}</span>
             {/each}
           </div>
         {/if}
@@ -319,7 +319,7 @@
           onclick={openDailyNote}
           class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
         >
-          <CalendarDays size={16} /> Nota do dia
+          <CalendarDays size={16} /> {$t("titlebar.dailyNote")}
         </button>
       {/if}
       {#if $settings.features.memory}
@@ -327,7 +327,7 @@
           onclick={() => memoryOpen.set(true)}
           class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
         >
-          <Sparkles size={16} class="text-accent" /> Nova Memória do Claude
+          <Sparkles size={16} class="text-accent" /> {$t("sidebar.newMemory")}
         </button>
       {/if}
       {#if $settings.features.graph}
@@ -337,7 +337,7 @@
             ? 'bg-accent/15 text-accent-light'
             : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
         >
-          <Share2 size={16} /> Grafo
+          <Share2 size={16} /> {$t("graph.title")}
         </button>
       {/if}
       {#if $settings.features.canvas}
@@ -357,7 +357,7 @@
             ? 'bg-accent/15 text-accent-light'
             : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
         >
-          <Pencil size={16} /> Rascunho
+          <Pencil size={16} /> {$t("sidebar.sketch")}
         </button>
       {/if}
       {#if $settings.features.git}
@@ -367,14 +367,14 @@
             ? 'bg-accent/15 text-accent-light'
             : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
         >
-          <GitBranch size={16} /> Versões (Git)
+          <GitBranch size={16} /> {$t("git.title")}
         </button>
       {/if}
       <button
         onclick={() => settingsOpen.set(true)}
         class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
       >
-        <SettingsIcon size={16} /> Configurações
+        <SettingsIcon size={16} /> {$t("common.settings")}
       </button>
     </div>
   </div>

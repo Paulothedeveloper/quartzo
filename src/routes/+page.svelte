@@ -467,13 +467,13 @@
   bind:open={quickOpen}
   commands={quickCommands}
   onCreate={createNamedNote}
-  createLabel="Criar nota"
-  placeholder="Ir para nota ou digite para criar…"
+  createLabel={tr("palette.createNote")}
+  placeholder={tr("palette.quickPlaceholder")}
 />
 <CommandPalette
   bind:open={typedOpen}
   commands={typeCommands}
-  placeholder="Escolha um tipo de nota…"
+  placeholder={tr("palette.typePlaceholder")}
 />
 <SearchModal bind:open={searchOpen} initial={searchInitial} />
 <ContextMenu />

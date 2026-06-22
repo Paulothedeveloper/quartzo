@@ -162,7 +162,7 @@
       <!-- Outline -->
       <button
         onclick={() => outlineOpen.update((v) => !v)}
-        title="Outline / cabeçalhos (Ctrl+Shift+O)"
+        title={$t("outline.title")}
         class="rounded-lg p-1.5 transition-colors {$outlineOpen
           ? 'bg-accent/15 text-accent-light'
           : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
@@ -173,7 +173,7 @@
       <!-- Backlinks -->
       <button
         onclick={() => backlinksOpen.update((v) => !v)}
-        title="Backlinks (Ctrl+Shift+B)"
+        title={$t("backlinks.title")}
         class="rounded-lg p-1.5 transition-colors {$backlinksOpen
           ? 'bg-accent/15 text-accent-light'
           : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
@@ -246,8 +246,8 @@
 {:else}
   <div class="flex flex-1 items-center justify-center text-text-secondary">
     <div class="text-center">
-      <p class="mb-1 text-lg">Nenhum arquivo aberto</p>
-      <p class="text-sm">Selecione uma nota no explorer à esquerda</p>
+      <p class="mb-1 text-lg">{$t("editor.noFileOpen")}</p>
+      <p class="text-sm">{$t("editor.noFileOpenSub")}</p>
     </div>
   </div>
 {/if}

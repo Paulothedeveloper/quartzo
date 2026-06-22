@@ -30,6 +30,7 @@
     createFolderIn,
   } from "$lib/vault-actions";
   import type { FileNode } from "$lib/types";
+  import { tr } from "$lib/i18n";
   import Self from "./FileTree.svelte";
 
   let { nodes = [], depth = 0 }: { nodes?: FileNode[]; depth?: number } = $props();
@@ -58,22 +59,22 @@
     e.preventDefault();
     e.stopPropagation();
     const common: CtxMenuItem[] = [
-      { label: "Renomear", icon: Pencil, action: () => renamingPath.set(node.path) },
-      { label: "Copiar caminho", icon: Copy, action: () => copyPath(node.path) },
-      { label: "Mostrar na pasta", icon: ExternalLink, action: () => revealEntry(node.path) },
+      { label: tr("common.rename"), icon: Pencil, action: () => renamingPath.set(node.path) },
+      { label: tr("vault.copyPath"), icon: Copy, action: () => copyPath(node.path) },
+      { label: tr("vault.showInFolder"), icon: ExternalLink, action: () => revealEntry(node.path) },
       { separator: true },
-      { label: "Apagar", icon: Trash2, danger: true, action: () => deleteEntry(node.path) },
+      { label: tr("common.delete"), icon: Trash2, danger: true, action: () => deleteEntry(node.path) },
     ];
     const items: CtxMenuItem[] = node.is_dir
       ? [
-          { label: "Nova nota aqui", icon: FilePlus, action: () => createNoteIn(node.path) },
-          { label: "Nova subpasta", icon: FolderPlus, action: () => createFolderIn(node.path) },
+          { label: tr("tree.newNoteHere"), icon: FilePlus, action: () => createNoteIn(node.path) },
+          { label: tr("tree.newSubfolder"), icon: FolderPlus, action: () => createFolderIn(node.path) },
           { separator: true },
           ...common,
         ]
       : [
-          { label: "Abrir", icon: CornerUpRight, action: () => selectedFile.set(node.path) },
-          { label: "Abrir ao lado", icon: Columns2, action: () => rightPane.set(node.path) },
+          { label: tr("common.open"), icon: CornerUpRight, action: () => selectedFile.set(node.path) },
+          { label: tr("tabs.openBeside"), icon: Columns2, action: () => rightPane.set(node.path) },
           { separator: true },
           ...common,
         ];
