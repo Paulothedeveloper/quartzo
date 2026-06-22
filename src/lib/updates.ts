@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.14.0",
+    date: "2026-06-22",
+    items: [
+      "Menu do vault (clique direito no nome do vault): Mostrar na pasta e Copiar caminho — igual ao Obsidian.",
+      "Aparência: cor de destaque personalizável (paleta cristal + cor livre).",
+      "Aparência: zoom global do app e tamanho da fonte da interface, ajustáveis.",
+      "Início do épico de Configurações no nível do Obsidian — mais ondas a caminho.",
+    ],
+  },
+  {
     version: "0.13.0",
     date: "2026-06-22",
     items: [

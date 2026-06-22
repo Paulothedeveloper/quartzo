@@ -1,6 +1,6 @@
 [package]
 name = "lumina"
-version = "0.13.0"
+version = "0.14.0"
 description = "Quartzo"
 authors = ["you"]
 edition = "2021"

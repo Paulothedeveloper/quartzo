@@ -33,7 +33,10 @@
   import { checkForUpdate, CHANGELOG, GITHUB_REPO, type UpdateResult } from "$lib/updates";
   import { settings, SHORTCUT_ACTIONS, DEFAULT_SHORTCUTS, formatCombo, type Settings, type EditorFont, type Density, type ViewMode } from "$lib/stores/settings";
   import { loadNoteTypes, saveNoteTypes, DEFAULT_TYPES, type NoteType } from "$lib/types-notes";
-  import { Layers, Trash2 } from "@lucide/svelte";
+  import { Layers, Trash2, Pipette } from "@lucide/svelte";
+
+  // Presets de cor de destaque (paleta cristal + complementares).
+  const ACCENTS = ["#67e8f9", "#38bdf8", "#a78bfa", "#34d399", "#fbbf24", "#f472b6", "#f87171"];
   import { currentVaultPath } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
   import { setVault } from "$lib/vault-actions";
@@ -82,7 +85,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.13.0");
+  let appVersion = $state("0.14.0");
   $effect(() => {
     try {
       getVersion()
@@ -546,6 +549,67 @@
                     {#if $settings.theme === "light"}<Check size={14} class="mb-0.5 inline" />{/if} Claro
                   </button>
                 </div>
+              </div>
+
+              <div class="card">
+                <div class="mb-2.5 flex items-center justify-between">
+                  <div class="text-sm">Cor de destaque</div>
+                  {#if $settings.accentColor}
+                    <button
+                      onclick={() => set("accentColor", "")}
+                      class="text-xs text-text-secondary hover:text-accent-light"
+                    >
+                      Restaurar
+                    </button>
+                  {/if}
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  {#each ACCENTS as a (a)}
+                    <button
+                      onclick={() => set("accentColor", a)}
+                      aria-label={a}
+                      title={a}
+                      class="h-7 w-7 rounded-full border-2 transition-transform hover:scale-110 active:scale-95 {(
+                        $settings.accentColor || '').toLowerCase() === a.toLowerCase()
+                        ? 'border-text-primary'
+                        : 'border-transparent'}"
+                      style="background:{a}"
+                    ></button>
+                  {/each}
+                  <label
+                    class="flex h-7 cursor-pointer items-center gap-1.5 rounded-lg border border-border px-2 text-xs text-text-secondary hover:bg-elevated"
+                    title="Cor personalizada"
+                  >
+                    <Pipette size={13} />
+                    <input
+                      type="color"
+                      value={$settings.accentColor || "#67e8f9"}
+                      oninput={(e) => set("accentColor", e.currentTarget.value)}
+                      class="h-0 w-0 opacity-0"
+                      aria-label="Cor personalizada"
+                    />
+                  </label>
+                </div>
+                <div class="divider"></div>
+                {@render sliderRow(
+                  "Zoom do app",
+                  Math.round($settings.appZoom * 100),
+                  80,
+                  140,
+                  5,
+                  "%",
+                  (v) => set("appZoom", v / 100)
+                )}
+                <div class="divider"></div>
+                {@render sliderRow(
+                  "Tamanho da fonte da interface",
+                  Math.round($settings.uiFontScale * 100),
+                  85,
+                  125,
+                  5,
+                  "%",
+                  (v) => set("uiFontScale", v / 100)
+                )}
               </div>
 
               <div class="card">

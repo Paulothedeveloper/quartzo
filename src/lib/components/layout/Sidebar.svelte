@@ -17,8 +17,11 @@
     Check,
     GitBranch,
     Pencil,
+    ExternalLink,
+    ClipboardCopy,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
+  import { revealItemInDir } from "@tauri-apps/plugin-opener";
   import { invoke } from "@tauri-apps/api/core";
   import { currentVaultPath, fileTree } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
@@ -53,16 +56,44 @@
   function openVaultMenu(e: MouseEvent) {
     e.stopPropagation();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const current = $currentVaultPath;
+    const items: CtxMenuItem[] = [];
+    // Ações do vault atual (igual ao Obsidian: clique-direito no nome do vault)
+    if (current) {
+      items.push(
+        {
+          label: tr("vault.showInFolder"),
+          icon: ExternalLink,
+          action: () =>
+            revealItemInDir(current).catch(() => showToast(tr("settings.toast.openFolderFail"), "error")),
+        },
+        {
+          label: tr("vault.copyPath"),
+          icon: ClipboardCopy,
+          action: async () => {
+            try {
+              await navigator.clipboard.writeText(current);
+              showToast(tr("settings.toast.pathCopied"), "success");
+            } catch {
+              showToast(tr("settings.toast.copyFail"), "error");
+            }
+          },
+        },
+        { separator: true },
+      );
+    }
     const recents = getRecentVaults();
-    const items: CtxMenuItem[] = recents.map((v) => ({
-      label: v.split(/[\\/]/).pop() ?? v,
-      icon: v === $currentVaultPath ? Check : QuartzIcon,
-      action: () => {
-        if (v !== $currentVaultPath) setVault(v).then(() => showToast("Vault aberto", "success"));
-      },
-    }));
+    for (const v of recents) {
+      items.push({
+        label: v.split(/[\\/]/).pop() ?? v,
+        icon: v === current ? Check : QuartzIcon,
+        action: () => {
+          if (v !== current) setVault(v).then(() => showToast(tr("sidebar.vaultOpened"), "success"));
+        },
+      });
+    }
     if (recents.length) items.push({ separator: true });
-    items.push({ label: "Abrir outra pasta…", icon: FolderPlus, action: openVault });
+    items.push({ label: tr("vault.openOther"), icon: FolderPlus, action: openVault });
     ctxMenu.set({ x: rect.left, y: rect.bottom + 4, items });
   }
 
