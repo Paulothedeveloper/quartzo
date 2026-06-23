@@ -26,6 +26,7 @@ export interface Settings {
   spellcheck: boolean; // verificação ortográfica do navegador no editor
   hoverPreview: boolean; // espiar página: pré-visualizar nota ao passar o mouse no [[wikilink]]
   hoverPreviewCtrl: boolean; // exigir Ctrl para acionar o espiar página
+  propertiesPanel: boolean; // editor visual de propriedades (front-matter) no topo do editor
   // Preview / renderização
   renderMermaid: boolean; // diagramas ```mermaid
   renderQueries: boolean; // views dinâmicas ```query (tabela/kanban/tarefas)
@@ -114,6 +115,7 @@ export const DEFAULT_SETTINGS: Settings = {
   spellcheck: false,
   hoverPreview: true,
   hoverPreviewCtrl: false,
+  propertiesPanel: true,
   renderMermaid: true,
   renderQueries: true,
   renderVideo: true,

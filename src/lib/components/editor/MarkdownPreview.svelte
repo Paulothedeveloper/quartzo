@@ -432,12 +432,14 @@
   let {
     content = "",
     notePath = "",
+    showFrontmatter = true,
     onOpenWikilink,
     onOpenPath,
     onScroller,
   }: {
     content?: string;
     notePath?: string;
+    showFrontmatter?: boolean;
     onOpenWikilink?: (target: string) => void;
     onOpenPath?: (path: string) => void;
     onScroller?: (el: HTMLElement) => void;
@@ -688,7 +690,7 @@
   {#if videoBlock && $settings.renderVideo}
     <VideoReview src={videoBlock.src} abs={videoBlock.abs} fps={videoBlock.fps} {content} />
   {/if}
-  {#if parsed.props.length}
+  {#if parsed.props.length && showFrontmatter}
     <div class="q-props">
       {#each parsed.props as p (p.key)}
         <div class="q-prop">

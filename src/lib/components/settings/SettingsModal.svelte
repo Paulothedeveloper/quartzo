@@ -92,7 +92,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.23.0");
+  let appVersion = $state("0.24.0");
   $effect(() => {
     try {
       getVersion()
@@ -644,6 +644,15 @@
                     () => set("hoverPreviewCtrl", !$settings.hoverPreviewCtrl)
                   )}
                 {/if}
+              </div>
+
+              <div class="card">
+                {@render toggleRow(
+                  "Editor de Propriedades (front-matter)",
+                  "Mostra um painel no topo do editor para editar as propriedades (YAML) em campos, sem digitar YAML cru.",
+                  $settings.propertiesPanel,
+                  () => set("propertiesPanel", !$settings.propertiesPanel)
+                )}
               </div>
 
               <div class="card">

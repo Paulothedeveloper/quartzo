@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.24.0",
+    date: "2026-06-23",
+    items: [
+      "Editor visual de Propriedades: edite o front-matter (YAML) da nota em campos no topo do editor — sem digitar YAML cru.",
+      "Adicionar/renomear/remover propriedades; listas (ex.: tags) preservadas como YAML válido.",
+      "Alimenta direto as tabelas/kanban dinâmicos. Liga/desliga em Configurações › Editor.",
+    ],
+  },
+  {
     version: "0.23.0",
     date: "2026-06-23",
     items: [

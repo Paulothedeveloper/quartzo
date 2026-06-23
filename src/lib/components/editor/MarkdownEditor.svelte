@@ -6,7 +6,8 @@
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { printNote } from "$lib/export";
-  import { insertAtCursor, wrapSelection, toggleLinePrefix } from "$lib/stores/editor";
+  import { insertAtCursor, wrapSelection, toggleLinePrefix, activeEditorView } from "$lib/stores/editor";
+  import { get } from "svelte/store";
   import { invoke } from "@tauri-apps/api/core";
   import { openTabs, activeTabPath } from "$lib/stores/tabs";
   import { showToast } from "$lib/stores/toast";
@@ -16,6 +17,7 @@
   import { t, tr } from "$lib/i18n";
   import CodeMirror from "./CodeMirror.svelte";
   import MarkdownPreview from "./MarkdownPreview.svelte";
+  import PropertiesPanel from "./PropertiesPanel.svelte";
 
   type Mode = "edit" | "split" | "read";
   let mode = $state<Mode>($settings.defaultMode);
@@ -51,6 +53,20 @@
     if (!path) return;
     markContent(path, value, true);
     scheduleSave(path, value);
+  }
+
+  // Aplica uma reescrita programática (ex.: editor de Propriedades).
+  // Prefere o EditorView vivo (mantém histórico/undo); senão atualiza direto a aba.
+  function setContent(next: string) {
+    const view = get(activeEditorView);
+    if (view) {
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: next },
+      });
+      // o updateListener do CodeMirror dispara onChange automaticamente
+    } else {
+      onChange(next);
+    }
   }
 
   async function insertImage() {
@@ -218,6 +234,11 @@
     </div>
   {/if}
 
+  <!-- Propriedades (front-matter) — editável no modo edição/dividido -->
+  {#if mode !== "read" && $settings.propertiesPanel}
+    <PropertiesPanel content={activeTab.content} {setContent} />
+  {/if}
+
   <!-- Corpo -->
   <div class="flex min-h-0 flex-1" bind:this={bodyEl}>
     {#if mode !== "read"}
@@ -236,6 +257,7 @@
         <MarkdownPreview
           content={activeTab.content}
           notePath={activeTab.path}
+          showFrontmatter={!(mode === "split" && $settings.propertiesPanel)}
           onOpenWikilink={openWikilink}
           onOpenPath={openNote}
           onScroller={(el) => (pvScroller = el)}
