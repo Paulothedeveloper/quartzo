@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.23.0 — 2026-06-23
+
+- **Proxy de vídeo (ffmpeg):** no bloco ```` ```video ````, formatos que o WebView2 não toca (H.265/ProRes/.mov/.mkv) ganham um botão **Gerar proxy (ffmpeg)** que transcodifica para **H.264 720p** em `.quartzo/proxies/<hash>.mp4` (reaproveitado depois) e troca o player para a versão compatível. Aviso automático quando o formato é arriscado ou falha ao carregar. Backend Rust: `ffmpeg_available`, `make_video_proxy`. Player de revisão de vídeo também traduzido (PT/EN/ES).
+
 ## 0.22.0 — 2026-06-23
 - **Git v2:** **diff por arquivo** (clique num arquivo alterado no painel de Versões → diff colorido inline, com untracked mostrado como adição inteira); **sincronização com remoto** — botões **Enviar (push)** / **Receber (pull --rebase)** com indicador de **commits à frente/atrás** do upstream; **snapshot automático** opcional (auto-commit a cada N minutos quando há mudanças, ligado no próprio painel). Backend Rust: `git_diff`, `git_remote`, `git_push`, `git_pull`. Settings: `gitAutoSnapshot`, `gitAutoSnapshotMinutes`.
 

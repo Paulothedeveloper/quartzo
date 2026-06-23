@@ -993,7 +993,10 @@ pub fn git_init(vault: String) -> Result<(), String> {
     let _ = run_git(&vault, &["symbolic-ref", "HEAD", "refs/heads/main"]);
     let gi = Path::new(&vault).join(".gitignore");
     if !gi.exists() {
-        let _ = fs::write(&gi, ".quartzo/canvas-assets/\n.DS_Store\nThumbs.db\n");
+        let _ = fs::write(
+            &gi,
+            ".quartzo/canvas-assets/\n.quartzo/proxies/\n.DS_Store\nThumbs.db\n",
+        );
     }
     Ok(())
 }
@@ -1132,6 +1135,70 @@ pub fn git_push(vault: String) -> Result<String, String> {
 #[tauri::command]
 pub fn git_pull(vault: String) -> Result<String, String> {
     run_git(&vault, &["pull", "--no-edit", "--rebase"])
+}
+
+// ==================== PROXY DE VÍDEO (ffmpeg) ====================
+
+fn fnv1a(s: &str) -> u64 {
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    for b in s.as_bytes() {
+        h ^= *b as u64;
+        h = h.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    h
+}
+
+/// ffmpeg está disponível no PATH do sistema?
+#[tauri::command]
+pub fn ffmpeg_available() -> bool {
+    let mut cmd = Command::new("ffmpeg");
+    cmd.arg("-version");
+    no_window(&mut cmd);
+    cmd.output().map(|o| o.status.success()).unwrap_or(false)
+}
+
+/// Gera (ou reaproveita) um proxy H.264 720p do vídeo para tocar no WebView.
+/// Salva em `<vault>/.quartzo/proxies/<hash>.mp4` e devolve o caminho absoluto.
+#[tauri::command]
+pub fn make_video_proxy(vault: String, src: String) -> Result<String, String> {
+    let dir = Path::new(&vault).join(".quartzo").join("proxies");
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let out = dir.join(format!("{:016x}.mp4", fnv1a(&src)));
+    if out.exists() {
+        return Ok(out.to_string_lossy().to_string());
+    }
+    let mut cmd = Command::new("ffmpeg");
+    cmd.args([
+        "-y",
+        "-i",
+        &src,
+        "-vf",
+        "scale=-2:720",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "23",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "160k",
+        "-movflags",
+        "+faststart",
+    ])
+    .arg(&out);
+    no_window(&mut cmd);
+    let res = cmd
+        .output()
+        .map_err(|e| format!("ffmpeg não encontrado no sistema: {e}"))?;
+    if res.status.success() {
+        Ok(out.to_string_lossy().to_string())
+    } else {
+        let _ = fs::remove_file(&out);
+        let err = String::from_utf8_lossy(&res.stderr);
+        Err(err.lines().last().unwrap_or("erro no ffmpeg").trim().to_string())
+    }
 }
 
 // ==================== FILE WATCHER ====================

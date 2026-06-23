@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.23.0",
+    date: "2026-06-23",
+    items: [
+      "Proxy de vídeo (ffmpeg): vídeos pesados (H.265/ProRes/.mov) que não tocam no app agora geram um proxy H.264 720p e tocam normalmente.",
+      "Aviso automático quando o formato pode não tocar, com botão “Gerar proxy (ffmpeg)” no player de revisão.",
+      "Player de revisão de vídeo agora totalmente traduzido (PT/EN/ES).",
+    ],
+  },
+  {
     version: "0.22.0",
     date: "2026-06-23",
     items: [

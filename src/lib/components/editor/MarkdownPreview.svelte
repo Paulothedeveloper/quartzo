@@ -485,7 +485,7 @@
 
   // ```video path: ... ``` -> resolve o vídeo local (por nome no vault ou relativo à nota)
   const VIDEO_EXT = /\.(mp4|webm|m4v|mov|ogg|ogv)$/i;
-  function videoSrc(target: string): string | null {
+  function videoAbs(target: string): string | null {
     const clean = target.split("|")[0].trim();
     if (!clean) return null;
     const files = flatFiles();
@@ -500,7 +500,7 @@
     }
     if (!abs) return null;
     if (!VIDEO_EXT.test(abs)) return null;
-    return safeSrc(abs);
+    return abs;
   }
 
   const VIDEO_BLOCK = /```video\s*\n([\s\S]*?)```/;
@@ -518,8 +518,8 @@
       else if (k === "fps") fps = parseFloat(v) || 30;
     }
     if (!path) return null;
-    const src = videoSrc(path);
-    return src ? { src, fps } : null;
+    const abs = videoAbs(path);
+    return abs ? { src: safeSrc(abs), abs, fps } : null;
   });
 
   let rootEl = $state<HTMLElement>();
@@ -686,7 +686,7 @@
 
 <div class="q-prose h-full overflow-auto px-10 py-8" bind:this={rootEl} use:delegateClick>
   {#if videoBlock && $settings.renderVideo}
-    <VideoReview src={videoBlock.src} fps={videoBlock.fps} {content} />
+    <VideoReview src={videoBlock.src} abs={videoBlock.abs} fps={videoBlock.fps} {content} />
   {/if}
   {#if parsed.props.length}
     <div class="q-props">
