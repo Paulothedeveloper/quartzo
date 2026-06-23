@@ -1,11 +1,25 @@
 <script lang="ts">
   import { untrack } from "svelte";
-  import { fly } from "svelte/transition";
-  import { GitBranch, X, Loader2, History, GitCommitVertical, FileDiff } from "@lucide/svelte";
+  import { fly, slide } from "svelte/transition";
+  import {
+    GitBranch,
+    X,
+    Loader2,
+    History,
+    GitCommitVertical,
+    FileDiff,
+    Upload,
+    Download,
+    ArrowUp,
+    ArrowDown,
+    Check,
+    Camera,
+  } from "@lucide/svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { currentVaultPath } from "$lib/stores/vault";
   import { gitOpen } from "$lib/stores/ui";
   import { showToast } from "$lib/stores/toast";
+  import { settings } from "$lib/stores/settings";
   import { t, tr } from "$lib/i18n";
 
   interface GitStatus {
@@ -20,29 +34,63 @@
     author: string;
     when: string;
   }
+  interface GitRemote {
+    has_remote: boolean;
+    url: string;
+    has_upstream: boolean;
+    ahead: number;
+    behind: number;
+  }
 
   let status = $state<GitStatus | null>(null);
+  let remote = $state<GitRemote | null>(null);
   let log = $state<GitCommit[]>([]);
   let loading = $state(false);
   let busy = $state(false);
+  let syncing = $state(false);
   let message = $state("");
+
+  // Diff por arquivo (expansível).
+  let diffFor = $state<string | null>(null);
+  let diffText = $state("");
+  let diffLoading = $state(false);
+
+  // Extrai o caminho de uma linha de `git status --porcelain` ("XY path", renomeio "old -> new").
+  function pathOf(line: string): string {
+    const raw = line.length > 3 ? line.slice(3) : line.trim();
+    const arrow = raw.indexOf(" -> ");
+    return (arrow >= 0 ? raw.slice(arrow + 4) : raw).replace(/^"|"$/g, "");
+  }
 
   async function refresh() {
     const vault = $currentVaultPath;
     if (!vault) {
       status = null;
+      remote = null;
       log = [];
       return;
     }
     loading = true;
     try {
       status = await invoke<GitStatus>("git_status", { vault });
-      log = status.is_repo ? await invoke<GitCommit[]>("git_log", { vault, limit: 30 }) : [];
+      if (status.is_repo) {
+        log = await invoke<GitCommit[]>("git_log", { vault, limit: 30 });
+        try {
+          remote = await invoke<GitRemote>("git_remote", { vault });
+        } catch {
+          remote = null;
+        }
+      } else {
+        log = [];
+        remote = null;
+      }
     } catch {
       status = null;
+      remote = null;
       log = [];
     } finally {
       loading = false;
+      diffFor = null;
     }
   }
 
@@ -89,6 +137,64 @@
       busy = false;
     }
   }
+
+  async function toggleDiff(line: string) {
+    const file = pathOf(line);
+    if (diffFor === line) {
+      diffFor = null;
+      return;
+    }
+    const vault = $currentVaultPath;
+    if (!vault) return;
+    diffFor = line;
+    diffLoading = true;
+    diffText = "";
+    try {
+      diffText = await invoke<string>("git_diff", { vault, file });
+    } catch (e) {
+      diffText = String(e);
+    } finally {
+      diffLoading = false;
+    }
+  }
+
+  async function doPush() {
+    const vault = $currentVaultPath;
+    if (!vault) return;
+    syncing = true;
+    try {
+      await invoke("git_push", { vault });
+      showToast(tr("git.pushed"), "success");
+      await refresh();
+    } catch (e) {
+      showToast(tr("git.pushError", { error: String(e) }), "error");
+    } finally {
+      syncing = false;
+    }
+  }
+
+  async function doPull() {
+    const vault = $currentVaultPath;
+    if (!vault) return;
+    syncing = true;
+    try {
+      await invoke("git_pull", { vault });
+      showToast(tr("git.pulled"), "success");
+      await refresh();
+    } catch (e) {
+      showToast(tr("git.pullError", { error: String(e) }), "error");
+    } finally {
+      syncing = false;
+    }
+  }
+
+  function diffLineClass(l: string): string {
+    if (l.startsWith("+++") || l.startsWith("---")) return "text-text-muted";
+    if (l.startsWith("@@")) return "text-accent-light";
+    if (l.startsWith("+")) return "text-emerald-400";
+    if (l.startsWith("-")) return "text-rose-400";
+    return "text-text-muted";
+  }
 </script>
 
 <div class="flex h-full flex-col">
@@ -127,6 +233,48 @@
         </button>
       </div>
     {:else if status}
+      <!-- Sincronização com o remoto -->
+      {#if remote?.has_remote}
+        <div class="mb-3 rounded-xl border border-border bg-bg/30 p-2.5">
+          <div class="mb-2 flex items-center gap-2 text-[11px] text-text-muted">
+            {#if remote.has_upstream && (remote.ahead > 0 || remote.behind > 0)}
+              {#if remote.ahead > 0}
+                <span class="inline-flex items-center gap-0.5 text-emerald-400"
+                  ><ArrowUp size={12} />{$t("git.ahead", { n: remote.ahead })}</span
+                >
+              {/if}
+              {#if remote.behind > 0}
+                <span class="inline-flex items-center gap-0.5 text-amber-400"
+                  ><ArrowDown size={12} />{$t("git.behind", { n: remote.behind })}</span
+                >
+              {/if}
+            {:else}
+              <span class="inline-flex items-center gap-1 text-emerald-400"
+                ><Check size={12} />{$t("git.synced")}</span
+              >
+            {/if}
+          </div>
+          <div class="flex gap-2">
+            <button
+              onclick={doPush}
+              disabled={syncing}
+              class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-elevated px-2.5 py-1.5 text-xs font-medium transition-all hover:bg-accent/15 hover:text-accent-light active:scale-[0.97] disabled:opacity-50"
+            >
+              {#if syncing}<Loader2 size={13} class="animate-spin" />{:else}<Upload size={13} />{/if}
+              {$t("git.push")}
+            </button>
+            <button
+              onclick={doPull}
+              disabled={syncing}
+              class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-elevated px-2.5 py-1.5 text-xs font-medium transition-all hover:bg-accent/15 hover:text-accent-light active:scale-[0.97] disabled:opacity-50"
+            >
+              {#if syncing}<Loader2 size={13} class="animate-spin" />{:else}<Download size={13} />{/if}
+              {$t("git.pull")}
+            </button>
+          </div>
+        </div>
+      {/if}
+
       <!-- Commit -->
       <div class="rounded-xl border border-border bg-bg/30 p-3">
         <div class="mb-2 flex items-center gap-1.5 text-xs font-medium text-text-secondary">
@@ -134,14 +282,33 @@
           {status.clean ? $t("git.noChanges") : $t("git.changeCount", { count: status.changed.length })}
         </div>
         {#if !status.clean}
-          <div class="mb-2 max-h-28 space-y-0.5 overflow-auto">
+          <div class="mb-2 max-h-44 space-y-0.5 overflow-auto">
             {#each status.changed as c, i (c)}
-              <div
+              <button
                 in:fly={{ y: 4, duration: 150, delay: Math.min(i * 18, 200) }}
-                class="truncate font-mono text-[11px] text-text-muted"
+                onclick={() => toggleDiff(c)}
+                title={$t("git.viewDiff")}
+                class="flex w-full items-center gap-1.5 truncate rounded px-1 py-0.5 text-left font-mono text-[11px] text-text-muted transition-colors hover:bg-elevated hover:text-text-primary {diffFor ===
+                c
+                  ? 'bg-elevated text-text-primary'
+                  : ''}"
               >
-                {c}
-              </div>
+                <FileDiff size={11} class="shrink-0 opacity-60" />
+                <span class="truncate">{c}</span>
+              </button>
+              {#if diffFor === c}
+                <div transition:slide={{ duration: 160 }} class="my-1 rounded-lg border border-border/60 bg-bg/40 p-2">
+                  {#if diffLoading}
+                    <div class="flex items-center gap-2 py-2 text-[11px] text-text-secondary">
+                      <Loader2 size={12} class="animate-spin" /> {$t("git.diffLoading")}
+                    </div>
+                  {:else if diffText.trim()}
+                    <pre class="max-h-64 overflow-auto whitespace-pre font-mono text-[10.5px] leading-relaxed">{#each diffText.split("\n") as dl}<div class={diffLineClass(dl)}>{dl || " "}</div>{/each}</pre>
+                  {:else}
+                    <div class="py-2 text-[11px] text-text-muted">{$t("git.diffEmpty")}</div>
+                  {/if}
+                </div>
+              {/if}
             {/each}
           </div>
         {/if}
@@ -160,6 +327,28 @@
           {$t("git.commitButton")}
         </button>
       </div>
+
+      <!-- Snapshot automático -->
+      <label
+        class="mt-3 flex cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-bg/20 p-2.5"
+      >
+        <Camera size={14} class="shrink-0 text-text-muted" />
+        <div class="min-w-0 flex-1">
+          <div class="text-xs font-medium text-text-primary">{$t("git.autoSnapshot")}</div>
+          <div class="truncate text-[11px] text-text-muted">
+            {$t("git.autoSnapshotHint", { n: $settings.gitAutoSnapshotMinutes })}
+          </div>
+        </div>
+        <input
+          type="checkbox"
+          role="switch"
+          aria-checked={$settings.gitAutoSnapshot}
+          checked={$settings.gitAutoSnapshot}
+          onchange={(e) =>
+            settings.update((s) => ({ ...s, gitAutoSnapshot: e.currentTarget.checked }))}
+          class="h-4 w-4 accent-accent"
+        />
+      </label>
 
       <!-- Histórico -->
       <div class="mb-1.5 mt-4 flex items-center gap-1.5 px-1 text-xs font-medium uppercase tracking-wide text-text-muted">

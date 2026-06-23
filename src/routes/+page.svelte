@@ -42,6 +42,7 @@
     rightPane,
   } from "$lib/stores/ui";
   import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
+  import { syncAutoSnapshot } from "$lib/git-auto";
   import { COMMAND_DEFS } from "$lib/commands";
   import { graphData } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
@@ -156,6 +157,13 @@
         }
       }
     });
+  });
+
+  // Snapshot automático do Git: reagenda quando o toggle/intervalo muda.
+  $effect(() => {
+    $settings.gitAutoSnapshot;
+    $settings.gitAutoSnapshotMinutes;
+    untrack(syncAutoSnapshot);
   });
 
   // File watcher: refaz árvore (e invalida grafo) quando o vault muda no disco.

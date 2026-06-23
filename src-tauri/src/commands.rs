@@ -1042,6 +1042,98 @@ pub fn git_log(vault: String, limit: u32) -> Result<Vec<GitCommit>, String> {
     Ok(v)
 }
 
+/// Diff de UM arquivo (trabalho vs HEAD). Para arquivos novos (não versionados)
+/// devolve uma visão sintética com todas as linhas como adições.
+#[tauri::command]
+pub fn git_diff(vault: String, file: String) -> Result<String, String> {
+    // arquivo versionado?
+    let tracked = run_git(&vault, &["ls-files", "--error-unmatch", "--", &file]).is_ok();
+    if tracked {
+        let out = run_git(
+            &vault,
+            &["-c", "core.quotepath=false", "diff", "HEAD", "--", &file],
+        )?;
+        if out.trim().is_empty() {
+            // pode estar só staged (ex.: já passou add -A): tenta o índice
+            let staged = run_git(
+                &vault,
+                &["-c", "core.quotepath=false", "diff", "--cached", "--", &file],
+            )
+            .unwrap_or_default();
+            return Ok(staged);
+        }
+        return Ok(out);
+    }
+    // novo arquivo: mostra como adição inteira
+    let full = Path::new(&vault).join(&file);
+    match fs::read_to_string(&full) {
+        Ok(content) => {
+            let mut s = format!("--- /dev/null\n+++ b/{file}\n");
+            for line in content.lines() {
+                s.push('+');
+                s.push_str(line);
+                s.push('\n');
+            }
+            Ok(s)
+        }
+        Err(_) => Ok(String::new()),
+    }
+}
+
+#[derive(Serialize, Clone)]
+pub struct GitRemote {
+    pub has_remote: bool,
+    pub url: String,
+    pub has_upstream: bool,
+    pub ahead: u32,
+    pub behind: u32,
+}
+
+/// Info do remoto: URL do origin + quantos commits à frente/atrás do upstream.
+#[tauri::command]
+pub fn git_remote(vault: String) -> Result<GitRemote, String> {
+    let url = run_git(&vault, &["remote", "get-url", "origin"])
+        .unwrap_or_default()
+        .trim()
+        .to_string();
+    let has_remote = !url.is_empty();
+    // ahead/behind vs upstream (@{u}); se não houver upstream, dá erro → 0/0.
+    let mut ahead = 0u32;
+    let mut behind = 0u32;
+    let mut has_upstream = false;
+    if let Ok(out) = run_git(&vault, &["rev-list", "--left-right", "--count", "@{u}...HEAD"]) {
+        let nums: Vec<&str> = out.split_whitespace().collect();
+        if nums.len() == 2 {
+            behind = nums[0].parse().unwrap_or(0);
+            ahead = nums[1].parse().unwrap_or(0);
+            has_upstream = true;
+        }
+    }
+    Ok(GitRemote { has_remote, url, has_upstream, ahead, behind })
+}
+
+/// Envia commits ao remoto (git push). Se não houver upstream, define -u origin <branch>.
+#[tauri::command]
+pub fn git_push(vault: String) -> Result<String, String> {
+    // tem upstream?
+    if run_git(&vault, &["rev-parse", "--abbrev-ref", "@{u}"]).is_ok() {
+        run_git(&vault, &["push"])
+    } else {
+        let branch = run_git(&vault, &["rev-parse", "--abbrev-ref", "HEAD"])
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+        let branch = if branch.is_empty() { "main".to_string() } else { branch };
+        run_git(&vault, &["push", "-u", "origin", &branch])
+    }
+}
+
+/// Traz commits do remoto (git pull --no-edit, rebase pra evitar merges feios).
+#[tauri::command]
+pub fn git_pull(vault: String) -> Result<String, String> {
+    run_git(&vault, &["pull", "--no-edit", "--rebase"])
+}
+
 // ==================== FILE WATCHER ====================
 
 pub struct WatchState(pub Mutex<Option<RecommendedWatcher>>);

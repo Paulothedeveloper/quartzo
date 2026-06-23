@@ -52,6 +52,9 @@ export interface Settings {
   sidebarWidth: number; // largura da barra lateral (px), arrastável
   newNoteLocation: "root" | "current"; // onde criar novas notas (raiz do vault ou pasta da nota atual)
   confirmBeforeDelete: boolean; // confirmar antes de mandar arquivos pra lixeira
+  // Git
+  gitAutoSnapshot: boolean; // salvar versão automática por intervalo
+  gitAutoSnapshotMinutes: number; // intervalo do snapshot automático (min)
   // Atalhos (id da ação -> combo normalizado, ex.: "ctrl+shift+k")
   shortcuts: Record<string, string>;
   // "Plugins nativos" ligados/desligados (id da feature -> bool)
@@ -132,6 +135,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sidebarWidth: 280,
   newNoteLocation: "root",
   confirmBeforeDelete: true,
+  gitAutoSnapshot: false,
+  gitAutoSnapshotMinutes: 10,
   shortcuts: { ...DEFAULT_SHORTCUTS },
   features: { ...DEFAULT_FEATURES },
 };

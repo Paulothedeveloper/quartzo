@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.22.0",
+    date: "2026-06-23",
+    items: [
+      "Git v2 — Diferenças por arquivo: clique num arquivo alterado e veja o diff colorido (verde/vermelho) ali mesmo no painel.",
+      "Git v2 — Sincronizar com remoto: botões Enviar (push) e Receber (pull), com indicador de “à frente/atrás” do GitHub.",
+      "Git v2 — Snapshot automático: salve uma versão sozinho a cada N minutos quando houver mudanças (liga no painel de Versões).",
+    ],
+  },
+  {
     version: "0.21.0",
     date: "2026-06-23",
     items: [
