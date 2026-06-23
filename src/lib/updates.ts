@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.21.0",
+    date: "2026-06-23",
+    items: [
+      "Paleta de comandos totalmente traduzida (PT/EN/ES): nomes e dicas de cada comando agora seguem o idioma.",
+      "Navegação das Configurações traduzida: todas as abas (Geral, Editor, Aparência, Plugins, Atalhos, Sobre…) e o título do diálogo.",
+      "Lista “Ir para: nota” da paleta também localizada.",
+    ],
+  },
+  {
     version: "0.20.0",
     date: "2026-06-22",
     items: [

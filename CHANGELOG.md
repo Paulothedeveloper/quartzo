@@ -3,6 +3,9 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.21.0 — 2026-06-23
+- **i18n Fase 3 (parte 1):** a **Paleta de comandos** (Ctrl+K) agora é totalmente traduzida — nomes e dicas de cada comando, e a lista “Ir para: nota”. A **navegação das Configurações** (todas as abas: Geral, Arquivos & Links, Editor, Markdown, Tipos de nota, Aparência, Plugins nativos, Nuvem, Integrações, Atalhos, Atualizações, Tutorial, Sobre) e o título do diálogo passam a seguir o idioma (PT/EN/ES).
+
 ## 0.20.0 — 2026-06-22
 - **i18n Fase 2:** tradução EN/ES ampliada para a **barra lateral**, **árvore de arquivos**, **abas**, **Outline**, **Backlinks**, estados vazios do editor, **menus de contexto** (arquivos e abas) e placeholders das paletas.
 

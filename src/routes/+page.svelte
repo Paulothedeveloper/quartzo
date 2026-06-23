@@ -301,14 +301,18 @@
   const commands = $derived<Command[]>([
     ...COMMAND_DEFS.filter((d) => actionMap[d.id]).map((d) => ({
       id: d.id,
-      label: d.label,
-      hint: $settings.shortcuts[d.id] ? formatCombo($settings.shortcuts[d.id]) : d.hint,
+      label: $t(`cmd.${d.id}`),
+      hint: $settings.shortcuts[d.id]
+        ? formatCombo($settings.shortcuts[d.id])
+        : d.hint
+          ? $t(`cmdhint.${d.id}`)
+          : undefined,
       action: actionMap[d.id],
     })),
-    ...$openTabs.map((t) => ({
-      id: `tab:${t.path}`,
-      label: `Ir para: ${t.name}`,
-      action: () => activeTabPath.set(t.path),
+    ...$openTabs.map((tab) => ({
+      id: `tab:${tab.path}`,
+      label: $t("palette.goTo", { name: tab.name }),
+      action: () => activeTabPath.set(tab.path),
     })),
   ]);
 

@@ -92,7 +92,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.20.0");
+  let appVersion = $state("0.21.0");
   $effect(() => {
     try {
       getVersion()
@@ -121,20 +121,20 @@
     | "sobre";
   let section = $state<Section>("geral");
 
-  const tabs: { id: Section; label: string; icon: typeof Info }[] = [
-    { id: "geral", label: "Geral", icon: Settings2 },
-    { id: "arquivos", label: "Arquivos & Links", icon: FolderInput },
-    { id: "editor", label: "Editor", icon: FileEdit },
-    { id: "markdown", label: "Markdown", icon: Braces },
-    { id: "tipos", label: "Tipos de nota", icon: Layers },
-    { id: "aparencia", label: "Aparência", icon: Palette },
-    { id: "plugins", label: "Plugins nativos", icon: Puzzle },
-    { id: "nuvem", label: "Nuvem", icon: Cloud },
-    { id: "integracoes", label: "Integrações", icon: Workflow },
-    { id: "atalhos", label: "Atalhos", icon: Keyboard },
-    { id: "atualizacoes", label: "Atualizações", icon: Download },
-    { id: "tutorial", label: "Tutorial", icon: GraduationCap },
-    { id: "sobre", label: "Sobre", icon: Info },
+  const tabs: { id: Section; icon: typeof Info }[] = [
+    { id: "geral", icon: Settings2 },
+    { id: "arquivos", icon: FolderInput },
+    { id: "editor", icon: FileEdit },
+    { id: "markdown", icon: Braces },
+    { id: "tipos", icon: Layers },
+    { id: "aparencia", icon: Palette },
+    { id: "plugins", icon: Puzzle },
+    { id: "nuvem", icon: Cloud },
+    { id: "integracoes", icon: Workflow },
+    { id: "atalhos", icon: Keyboard },
+    { id: "atualizacoes", icon: Download },
+    { id: "tutorial", icon: GraduationCap },
+    { id: "sobre", icon: Info },
   ];
 
   // ---- Integrações (PRISMA / ecossistema) ----
@@ -396,12 +396,12 @@
       transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
       role="dialog"
       aria-modal="true"
-      aria-label="Configurações"
+      aria-label={$t("common.settings")}
       tabindex="-1"
     >
       <!-- Rail de seções -->
       <nav class="flex w-48 shrink-0 flex-col gap-1 border-r border-border bg-bg/40 p-3">
-        <div class="px-2 pb-2 pt-1 text-sm font-semibold">Configurações</div>
+        <div class="px-2 pb-2 pt-1 text-sm font-semibold">{$t("common.settings")}</div>
         {#each tabs as tab (tab.id)}
           <button
             class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors {section ===
@@ -411,7 +411,7 @@
             onclick={() => (section = tab.id)}
           >
             <tab.icon size={16} />
-            {tab.label}
+            {$t(`settings.tab.${tab.id}`)}
           </button>
         {/each}
       </nav>
@@ -419,7 +419,7 @@
       <!-- Conteúdo -->
       <div class="flex min-w-0 flex-1 flex-col">
         <div class="flex h-12 shrink-0 items-center justify-between border-b border-border px-5">
-          <span class="text-sm font-medium">{tabs.find((t) => t.id === section)?.label}</span>
+          <span class="text-sm font-medium">{$t(`settings.tab.${section}`)}</span>
           <button
             onclick={() => (open = false)}
             class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
