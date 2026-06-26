@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.25.0 — 2026-06-26
+
+- **Busca fuzzy** na **Paleta de comandos** (Ctrl+K) e no **“Ir para nota”** (Ctrl+O): casa subsequências (ex.: `cfg` → Configurações, `nta` → Nova nota), **ranqueia por relevância** (bônus de prefixo, início de palavra e letras consecutivas) e **realça** as letras casadas. Helper `src/lib/fuzzy.ts` (fuzzyMatch/highlightParts).
+
 ## 0.24.0 — 2026-06-23
 
 - **Editor visual de Propriedades (front-matter):** painel no topo do editor (modo edição/dividido) que lê o bloco YAML `--- … ---` e mostra **campos editáveis** (chave/valor) — adicionar, renomear, remover, sem digitar YAML cru. Edições vão direto pro CodeMirror vivo (mantém undo), listas como `tags` viram `[a, b]` (YAML válido, não-destrutivo). Alimenta as views dinâmicas (tabela/kanban). Liga/desliga em **Configurações › Editor**. Helper `src/lib/frontmatter.ts` (parseFm/serializeFm/applyFm), componente `PropertiesPanel.svelte`, i18n `props.*` PT/EN/ES.

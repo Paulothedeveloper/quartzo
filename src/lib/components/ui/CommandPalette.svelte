@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade, fly } from "svelte/transition";
   import { t, tr } from "$lib/i18n";
+  import { fuzzyMatch, highlightParts } from "$lib/fuzzy";
 
   export interface Command {
     id: string;
@@ -27,9 +28,18 @@
   let cursor = $state(0);
   let inputEl = $state<HTMLInputElement | null>(null);
 
-  const filtered = $derived(
-    commands.filter((c) => c.label.toLowerCase().includes(search.toLowerCase()))
-  );
+  // Busca fuzzy: casa subsequências (ex.: "nta" acha "Nova nota"), ranqueia por
+  // pontuação e realça as letras casadas. Sem busca, mantém a ordem original.
+  const ranked = $derived.by(() => {
+    const q = search.trim();
+    if (!q) return commands.map((c) => ({ cmd: c, ranges: [] as [number, number][] }));
+    return commands
+      .map((c) => ({ cmd: c, r: fuzzyMatch(q, c.label) }))
+      .filter((x) => x.r.match)
+      .sort((a, b) => b.r.score - a.r.score)
+      .map((x) => ({ cmd: x.cmd, ranges: x.r.ranges }));
+  });
+  const filtered = $derived(ranked.map((r) => r.cmd));
   const canCreate = $derived(!!onCreate && search.trim().length > 0);
 
   function create() {
@@ -95,7 +105,7 @@
         />
       </div>
       <div class="max-h-[320px] overflow-auto p-2">
-        {#each filtered as cmd, i (cmd.id)}
+        {#each ranked as { cmd, ranges }, i (cmd.id)}
           <button
             class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition-colors {i ===
             cursor
@@ -104,7 +114,11 @@
             onmouseenter={() => (cursor = i)}
             onclick={() => run(cmd)}
           >
-            <span>{cmd.label}</span>
+            <span
+              >{#each highlightParts(cmd.label, ranges) as part}{#if part.hit}<span
+                    class="text-accent-light">{part.text}</span
+                  >{:else}{part.text}{/if}{/each}</span
+            >
             {#if cmd.hint}<span class="text-xs text-text-muted">{cmd.hint}</span>{/if}
           </button>
         {:else}

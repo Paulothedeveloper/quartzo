@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.25.0",
+    date: "2026-06-26",
+    items: [
+      "Busca fuzzy na paleta de comandos (Ctrl+K) e no “Ir para nota” (Ctrl+O): digite só algumas letras (ex.: “cfg” acha Configurações) e veja as letras casadas realçadas.",
+      "Resultados ranqueados por relevância (prefixo, início de palavra e letras seguidas pontuam mais).",
+    ],
+  },
+  {
     version: "0.24.0",
     date: "2026-06-23",
     items: [
