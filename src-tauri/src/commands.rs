@@ -999,12 +999,13 @@ pub fn prisma_search_assets(query: String, limit: i64) -> Result<Vec<PrismaAsset
     let mut stmt = conn.prepare(sql).map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map(rusqlite::params![q, lim], |r| {
+            // Colunas de texto toleram NULL (não derruba a linha silenciosamente).
             Ok(PrismaAsset {
                 id: r.get(0)?,
-                path: r.get(1)?,
-                filename: r.get(2)?,
-                ext: r.get(3)?,
-                kind: r.get(4)?,
+                path: r.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                filename: r.get::<_, Option<String>>(2)?.unwrap_or_default(),
+                ext: r.get::<_, Option<String>>(3)?.unwrap_or_default(),
+                kind: r.get::<_, Option<String>>(4)?.unwrap_or_default(),
                 thumbnail: r.get::<_, Option<String>>(5)?,
                 duration: r.get::<_, Option<f64>>(6)?,
                 width: r.get::<_, Option<i64>>(7)?,

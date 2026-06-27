@@ -182,7 +182,15 @@
       }
       const vault = get(currentVaultPath);
       if (vault) {
-        let abs = `${vault.replace(/[\\/]+$/, "")}/${rel.replace(/^[\\/]+/, "")}`.replace(/\\/g, "/");
+        // SEGURANÇA: remove segmentos "" / "." / ".." pra impedir path traversal
+        // (ex.: quartzo://note/..%2f..%2f.ssh) — o alvo fica SEMPRE dentro do vault.
+        const cleanRel = rel
+          .replace(/\\/g, "/")
+          .split("/")
+          .filter((p) => p && p !== "." && p !== "..")
+          .join("/");
+        if (!cleanRel) return;
+        let abs = `${vault.replace(/[\\/]+$/, "")}/${cleanRel}`;
         if (!/\.md$/i.test(abs)) abs += ".md";
         openNote(abs);
       }

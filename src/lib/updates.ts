@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.34.0",
+    date: "2026-06-27",
+    items: [
+      "Segurança: links quartzo://nota agora ficam restritos ao vault (correção de path traversal encontrada em auditoria).",
+      "Robustez: a busca de mídia do PRISMA não some mais com itens que tenham campos vazios no banco.",
+    ],
+  },
+  {
     version: "0.33.0",
     date: "2026-06-27",
     items: [

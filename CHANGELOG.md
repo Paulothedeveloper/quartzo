@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.34.0 — 2026-06-27
+
+- **Segurança (auditoria):** corrigido **path traversal** no deep link `quartzo://note/…` — o fallback montava o caminho sem neutralizar `..`, permitindo que um link malicioso (`..%2f..%2f…`) abrisse arquivos **fora do vault**. Agora os segmentos `.`/`..`/vazios são removidos e o alvo fica sempre dentro do vault (`+page.svelte`).
+- **Robustez:** `prisma_search_assets` agora tolera colunas `NULL` (path/filename/ext/type) — antes uma linha com campo nulo era **descartada silenciosamente** da busca.
+
 ## 0.33.0 — 2026-06-27
 
 - **i18n do corpo das Configurações (conclusão):** todo o texto visível das Configurações agora é PT/EN/ES — descrições de cada opção, **Tutorial** (8 passos), **Sobre**, seções **Markdown/Aparência/Nuvem/Integrações/Atualizações**, os **Plugins nativos** (`feat.*`/`featd.*`) e os **nomes dos atalhos** (reaproveitando as chaves `cmd.*`). +178 chaves (×3 idiomas) via dict, `tutorialSteps`/`delays` viraram `$derived` para reagir à troca de idioma. **Marco: i18n do app concluída de ponta a ponta.**
