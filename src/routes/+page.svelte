@@ -46,6 +46,7 @@
   } from "$lib/stores/ui";
   import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
   import { syncAutoSnapshot } from "$lib/git-auto";
+  import { recordNav, navBack, navForward, loadBookmarks, toggleBookmark } from "$lib/stores/nav";
   import { COMMAND_DEFS } from "$lib/commands";
   import { graphData } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
@@ -160,6 +161,18 @@
         }
       }
     });
+  });
+
+  // Histórico de navegação: registra cada troca de nota ativa.
+  $effect(() => {
+    const p = $activeTabPath;
+    if (p) untrack(() => recordNav(p));
+  });
+
+  // Favoritos: (re)carrega ao abrir/trocar de vault.
+  $effect(() => {
+    $currentVaultPath;
+    untrack(loadBookmarks);
   });
 
   // Snapshot automático do Git: reagenda quando o toggle/intervalo muda.
@@ -351,6 +364,12 @@
     settings: () => settingsOpen.update((v) => !v),
     "prisma-attach": () => prismaPickerOpen.set(true),
     "copy-quartzo-link": copyQuartzoLink,
+    "nav-back": () => navBack(openNote),
+    "nav-forward": () => navForward(openNote),
+    "toggle-bookmark": () => {
+      const p = get(activeTabPath);
+      if (p) toggleBookmark(p);
+    },
   };
 
   const commands = $derived<Command[]>([
@@ -407,6 +426,19 @@
     return parts.join("+");
   }
   function onGlobalKeydown(e: KeyboardEvent) {
+    // Navegação voltar/avançar (Alt+←/→) — fora do sistema de atalhos (não exige Ctrl).
+    if (e.altKey && !e.ctrlKey && !e.metaKey && !get(settingsOpen)) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        navBack(openNote);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        navForward(openNote);
+        return;
+      }
+    }
     if (!(e.ctrlKey || e.metaKey)) return;
     if (get(settingsOpen)) return; // não dispara enquanto edita atalhos nas Configurações
     const combo = comboFromEvent(e);

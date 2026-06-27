@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.39.0",
+    date: "2026-06-27",
+    items: [
+      "Histórico de navegação: voltar/avançar entre notas com Alt+← / Alt+→ e botões no topo (estilo navegador).",
+      "Favoritos: marque notas com a estrela (na barra do editor ou Ctrl+Shift+S); elas aparecem numa seção “Favoritos” na barra lateral.",
+    ],
+  },
+  {
     version: "0.38.0",
     date: "2026-06-27",
     items: [

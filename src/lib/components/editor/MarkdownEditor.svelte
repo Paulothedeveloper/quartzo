@@ -1,11 +1,12 @@
 <script lang="ts">
   import {
-    PenLine, Columns2, BookOpen, Check, Loader2, Link2, List, Printer, Search,
+    PenLine, Columns2, BookOpen, Check, Loader2, Link2, List, Printer, Search, Star,
     Bold, Italic, Strikethrough, Code, Quote, ListOrdered, ListChecks,
     Heading1, Heading2, Table, SquareCode, Image as ImageIcon, Minus, Link as LinkIcon, Lightbulb,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { openSearchPanel } from "@codemirror/search";
+  import { bookmarks, toggleBookmark } from "$lib/stores/nav";
   import { printNote } from "$lib/export";
   import { insertAtCursor, wrapSelection, toggleLinePrefix, activeEditorView } from "$lib/stores/editor";
   import { get } from "svelte/store";
@@ -175,6 +176,17 @@
           {/if}
         </span>
       {/if}
+
+      <!-- Favoritar nota -->
+      <button
+        onclick={() => activeTab && toggleBookmark(activeTab.path)}
+        title={$t("editor.bookmark")}
+        class="rounded-lg p-1.5 transition-colors {activeTab && $bookmarks.includes(activeTab.path)
+          ? 'text-accent-light'
+          : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+      >
+        <Star size={15} fill={activeTab && $bookmarks.includes(activeTab.path) ? "currentColor" : "none"} />
+      </button>
 
       <!-- Buscar / substituir na nota (Ctrl+F) -->
       {#if mode !== "read"}

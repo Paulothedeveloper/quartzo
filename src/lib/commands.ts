@@ -36,6 +36,9 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "settings", label: "Configurações", defaultCombo: "ctrl+," },
   { id: "prisma-attach", label: "Anexar mídia do PRISMA…", hint: "PRISMA" },
   { id: "copy-quartzo-link", label: "Copiar link da nota (quartzo://)" },
+  { id: "nav-back", label: "Voltar", hint: "Alt+←" },
+  { id: "nav-forward", label: "Avançar", hint: "Alt+→" },
+  { id: "toggle-bookmark", label: "Favoritar / desfavoritar nota", defaultCombo: "ctrl+shift+s" },
 ];
 
 /** Atalhos padrão derivados dos comandos que têm defaultCombo. */

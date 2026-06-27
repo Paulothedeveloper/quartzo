@@ -20,6 +20,8 @@
     ExternalLink,
     ClipboardCopy,
     Settings2,
+    Star,
+    X,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
@@ -28,7 +30,8 @@
   import { showToast } from "$lib/stores/toast";
   import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, type CtxMenuItem } from "$lib/stores/ui";
   import { getRecentVaults, vaultLabel, settings } from "$lib/stores/settings";
-  import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir } from "$lib/vault-actions";
+  import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
+  import { bookmarks, toggleBookmark } from "$lib/stores/nav";
   import type { FileNode } from "$lib/types";
   import FileTree from "./FileTree.svelte";
   import EmptyState from "$lib/components/ui/EmptyState.svelte";
@@ -256,6 +259,33 @@
         </button>
       {/if}
     </div>
+
+    <!-- Favoritos -->
+    {#if $currentVaultPath && $bookmarks.length}
+      <div class="border-b border-border px-2 pb-1.5 pt-1">
+        <div class="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-text-secondary">
+          <Star size={12} class="text-accent-light" />
+          {$t("sidebar.bookmarks")}
+        </div>
+        <div class="max-h-40 space-y-0.5 overflow-auto">
+          {#each $bookmarks as b (b)}
+            <div class="group flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors hover:bg-elevated">
+              <Star size={12} class="shrink-0 text-accent-light" fill="currentColor" />
+              <button class="min-w-0 flex-1 truncate text-left text-text-secondary hover:text-text-primary" onclick={() => openNote(b)}>
+                {b.split(/[\\/]/).pop()?.replace(/\.md$/i, "")}
+              </button>
+              <button
+                class="shrink-0 rounded p-0.5 text-text-muted opacity-0 transition-opacity hover:text-text-primary group-hover:opacity-100"
+                title={$t("sidebar.removeBookmark")}
+                onclick={() => toggleBookmark(b)}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
 
     <!-- Lista / árvore -->
     <div class="flex-1 overflow-auto px-2 pb-2">

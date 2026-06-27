@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.39.0 — 2026-06-27
+
+- **Histórico de navegação:** voltar/avançar entre notas com **Alt+←/Alt+→** e botões na barra de título (estilo navegador). `src/lib/stores/nav.ts` (navStack/navIndex + canBack/canForward; grava em cada troca de aba ativa via `recordNav`, com supressão ao voltar/avançar). Comandos `nav-back`/`nav-forward` na paleta.
+- **Favoritos (bookmarks):** marque a nota pela **estrela** na barra do editor ou **Ctrl+Shift+S** (`toggle-bookmark`); persistido por vault em `quartzo:bookmarks:<vault>`. Seção **Favoritos** na barra lateral (abrir/remover). i18n PT/EN/ES.
+
 ## 0.38.0 — 2026-06-27
 
 - **Buscar e substituir na nota:** `@codemirror/search` integrado — **Ctrl+F** abre o painel (buscar, substituir, substituir tudo, próximo/anterior, regex/case) no topo do editor, **tematizado** (dark/cristal) via `lumTheme`. Botão de lupa na barra do editor (`openSearchPanel`) e realce de ocorrências (`highlightSelectionMatches`). `searchKeymap` adicionado ao editor.

@@ -11,11 +11,14 @@
     CalendarDays,
     Sparkles,
     Layers,
+    ChevronLeft,
+    ChevronRight,
   } from "@lucide/svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { currentVaultPath } from "$lib/stores/vault";
   import { settingsOpen, searchRequest, memoryOpen, typePickerRequest, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
-  import { createNoteIn, createFolderIn, openDailyNote, newNoteDir } from "$lib/vault-actions";
+  import { createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
+  import { canBack, canForward, navBack, navForward } from "$lib/stores/nav";
   import { showToast } from "$lib/stores/toast";
   import { sfx } from "$lib/sfx";
   import { t, tr } from "$lib/i18n";
@@ -76,6 +79,28 @@
   <div class="qbrand" data-tauri-drag-region>
     <CrystalIllustration size={22} glow={0.5} float={false} />
     <span class="q-wordmark qbrand-name">Quartzo</span>
+  </div>
+
+  <!-- Voltar / Avançar (histórico de navegação) -->
+  <div class="qnav">
+    <button
+      class="qnav-btn"
+      disabled={!$canBack}
+      onclick={() => navBack(openNote)}
+      title={$t("titlebar.navBack")}
+      aria-label={$t("titlebar.navBack")}
+    >
+      <ChevronLeft size={17} />
+    </button>
+    <button
+      class="qnav-btn"
+      disabled={!$canForward}
+      onclick={() => navForward(openNote)}
+      title={$t("titlebar.navForward")}
+      aria-label={$t("titlebar.navForward")}
+    >
+      <ChevronRight size={17} />
+    </button>
   </div>
 
   <!-- Busca central -->
@@ -168,6 +193,31 @@
     font-size: 1.05rem;
     font-weight: 700;
     letter-spacing: -0.01em;
+  }
+
+  /* Voltar / Avançar */
+  .qnav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+  }
+  .qnav-btn {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    transition: background 0.14s ease, color 0.14s ease;
+  }
+  .qnav-btn:hover:not(:disabled) {
+    background: var(--color-elevated);
+    color: var(--color-text-primary);
+  }
+  .qnav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
 
   /* Busca central (botão estilizado como input) */
