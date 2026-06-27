@@ -256,6 +256,43 @@ desktop vs `MobileShell`). **Mesmos componentes de conteúdo**, casca diferente.
 
 ---
 
+## 12. Decisões TRAVADAS (2026-06-27) ✅
+
+Confirmadas pelo Paulo. **Estas são as regras do projeto mobile** — qualquer
+mudança tem que ser explícita.
+
+1. **Vault no Android:** **App-specific storage** apenas no **MVP de testes**
+   (notas descartáveis). Vault REAL só depois do **SAF** implementado. Trava de
+   segurança aceita: **não usar notas reais em app-storage** (some ao desinstalar).
+2. **Sync PC↔celular:** principal = **pasta no Google Drive via SAF** (permissão
+   uma vez), o mais perto possível de automático **sem prometer instantâneo**.
+   Plano B = botão **Exportar/Importar vault (.zip)** bem visível.
+3. **Conflito de edição:** **criar cópia de conflito** — `Nota.md` +
+   `Nota (conflito AAAA-MM-DD).md`. **Nunca** sobrescrever/perder texto.
+4. **Git no mobile:** **desativar a aba "Versões"** no MVP (feature flag por
+   plataforma). `gix` fica para avaliação futura, se sentir falta.
+5. **Distribuição:** **só sideload (APK)** por enquanto. Play Store só se decidir
+   distribuir publicamente depois.
+6. **minSDK = 26 (Android 8)** / target = API mais recente. Aparelho principal do
+   Paulo = Android 14. (Escolha técnica: recursos dependem do WebView atualizável,
+   não da API; 26 dá mais alcance sem perder capacidade.)
+7. **iOS:** **fora de escopo agora** (só Android). Arquitetura (abstração de FS)
+   já deixa a porta aberta pro futuro.
+
+**Itens de ambiente travados:**
+- **Caminho com espaços** (`D:\Projetos do Claude\PC - QUARTZO`) **quebra o
+  NDK/Gradle**. Solução na F0: **junction** `mklink /J D:\dev\quartzo "D:\Projetos
+  do Claude\PC - QUARTZO"` e rodar `tauri android *` a partir de `D:\dev\quartzo`
+  (não move nada, não mexe no git; desktop continua buildando no lugar original).
+- **rusqlite + ffmpeg** ficam **`#[cfg(desktop)]`** — NÃO compilam no Android
+  (PRISMA é 100% desktop). Reduz APK e evita erro de NDK.
+- **CodeMirror + teclado virtual:** tratar **se** der problema (não-bloqueador,
+  resolve na F1/F4).
+
+**Pronto para iniciar a Fase 0 quando o Paulo der o "go".** (Não iniciar antes.)
+
+---
+
 ### Estado atual (referência)
 
 Quartzo desktop em **v0.35** (Tauri 2 + SvelteKit/Svelte 5 + Rust), pasta
