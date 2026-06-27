@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.36.0 — 2026-06-27
+
+- **Autocomplete de `[[wikilinks]]`:** ao digitar `[[` no editor, o CodeMirror sugere as notas do vault (com filtro por nome); ao escolher, insere o nome e **fecha o `]]`** sozinho (sem duplicar se já houver). Fonte de autocomplete nova (`wikiSource`) combinada com o menu "/"; usa `flatFiles()`. Setting `wikilinkAutocomplete` (default on) + toggle em **Configurações › Editor**.
+
 ## 0.35.0 — 2026-06-27
 
 - **Gerenciar vaults (renomear + remover):** no menu do nome do vault (canto da barra lateral) há uma entrada **“Gerenciar vaults…”** que abre um modal (`VaultManager.svelte`) listando todos os vaults salvos — cada um com **apelido editável** (rename) e **remover da lista** (não apaga a pasta do disco). Apelido persistido em `quartzo:vaultLabels` (`vaultLabel`/`setVaultLabel`), usado também na barra lateral e no menu de troca. `removeRecentVault` agora também limpa o apelido.

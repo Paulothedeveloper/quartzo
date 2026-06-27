@@ -27,6 +27,7 @@ export interface Settings {
   hoverPreview: boolean; // espiar página: pré-visualizar nota ao passar o mouse no [[wikilink]]
   hoverPreviewCtrl: boolean; // exigir Ctrl para acionar o espiar página
   propertiesPanel: boolean; // editor visual de propriedades (front-matter) no topo do editor
+  wikilinkAutocomplete: boolean; // sugerir notas ao digitar [[ no editor
   graphContinuous: boolean; // grafo com física contínua (nós acomodam + reagem ao arrastar)
   // Preview / renderização
   renderMermaid: boolean; // diagramas ```mermaid
@@ -117,6 +118,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hoverPreview: true,
   hoverPreviewCtrl: false,
   propertiesPanel: true,
+  wikilinkAutocomplete: true,
   graphContinuous: true,
   renderMermaid: true,
   renderQueries: true,

@@ -93,7 +93,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.35.0");
+  let appVersion = $state("0.36.0");
   $effect(() => {
     try {
       getVersion()
@@ -589,6 +589,13 @@
                   $t("set.slashMenuDesc"),
                   $settings.slashMenu,
                   () => set("slashMenu", !$settings.slashMenu)
+                )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  $t("set.wikilinkAutocomplete"),
+                  $t("set.wikilinkAutocompleteDesc"),
+                  $settings.wikilinkAutocomplete,
+                  () => set("wikilinkAutocomplete", !$settings.wikilinkAutocomplete)
                 )}
               </div>
 

@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.36.0",
+    date: "2026-06-27",
+    items: [
+      "Autocomplete de [[wikilinks]]: ao digitar [[ no editor, aparece a lista de notas do vault (com filtro) — escolha e ele fecha o ]] sozinho.",
+      "Liga/desliga em Configurações › Editor.",
+    ],
+  },
+  {
     version: "0.35.0",
     date: "2026-06-27",
     items: [

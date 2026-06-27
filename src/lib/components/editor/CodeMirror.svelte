@@ -30,6 +30,7 @@
   import { activeEditorView } from "$lib/stores/editor";
   import { pickColor } from "$lib/color";
   import { hoverWikilink, clearHoverPreview } from "$lib/hover-preview";
+  import { flatFiles } from "$lib/vault-actions";
 
   let {
     doc = "",
@@ -157,8 +158,39 @@
     if (prev && !/\s/.test(prev)) return null; // só no início de palavra
     return { from: before.from, options: SLASH };
   }
-  const slashExt = (s: Settings) =>
-    s.slashMenu ? autocompletion({ override: [slashSource], icons: false }) : [];
+
+  // ---- Autocomplete de [[wikilink]] : sugere notas do vault ao digitar "[[" ----
+  function wikiSource(ctx: CompletionContext) {
+    // captura tudo depois de "[[" até o cursor (sem fechar/quebrar linha)
+    const before = ctx.matchBefore(/\[\[[^\]\n]*/);
+    if (!before) return null;
+    const from = before.from + 2; // posição logo após "[["
+    const options: Completion[] = flatFiles()
+      .filter((f) => /\.md$/i.test(f.name))
+      .map((f) => {
+        const name = f.name.replace(/\.md$/i, "");
+        return {
+          label: name,
+          type: "text",
+          apply: (view: EditorView, _c: Completion, a: number, b: number) => {
+            const hasClosing = view.state.sliceDoc(b, b + 2) === "]]";
+            const insert = name + (hasClosing ? "" : "]]");
+            view.dispatch({
+              changes: { from: a, to: b, insert },
+              selection: { anchor: a + name.length + 2 },
+            });
+          },
+        };
+      });
+    return { from, options };
+  }
+
+  const slashExt = (s: Settings) => {
+    const sources = [];
+    if (s.slashMenu) sources.push(slashSource);
+    if (s.wikilinkAutocomplete) sources.push(wikiSource);
+    return sources.length ? autocompletion({ override: sources, icons: false }) : [];
+  };
 
   // ---- Compartments reconfiguráveis pelas Configurações ----
   const fontComp = new Compartment();
