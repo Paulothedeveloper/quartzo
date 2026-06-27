@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.43.0",
+    date: "2026-06-27",
+    items: [
+      "Corrigir links quebrados (Relink): botão na barra do editor (e Ctrl+K) lista os [[links]]/![[anexos]] que não apontam pra nada. Para cada um, escolha: buscar no vault, escanear o PC (Desktop/Documentos/Downloads…) ou achar manualmente — e reaponta sozinho.",
+      "Se o arquivo achado estiver fora do vault, ele é copiado pra dentro (attachments) e o link é refeito.",
+    ],
+  },
+  {
     version: "0.42.0",
     date: "2026-06-27",
     items: [

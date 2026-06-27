@@ -1445,6 +1445,101 @@ fn is_word_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
 }
 
+// ---- Relink: achar um arquivo (por nome) p/ corrigir link quebrado ----
+
+fn scan_dir_for(dir: &Path, target_lc: &str, out: &mut Vec<String>, seen: &mut HashSet<String>, depth: usize) {
+    if depth > 6 || out.len() >= 100 {
+        return;
+    }
+    let rd = match fs::read_dir(dir) {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+    for entry in rd.flatten() {
+        if out.len() >= 100 {
+            return;
+        }
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name.starts_with('.')
+            || name.eq_ignore_ascii_case("node_modules")
+            || name.eq_ignore_ascii_case("target")
+            || name.eq_ignore_ascii_case("$RECYCLE.BIN")
+            || name.eq_ignore_ascii_case("AppData")
+        {
+            continue;
+        }
+        let p = entry.path();
+        if p.is_dir() {
+            scan_dir_for(&p, target_lc, out, seen, depth + 1);
+        } else if name.to_lowercase() == target_lc {
+            let full = p.to_string_lossy().to_string();
+            if seen.insert(full.clone()) {
+                out.push(full);
+            }
+        }
+    }
+}
+
+/// Procura um arquivo por NOME exato no vault + pastas comuns do usuário
+/// (Desktop, Documentos, Downloads, Imagens, Vídeos). Cap 100, profundidade 6.
+#[tauri::command]
+pub fn scan_for_file(filename: String, vault: Option<String>) -> Result<Vec<String>, String> {
+    let target = filename.trim().to_lowercase();
+    if target.is_empty() {
+        return Ok(vec![]);
+    }
+    let mut roots: Vec<PathBuf> = Vec::new();
+    if let Some(v) = vault {
+        roots.push(PathBuf::from(v));
+    }
+    if let Ok(up) = std::env::var("USERPROFILE") {
+        for d in ["Desktop", "Documents", "Downloads", "Pictures", "Videos", "Music"] {
+            roots.push(Path::new(&up).join(d));
+        }
+    }
+    let mut out = Vec::new();
+    let mut seen = HashSet::new();
+    for root in roots {
+        scan_dir_for(&root, &target, &mut out, &mut seen, 0);
+        if out.len() >= 100 {
+            break;
+        }
+    }
+    Ok(out)
+}
+
+/// Copia um arquivo externo para `<vault>/attachments/` e devolve o NOME final
+/// (para embutir por nome). Evita sobrescrever adicionando sufixo (1), (2)…
+#[tauri::command]
+pub fn import_attachment(vault: String, src: String) -> Result<String, String> {
+    let src_p = Path::new(&src);
+    if !src_p.is_file() {
+        return Err("Arquivo de origem não encontrado".into());
+    }
+    let fname = src_p
+        .file_name()
+        .ok_or("Arquivo inválido")?
+        .to_string_lossy()
+        .to_string();
+    let dir = Path::new(&vault).join("attachments");
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let stem = src_p.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default();
+    let ext = src_p.extension().map(|s| s.to_string_lossy().to_string());
+    let mut dest = dir.join(&fname);
+    let mut final_name = fname.clone();
+    let mut n = 1;
+    while dest.exists() {
+        final_name = match &ext {
+            Some(e) => format!("{stem} ({n}).{e}"),
+            None => format!("{stem} ({n})"),
+        };
+        dest = dir.join(&final_name);
+        n += 1;
+    }
+    fs::copy(&src, &dest).map_err(|e| e.to_string())?;
+    Ok(final_name)
+}
+
 /// Converte menções não-linkadas: numa nota, envolve as ocorrências (palavra
 /// inteira) de `target_name` em `[[ ]]`, pulando wikilinks e código já existentes.
 /// Retorna quantas foram linkadas.

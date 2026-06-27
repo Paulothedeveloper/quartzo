@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.43.0 — 2026-06-27
+
+- **Relink — corrigir links quebrados:** botão (ícone de elo partido) na barra do editor + comando na paleta. O `RelinkModal` detecta `[[links]]`/`![[anexos]]` da nota que não resolvem no vault e, para cada um, oferece **3 caminhos (escolha do usuário)**: **Buscar no vault** (por nome), **Escanear o PC** (Rust `scan_for_file` varre Desktop/Documentos/Downloads/Imagens/Vídeos/Música + vault, exato por nome, cap 100/prof. 6) ou **Escolher arquivo…** (diálogo). Ao escolher, reaponta o link; se o arquivo estiver **fora do vault**, é copiado pra `attachments/` (Rust `import_attachment`, com sufixo anti-colisão) e o link é refeito por nome — preservando `!`, alias e `#seção`. Grava no disco + atualiza o editor ao vivo.
+
 ## 0.42.0 — 2026-06-27
 
 - **Menções não-linkadas mais ricas:** no painel de Backlinks, cada menção mostra o **termo destacado** (`<mark>`) no trecho e ganha um botão **“Linkar”** que converte a menção em `[[link]]` na nota de origem. Rust `link_mention(path, target_name)` envolve as ocorrências (palavra inteira, case-insensitive) em `[[ ]]`, **pulando wikilinks e código** (inline e cercado) já existentes; re-sincroniza a aba aberta não-suja. i18n PT/EN/ES.

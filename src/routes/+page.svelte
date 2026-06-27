@@ -18,6 +18,7 @@
   import HoverPreview from "$lib/components/ui/HoverPreview.svelte";
   import PrismaPicker from "$lib/components/ui/PrismaPicker.svelte";
   import VaultManager from "$lib/components/ui/VaultManager.svelte";
+  import RelinkModal from "$lib/components/ui/RelinkModal.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -42,6 +43,7 @@
     searchRequest,
     typePickerRequest,
     prismaPickerOpen,
+    relinkOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
@@ -378,6 +380,7 @@
       const p = get(activeTabPath);
       if (p) toggleBookmark(p);
     },
+    "fix-broken-links": () => relinkOpen.set(true),
   };
 
   const commands = $derived<Command[]>([
@@ -583,3 +586,4 @@
 <HoverPreview />
 <PrismaPicker />
 <VaultManager />
+<RelinkModal />

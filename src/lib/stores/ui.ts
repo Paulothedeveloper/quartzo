@@ -55,6 +55,9 @@ export const prismaPickerOpen = writable(false);
 /** Abre o gerenciador de vaults (renomear / remover da lista). */
 export const vaultManagerOpen = writable(false);
 
+/** Abre o corretor de links quebrados (relink) da nota atual. */
+export const relinkOpen = writable(false);
+
 /** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
 export interface HoverPreviewState {
   path: string;

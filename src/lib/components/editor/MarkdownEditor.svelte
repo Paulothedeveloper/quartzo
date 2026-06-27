@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    PenLine, Columns2, BookOpen, Check, Loader2, Link2, List, Printer, Search, Star,
+    PenLine, Columns2, BookOpen, Check, Loader2, Link2, List, Printer, Search, Star, Unlink,
     Bold, Italic, Strikethrough, Code, Quote, ListOrdered, ListChecks,
     Heading1, Heading2, Table, SquareCode, Image as ImageIcon, Minus, Link as LinkIcon, Lightbulb,
   } from "@lucide/svelte";
@@ -14,7 +14,7 @@
   import { openTabs, activeTabPath } from "$lib/stores/tabs";
   import { showToast } from "$lib/stores/toast";
   import { settings } from "$lib/stores/settings";
-  import { backlinksOpen, outlineOpen } from "$lib/stores/ui";
+  import { backlinksOpen, outlineOpen, relinkOpen } from "$lib/stores/ui";
   import { openWikilink, openNote } from "$lib/vault-actions";
   import { t, tr } from "$lib/i18n";
   import CodeMirror from "./CodeMirror.svelte";
@@ -176,6 +176,15 @@
           {/if}
         </span>
       {/if}
+
+      <!-- Corrigir links quebrados (relink) -->
+      <button
+        onclick={() => relinkOpen.set(true)}
+        title={$t("relink.title")}
+        class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+      >
+        <Unlink size={15} />
+      </button>
 
       <!-- Favoritar nota -->
       <button

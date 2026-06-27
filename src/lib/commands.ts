@@ -39,6 +39,7 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "nav-back", label: "Voltar", hint: "Alt+←" },
   { id: "nav-forward", label: "Avançar", hint: "Alt+→" },
   { id: "toggle-bookmark", label: "Favoritar / desfavoritar nota", defaultCombo: "ctrl+shift+s" },
+  { id: "fix-broken-links", label: "Corrigir links quebrados…", hint: "links" },
 ];
 
 /** Atalhos padrão derivados dos comandos que têm defaultCombo. */
