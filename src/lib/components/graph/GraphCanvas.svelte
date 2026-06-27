@@ -176,6 +176,10 @@
   }
 
   const gview = $state<GraphState>({ hoveredId: null, matched: null });
+  // Modo leve: em grafos grandes desliga sombras/blur/glow (GPU-pesados ao
+  // dar pan/zoom) e congela o layout. Visual quase idêntico de longe, MUITO
+  // mais fluido. Limiar por nº de nós OU de arestas.
+  let liteMode = $state(false);
   let activeGroup = $state<string | null>(null);
   let focusTarget = $state<{ ids: string[] | null; nonce: number }>({ ids: null, nonce: 0 });
 
@@ -230,10 +234,12 @@
       } else {
         opacity = 0.5;
       }
-      const glow = "filter:drop-shadow(0 0 1px rgba(103,232,249,0.5));";
-      const draw = drawOnce
-        ? "stroke-dasharray:8000;stroke-dashoffset:8000;animation:edge-draw 0.9s var(--ease-out,ease) forwards;"
-        : "";
+      // No modo leve, sem glow nem animação de "desenho" (caros em massa).
+      const glow = liteMode ? "" : "filter:drop-shadow(0 0 1px rgba(103,232,249,0.5));";
+      const draw =
+        drawOnce && !liteMode
+          ? "stroke-dasharray:8000;stroke-dashoffset:8000;animation:edge-draw 0.9s var(--ease-out,ease) forwards;"
+          : "";
       return { ...e, style: `stroke:${stroke};stroke-width:${width};opacity:${opacity};${glow}${draw}` };
     });
   }
@@ -260,6 +266,9 @@
       neighbors.get(e.source)!.add(e.target);
       neighbors.get(e.target)!.add(e.source);
     }
+
+    // Grafo grande -> modo leve (sem efeitos pesados) + layout congelado.
+    liteMode = rNodes.length > 150 || valid.length > 300;
 
     // Centros de cluster por pasta, distribuídos num círculo (folders se agrupam).
     const groupList = [...new Set(rNodes.map((n) => n.group))].sort();
@@ -304,9 +313,9 @@
 
     baseEdges = valid.map((e) => ({ id: e.id, source: e.source, target: e.target, type: "bezier" }));
 
-    // Contínuo (até ~600 nós): a simulação roda ao vivo, os nós se acomodam e
-    // reagem ao arraste; para sozinha quando estabiliza (alphaMin).
-    const continuous = get(settings).graphContinuous && rNodes.length <= 600;
+    // Contínuo só em grafos pequenos (≤150 nós): a simulação roda ao vivo, os
+    // nós se acomodam e reagem ao arraste. Acima disso, congela (fica fluido).
+    const continuous = get(settings).graphContinuous && !liteMode;
     if (continuous) {
       sim = s;
       tickCount = 0;
@@ -379,7 +388,7 @@
   });
 </script>
 
-<div class="graph-wrap h-full w-full">
+<div class="graph-wrap h-full w-full" class:graph-wrap--lite={liteMode}>
   <SvelteFlow
     bind:nodes
     bind:edges
@@ -416,6 +425,32 @@
 <style>
   .graph-wrap {
     position: relative;
+  }
+  /* ===== MODO LEVE (grafos grandes): tira efeitos GPU-pesados que travam o
+     pan/zoom — sombras, glow, blur e a animação de entrada. Cores e formas
+     ficam (de longe é quase imperceptível), mas a fluidez melhora muito. ===== */
+  .graph-wrap--lite :global(.neuron) {
+    background: color-mix(in srgb, var(--c) 58%, #0a1120) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16) !important;
+  }
+  .graph-wrap--lite :global(.gnode.hovered .neuron),
+  .graph-wrap--lite :global(.gnode.focused .neuron) {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+      0 0 6px color-mix(in srgb, var(--c) 70%, transparent) !important;
+  }
+  .graph-wrap--lite :global(.gnode) {
+    animation: none !important;
+  }
+  .graph-wrap--lite :global(.glabel) {
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+  .graph-wrap--lite :global(.svelte-flow__edge-path) {
+    filter: none !important;
+    transition: none !important;
+  }
+  .graph-wrap--lite::after {
+    content: none;
   }
   .region-back {
     display: inline-flex;

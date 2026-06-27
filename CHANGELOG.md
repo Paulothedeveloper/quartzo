@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.28.0 — 2026-06-26
+
+- **Grafo travando — correção definitiva:** grafos grandes (>150 nós ou >300 arestas) entram em **modo leve** — desliga `box-shadow`/`radial-gradient`/`backdrop-filter`/`drop-shadow` dos nós e arestas (os efeitos GPU que travavam o pan/zoom), pula a animação de entrada e **congela o layout** (sem física contínua). Cores e formas permanecem, então de longe é quase imperceptível, mas a fluidez melhora muito. Grafos pequenos mantêm a física contínua e todos os efeitos. Combinado com `onlyRenderVisibleElements` e o cache de nós (v0.27).
+
 ## 0.27.0 — 2026-06-26
 
 - **Desempenho do grafo (sem mudar o visual):** a aba do grafo estava travando após a física contínua. Otimizações: (1) os objetos `data` de cada nó e os membros de cada pasta são **cacheados** (não recriados a cada tick); (2) os **lobos/regiões** (bbox por pasta, caro) recalculam só **a cada 6 ticks** + no repouso, em vez de todo frame; (3) `onlyRenderVisibleElements` no SvelteFlow — **só renderiza o que está na tela** (nós e arestas fora da viewport são descartados). Resultado: acomodação e arraste bem mais fluidos, mesmo em grafos grandes. Nada do visual mudou.

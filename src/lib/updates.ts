@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.28.0",
+    date: "2026-06-26",
+    items: [
+      "Grafo travando: corrigido de vez. Em grafos grandes, um “modo leve” desliga sombras/brilho/desfoque (que pesavam no pan/zoom) e congela o layout — fica bem fluido. Grafos pequenos mantêm a animação e os efeitos.",
+    ],
+  },
+  {
     version: "0.27.0",
     date: "2026-06-26",
     items: [
