@@ -93,6 +93,7 @@
         path: n.path,
         group: n.group,
         index: i,
+        lite: liteMode,
       });
       if (!groupNodeIds.has(n.group)) groupNodeIds.set(n.group, []);
       groupNodeIds.get(n.group)!.push(n.id);
@@ -311,7 +312,13 @@
       .force("x", forceX((d: any) => gx(d.id)).strength(0.16))
       .force("y", forceY((d: any) => gy(d.id)).strength(0.16));
 
-    baseEdges = valid.map((e) => ({ id: e.id, source: e.source, target: e.target, type: "bezier" }));
+    // Arestas retas no modo leve (geometria bem mais barata que bezier).
+    baseEdges = valid.map((e) => ({
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      type: liteMode ? "straight" : "bezier",
+    }));
 
     // Contínuo só em grafos pequenos (≤150 nós): a simulação roda ao vivo, os
     // nós se acomodam e reagem ao arraste. Acima disso, congela (fica fluido).
@@ -372,9 +379,12 @@
   });
 
   // Reaplica estilo das arestas quando hover/busca mudam.
+  // No modo leve, NÃO restiliza centenas de arestas a cada hover (era o que
+  // mais travava ao passar o mouse); as arestas ficam no estilo base.
   $effect(() => {
     gview.hoveredId;
     gview.matched;
+    if (liteMode) return;
     untrack(() => applyEdgeStyles());
   });
 
@@ -440,6 +450,10 @@
   }
   .graph-wrap--lite :global(.gnode) {
     animation: none !important;
+    transition: none !important;
+  }
+  .graph-wrap--lite :global(.neuron) {
+    transition: none !important;
   }
   .graph-wrap--lite :global(.glabel) {
     backdrop-filter: none !important;

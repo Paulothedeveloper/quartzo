@@ -8,7 +8,7 @@
     data,
   }: {
     id: string;
-    data: { label: string; color: string; size: number; path: string; index: number };
+    data: { label: string; color: string; size: number; path: string; index: number; lite?: boolean };
   } = $props();
 
   const ctx = getContext<GraphCtx>(GRAPH_CTX);
@@ -51,7 +51,11 @@
       <span class="gicon" style="font-size:{Math.max(data.size * 0.55, 6)}px">{icon}</span>
     {/if}
   </span>
-  <span class="glabel">{data.label}</span>
+  <!-- Em grafos grandes (lite), o rótulo só existe no DOM quando o nó está sob
+       o cursor — evita centenas de <span> sempre presentes. -->
+  {#if !data.lite || hovered}
+    <span class="glabel">{data.label}</span>
+  {/if}
 </div>
 
 <style>

@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.29.0 — 2026-06-26
+
+- **Grafo ainda mais suave (modo leve v2):** (1) arestas **retas** em vez de bezier (geometria muito mais barata); (2) o **rótulo** só entra no DOM quando o nó está **sob o cursor** (antes eram centenas de `<span>` sempre presentes); (3) o hover **não restiliza todas as arestas** (era O(arestas) a cada movimento do mouse) — ficam no estilo base; (4) `transition: none` nos nós (dim instantâneo). Pan/zoom e hover bem mais leves em grafos grandes.
+
 ## 0.28.0 — 2026-06-26
 
 - **Grafo travando — correção definitiva:** grafos grandes (>150 nós ou >300 arestas) entram em **modo leve** — desliga `box-shadow`/`radial-gradient`/`backdrop-filter`/`drop-shadow` dos nós e arestas (os efeitos GPU que travavam o pan/zoom), pula a animação de entrada e **congela o layout** (sem física contínua). Cores e formas permanecem, então de longe é quase imperceptível, mas a fluidez melhora muito. Grafos pequenos mantêm a física contínua e todos os efeitos. Combinado com `onlyRenderVisibleElements` e o cache de nós (v0.27).

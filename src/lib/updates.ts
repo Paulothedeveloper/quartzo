@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.29.0",
+    date: "2026-06-26",
+    items: [
+      "Grafo ainda mais suave: no modo leve as conexões viram retas (mais baratas), os rótulos só existem no nó sob o cursor, e o passar do mouse não recalcula todas as conexões. Pan/zoom e hover bem mais leves.",
+    ],
+  },
+  {
     version: "0.28.0",
     date: "2026-06-26",
     items: [
