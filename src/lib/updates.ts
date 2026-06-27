@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.37.0",
+    date: "2026-06-27",
+    items: [
+      "Renomear nota agora corrige os links: ao renomear, o Quartzo varre o vault e atualiza todos os [[links]] e ![[embeds]] que apontavam pra ela (preserva apelido, #seção e pasta).",
+      "Sem mais links quebrados ao renomear. As notas abertas se atualizam sozinhas.",
+    ],
+  },
+  {
     version: "0.36.0",
     date: "2026-06-27",
     items: [

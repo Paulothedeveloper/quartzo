@@ -1359,6 +1359,114 @@ pub fn delete_to_trash(path: String) -> Result<(), String> {
     trash::delete(&path).map_err(|e| e.to_string())
 }
 
+// ---- Renomear nota atualizando os [[wikilinks]] que apontam pra ela ----
+
+/// Reescreve o miolo de um wikilink ([[alvo|alias#h]]) trocando o stem antigo
+/// pelo novo, preservando pasta, alias e heading. Retorna o miolo (alterado ou não).
+fn rewrite_inner(inner: &str, old_stem_lc: &str, new_stem: &str) -> String {
+    let (target_part, rest) = match inner.find('|') {
+        Some(p) => (&inner[..p], &inner[p..]), // rest inclui "|alias"
+        None => (inner, ""),
+    };
+    let (path_part, heading) = match target_part.find('#') {
+        Some(p) => (&target_part[..p], &target_part[p..]),
+        None => (target_part, ""),
+    };
+    let norm = path_part.trim().replace('\\', "/");
+    let (dir, last) = match norm.rfind('/') {
+        Some(p) => (norm[..=p].to_string(), norm[p + 1..].to_string()),
+        None => (String::new(), norm.clone()),
+    };
+    let last_stem = if last.to_lowercase().ends_with(".md") {
+        &last[..last.len() - 3]
+    } else {
+        &last[..]
+    };
+    if last_stem.to_lowercase() == old_stem_lc {
+        format!("{dir}{new_stem}{heading}{rest}")
+    } else {
+        inner.to_string()
+    }
+}
+
+/// Varre o conteúdo e reescreve todos os [[...]] / ![[...]] que apontam pro stem antigo.
+fn rewrite_wikilinks(content: &str, old_stem_lc: &str, new_stem: &str) -> (String, bool) {
+    let mut out = String::with_capacity(content.len());
+    let mut i = 0;
+    let mut changed = false;
+    while i < content.len() {
+        if content[i..].starts_with("[[") {
+            if let Some(rel) = content[i + 2..].find("]]") {
+                let inner = &content[i + 2..i + 2 + rel];
+                if !inner.contains('\n') {
+                    let new_inner = rewrite_inner(inner, old_stem_lc, new_stem);
+                    if new_inner != inner {
+                        changed = true;
+                    }
+                    out.push_str("[[");
+                    out.push_str(&new_inner);
+                    out.push_str("]]");
+                    i += 2 + rel + 2;
+                    continue;
+                }
+            }
+        }
+        let ch = content[i..].chars().next().unwrap();
+        out.push(ch);
+        i += ch.len_utf8();
+    }
+    (out, changed)
+}
+
+#[derive(Serialize, Clone)]
+pub struct RenameNoteResult {
+    pub new_path: String,
+    pub updated: u32,
+}
+
+/// Renomeia uma nota (.md) E atualiza todos os wikilinks do vault que a citavam.
+#[tauri::command]
+pub fn rename_note(vault: String, path: String, new_name: String) -> Result<RenameNoteResult, String> {
+    let p = Path::new(&path);
+    let parent = p.parent().ok_or("Sem pasta pai")?;
+    let old_stem = stem(p);
+    let safe = sanitize_filename(&new_name);
+    if safe.is_empty() {
+        return Err("Nome inválido".into());
+    }
+    let final_name = if safe.to_lowercase().ends_with(".md") {
+        safe.clone()
+    } else {
+        format!("{safe}.md")
+    };
+    let dest = parent.join(&final_name);
+    if dest != p && dest.exists() {
+        return Err("Já existe um item com esse nome".into());
+    }
+    fs::rename(p, &dest).map_err(|e| e.to_string())?;
+    let new_stem = stem(&dest);
+
+    // Atualiza os links em todas as notas do vault.
+    let old_lc = old_stem.to_lowercase();
+    let mut files = Vec::new();
+    collect_md(Path::new(&vault), &mut files);
+    let mut updated = 0u32;
+    for f in &files {
+        let content = match fs::read_to_string(f) {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+        let (new_content, changed) = rewrite_wikilinks(&content, &old_lc, &new_stem);
+        if changed && fs::write(f, new_content).is_ok() {
+            updated += 1;
+        }
+    }
+    Ok(RenameNoteResult {
+        new_path: dest.to_string_lossy().to_string(),
+        updated,
+    })
+}
+
 // ==================== BUSCA GLOBAL (FULL-TEXT) ====================
 
 #[derive(Serialize, Clone)]

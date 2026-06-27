@@ -3,7 +3,7 @@ mod commands;
 use commands::{
     build_graph_index, create_folder, create_note, daily_note, delete_to_trash, get_backlinks,
     build_query_index, copy_vault_to_cloud, create_note_full, detect_cloud_folders,
-    get_unlinked_mentions, git_commit, git_diff, git_init, git_log, git_pull, git_push, git_remote,
+    get_unlinked_mentions, git_commit, git_diff, git_init, git_log, git_pull, git_push, git_remote, rename_note,
     git_status, launch_prisma, prisma_installed, prisma_db_present, prisma_search_assets,
     ffmpeg_available, make_video_proxy,
     list_css_snippets, list_tags, read_directory, read_file, read_image_base64, rename_path,
@@ -104,6 +104,7 @@ pub fn run() {
             get_backlinks,
             start_vault_watch,
             rename_path,
+            rename_note,
             delete_to_trash,
             search_notes,
             create_folder,

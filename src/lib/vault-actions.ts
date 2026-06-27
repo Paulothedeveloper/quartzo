@@ -8,6 +8,7 @@ import { rememberVault, addRecentVault } from "$lib/stores/settings";
 import { renamingPath, rightPane, backlinksOpen, showGraph, showCanvas, showSketch, askConfirm } from "$lib/stores/ui";
 import { graphData } from "$lib/stores/graph";
 import { settings } from "$lib/stores/settings";
+import { activeEditorView } from "$lib/stores/editor";
 import { loadTabs } from "$lib/tab-persist";
 import { tr } from "$lib/i18n";
 import type { FileNode } from "$lib/types";
@@ -213,16 +214,53 @@ export async function openNote(path: string): Promise<void> {
 /** Renomeia arquivo/pasta e ajusta abas abertas. */
 export async function renameEntry(path: string, newName: string): Promise<void> {
   if (!newName.trim()) return;
+  const isNote = /\.md$/i.test(path);
   try {
-    const newPath = await invoke<string>("rename_path", { path, newName });
+    let newPath: string;
+    let updated = 0;
+    if (isNote) {
+      // Renomeia a nota E corrige os [[wikilinks]] que apontavam pra ela.
+      const res = await invoke<{ new_path: string; updated: number }>("rename_note", {
+        vault: get(currentVaultPath),
+        path,
+        newName,
+      });
+      newPath = res.new_path;
+      updated = res.updated;
+    } else {
+      newPath = await invoke<string>("rename_path", { path, newName });
+    }
+    // atualiza a aba renomeada (caminho + nome)
     openTabs.update((ts) =>
       ts.map((t) => (t.path === path ? { ...t, path: newPath, name: baseName(newPath) } : t))
     );
     if (get(activeTabPath) === path) activeTabPath.set(newPath);
+
+    // Se links foram reescritos no disco, re-sincroniza as abas abertas
+    // NÃO sujas (senão a auto-gravação delas sobrescreveria a correção dos links).
+    if (updated > 0) {
+      const view = get(activeEditorView);
+      const activeP = get(activeTabPath);
+      for (const t of get(openTabs)) {
+        if (t.dirty) continue;
+        try {
+          const fresh = await invoke<string>("read_file", { path: t.path });
+          if (fresh === t.content) continue;
+          openTabs.update((ts) => ts.map((x) => (x.path === t.path ? { ...x, content: fresh } : x)));
+          // se for a aba ativa aberta no editor, atualiza o CodeMirror ao vivo
+          if (t.path === activeP && view) {
+            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: fresh } });
+          }
+        } catch {
+          /* ignora */
+        }
+      }
+    }
+
     await refreshTree();
-    showToast("Renomeado", "success");
+    showToast(updated > 0 ? tr("toast.renamedLinks", { count: updated }) : tr("toast.renamed"), "success");
   } catch (e) {
-    showToast(`Erro ao renomear: ${e}`, "error");
+    showToast(`${tr("toast.renameError")}: ${e}`, "error");
   }
 }
 
