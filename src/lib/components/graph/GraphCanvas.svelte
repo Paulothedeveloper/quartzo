@@ -65,6 +65,11 @@
   let simById = new Map<string, SimNode>();
   let rNodesRef: RawGraphNode[] = [];
   let degreeRef = new Map<string, number>();
+  // Caches de desempenho: os `data` dos nós e os lobos não mudam a cada tick —
+  // só as posições. Reaproveitar evita recriar centenas de objetos 60x/s.
+  let noteDataCache = new Map<string, any>();
+  let cachedRegions: Node[] = [];
+  let tickCount = 0;
   onDestroy(() => sim?.stop());
 
   function posFromSim(): Map<string, { x: number; y: number }> {
@@ -73,29 +78,33 @@
     return m;
   }
 
-  // Monta os nós (notas + lobos/regiões por pasta) a partir das posições atuais.
-  function buildNodes(pos: Map<string, { x: number; y: number }>): Node[] {
-    const noteNodes: Node[] = rNodesRef.map((n, i) => {
+  // Prepara, UMA vez por carga de dados, o `data` de cada nota + os membros de
+  // cada pasta (não dependem de posição). Barato no tick (só posições mudam).
+  function prepareCaches(rNodes: RawGraphNode[]) {
+    noteDataCache = new Map();
+    groupNodeIds = new Map();
+    rNodes.forEach((n, i) => {
       const deg = degreeRef.get(n.id) ?? 0;
       const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
-      const p = pos.get(n.id) ?? { x: 0, y: 0 };
-      return {
-        id: n.id,
-        type: "note",
-        position: { x: p.x, y: p.y },
-        zIndex: 2,
-        data: { label: n.label, color: colorFor(n.group), size, path: n.path, group: n.group, index: i },
-      } satisfies Node;
+      noteDataCache.set(n.id, {
+        label: n.label,
+        color: colorFor(n.group),
+        size,
+        path: n.path,
+        group: n.group,
+        index: i,
+      });
+      if (!groupNodeIds.has(n.group)) groupNodeIds.set(n.group, []);
+      groupNodeIds.get(n.group)!.push(n.id);
     });
+  }
 
-    groupNodeIds = new Map();
+  // Recalcula só os lobos/regiões (bbox por pasta) — chamado em cadência baixa.
+  function computeRegions(pos: Map<string, { x: number; y: number }>): Node[] {
     const bbox = new Map<string, { minX: number; minY: number; maxX: number; maxY: number; n: number }>();
     for (const n of rNodesRef) {
       const p = pos.get(n.id) ?? { x: 0, y: 0 };
-      const deg = degreeRef.get(n.id) ?? 0;
-      const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
-      if (!groupNodeIds.has(n.group)) groupNodeIds.set(n.group, []);
-      groupNodeIds.get(n.group)!.push(n.id);
+      const size = noteDataCache.get(n.id)?.size ?? 7;
       const b = bbox.get(n.group) ?? { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, n: 0 };
       b.minX = Math.min(b.minX, p.x);
       b.minY = Math.min(b.minY, p.y);
@@ -105,7 +114,7 @@
       bbox.set(n.group, b);
     }
     const PAD = 70;
-    const regionNodes: Node[] = [...bbox.entries()]
+    return [...bbox.entries()]
       .filter(([, b]) => b.n >= 2)
       .map(([group, b]) => ({
         id: `region:${group}`,
@@ -124,8 +133,20 @@
           group,
         },
       })) satisfies Node[];
+  }
 
-    return [...regionNodes, ...noteNodes];
+  // Monta os nós reaproveitando `data` (cache) e, opcionalmente, recalculando
+  // os lobos (caro) — no tick isso roda em cadência baixa.
+  function buildNodes(pos: Map<string, { x: number; y: number }>, recomputeRegions = true): Node[] {
+    if (recomputeRegions) cachedRegions = computeRegions(pos);
+    const noteNodes: Node[] = rNodesRef.map((n) => ({
+      id: n.id,
+      type: "note",
+      position: pos.get(n.id) ?? { x: 0, y: 0 },
+      zIndex: 2,
+      data: noteDataCache.get(n.id),
+    }));
+    return [...cachedRegions, ...noteNodes];
   }
 
   // Arrastar um nó: fixa no ponteiro e reaquece a simulação (vizinhos reagem).
@@ -265,6 +286,7 @@
     degreeRef = degree;
     simNodesRef = simNodes;
     simById = new Map(simNodes.map((s) => [s.id, s]));
+    prepareCaches(rNodes); // data dos nós + membros das pastas (1x por carga)
 
     const s = forceSimulation(simNodes)
       .force("charge", forceManyBody().strength(-230).distanceMax(520))
@@ -287,19 +309,23 @@
     const continuous = get(settings).graphContinuous && rNodes.length <= 600;
     if (continuous) {
       sim = s;
+      tickCount = 0;
       let fitPending = true;
       s.alphaDecay(0.035);
       s.on("tick", () => {
-        nodes = buildNodes(posFromSim());
+        tickCount++;
+        // Lobos (caro) só a cada 6 ticks; notas (posições) a cada tick.
+        nodes = buildNodes(posFromSim(), tickCount % 6 === 0);
       });
       s.on("end", () => {
+        nodes = buildNodes(posFromSim(), true); // acerta os lobos no repouso
         // enquadra uma única vez quando a 1ª acomodação termina (não a cada arraste)
         if (fitPending && activeGroup === null) {
           fitPending = false;
           focusTarget = { ids: null, nonce: focusTarget.nonce + 1 };
         }
       });
-      nodes = buildNodes(posFromSim());
+      nodes = buildNodes(posFromSim(), true);
       applyEdgeStyles();
       s.alpha(1).restart();
     } else {
@@ -307,7 +333,7 @@
       s.stop();
       const ticks = rNodes.length > 1000 ? 200 : rNodes.length > 300 ? 340 : 460;
       for (let i = 0; i < ticks; i++) s.tick();
-      nodes = buildNodes(posFromSim());
+      nodes = buildNodes(posFromSim(), true);
       applyEdgeStyles();
     }
   }
@@ -364,6 +390,7 @@
     maxZoom={4}
     nodesConnectable={false}
     elementsSelectable={true}
+    onlyRenderVisibleElements={true}
     defaultEdgeOptions={{ type: "bezier" }}
     onnodeclick={({ node }) => {
       if (node.type === "region") focusGroup((node.data as any).group as string);

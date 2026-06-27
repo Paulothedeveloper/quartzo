@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.27.0",
+    date: "2026-06-26",
+    items: [
+      "Desempenho do grafo: muito mais leve e fluido (sem mudar o visual). Os dados dos nós são reaproveitados, os lobos recalculam em cadência menor e só o que está na tela é renderizado.",
+    ],
+  },
+  {
     version: "0.26.0",
     date: "2026-06-26",
     items: [

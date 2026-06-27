@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.27.0 — 2026-06-26
+
+- **Desempenho do grafo (sem mudar o visual):** a aba do grafo estava travando após a física contínua. Otimizações: (1) os objetos `data` de cada nó e os membros de cada pasta são **cacheados** (não recriados a cada tick); (2) os **lobos/regiões** (bbox por pasta, caro) recalculam só **a cada 6 ticks** + no repouso, em vez de todo frame; (3) `onlyRenderVisibleElements` no SvelteFlow — **só renderiza o que está na tela** (nós e arestas fora da viewport são descartados). Resultado: acomodação e arraste bem mais fluidos, mesmo em grafos grandes. Nada do visual mudou.
+
 ## 0.26.0 — 2026-06-26
 
 - **Grafo com física contínua:** a simulação roda **ao vivo** — os nós se acomodam suavemente ao abrir e **reagem ao arrastar** (fixa o nó no ponteiro e reaquece a simulação; vizinhos se reorganizam; para sozinha ao estabilizar). Auto-enquadra na 1ª acomodação. Em grafos grandes (>600 nós) o layout é pré-calculado automaticamente. Liga/desliga em **Configurações › Aparência**.
