@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.40.0 — 2026-06-27
+
+- **Aliases de front-matter:** `aliases: [Apelido, Outro]` (ou escalar / lista em bloco) na nota faz `[[Apelido]]` resolver pra ela. Rust `build_alias_index` (parser `parse_aliases`/`frontmatter_block`) → store `aliasIndex` (carregado por vault + no vault-changed); `resolveWikilink` cai no alias após nome/caminho; **autocomplete de `[[`** também sugere os aliases (com `↪ nota`).
+
 ## 0.39.0 — 2026-06-27
 
 - **Histórico de navegação:** voltar/avançar entre notas com **Alt+←/Alt+→** e botões na barra de título (estilo navegador). `src/lib/stores/nav.ts` (navStack/navIndex + canBack/canForward; grava em cada troca de aba ativa via `recordNav`, com supressão ao voltar/avançar). Comandos `nav-back`/`nav-forward` na paleta.

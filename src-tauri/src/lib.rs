@@ -1,7 +1,7 @@
 mod commands;
 
 use commands::{
-    build_graph_index, create_folder, create_note, daily_note, delete_to_trash, get_backlinks,
+    build_graph_index, build_alias_index, create_folder, create_note, daily_note, delete_to_trash, get_backlinks,
     build_query_index, copy_vault_to_cloud, create_note_full, detect_cloud_folders,
     get_unlinked_mentions, git_commit, git_diff, git_init, git_log, git_pull, git_push, git_remote, rename_note,
     git_status, launch_prisma, prisma_installed, prisma_db_present, prisma_search_assets,
@@ -100,6 +100,7 @@ pub fn run() {
             write_file,
             create_note,
             build_graph_index,
+            build_alias_index,
             save_memory,
             get_backlinks,
             start_vault_watch,

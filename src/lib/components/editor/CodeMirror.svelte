@@ -32,6 +32,7 @@
   import { pickColor } from "$lib/color";
   import { hoverWikilink, clearHoverPreview } from "$lib/hover-preview";
   import { flatFiles } from "$lib/vault-actions";
+  import { aliasIndex } from "$lib/stores/aliases";
 
   let {
     doc = "",
@@ -194,23 +195,27 @@
     const before = ctx.matchBefore(/\[\[[^\]\n]*/);
     if (!before) return null;
     const from = before.from + 2; // posição logo após "[["
+    const apply = (label: string) => (view: EditorView, _c: Completion, a: number, b: number) => {
+      const hasClosing = view.state.sliceDoc(b, b + 2) === "]]";
+      const insert = label + (hasClosing ? "" : "]]");
+      view.dispatch({
+        changes: { from: a, to: b, insert },
+        selection: { anchor: a + label.length + 2 },
+      });
+    };
     const options: Completion[] = flatFiles()
       .filter((f) => /\.md$/i.test(f.name))
       .map((f) => {
         const name = f.name.replace(/\.md$/i, "");
-        return {
-          label: name,
-          type: "text",
-          apply: (view: EditorView, _c: Completion, a: number, b: number) => {
-            const hasClosing = view.state.sliceDoc(b, b + 2) === "]]";
-            const insert = name + (hasClosing ? "" : "]]");
-            view.dispatch({
-              changes: { from: a, to: b, insert },
-              selection: { anchor: a + name.length + 2 },
-            });
-          },
-        };
+        return { label: name, type: "text", apply: apply(name) };
       });
+    // Aliases declarados no front-matter (aliases:) também viram sugestões.
+    const fileSet = new Set(options.map((o) => o.label.toLowerCase()));
+    for (const [alias, path] of get(aliasIndex)) {
+      if (fileSet.has(alias)) continue;
+      const note = (path.split(/[\\/]/).pop() ?? "").replace(/\.md$/i, "");
+      options.push({ label: alias, detail: `↪ ${note}`, type: "text", apply: apply(alias) });
+    }
     return { from, options };
   }
 

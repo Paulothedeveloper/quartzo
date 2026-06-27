@@ -50,6 +50,7 @@
   import { COMMAND_DEFS } from "$lib/commands";
   import { graphData } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
+  import { loadAliasIndex } from "$lib/stores/aliases";
   import { clearBacklinkCache } from "$lib/backlink-cache";
   import { saveTabs } from "$lib/tab-persist";
   import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink } from "$lib/vault-actions";
@@ -175,6 +176,12 @@
     untrack(loadBookmarks);
   });
 
+  // Índice de aliases (front-matter) — (re)carrega ao abrir/trocar de vault.
+  $effect(() => {
+    const v = $currentVaultPath;
+    untrack(() => loadAliasIndex(v));
+  });
+
   // Snapshot automático do Git: reagenda quando o toggle/intervalo muda.
   $effect(() => {
     $settings.gitAutoSnapshot;
@@ -215,6 +222,7 @@
         refreshTree();
         graphData.set(null); // força reindexar o grafo
         loadQueryIndex(get(currentVaultPath), true); // atualiza as views ```query
+        loadAliasIndex(get(currentVaultPath)); // atualiza aliases (front-matter)
         clearBacklinkCache(); // invalida cache de backlinks (arquivos mudaram)
       }, 300);
     }).then((u) => (unlisten = u));

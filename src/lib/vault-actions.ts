@@ -9,6 +9,7 @@ import { renamingPath, rightPane, backlinksOpen, showGraph, showCanvas, showSket
 import { graphData } from "$lib/stores/graph";
 import { settings } from "$lib/stores/settings";
 import { activeEditorView } from "$lib/stores/editor";
+import { resolveAlias } from "$lib/stores/aliases";
 import { loadTabs } from "$lib/tab-persist";
 import { tr } from "$lib/i18n";
 import type { FileNode } from "$lib/types";
@@ -188,7 +189,9 @@ export function resolveWikilink(target: string): string | null {
   if (exact) return exact.path;
   // 2) match pelo nome completo (com extensão)
   const full = files.find((f) => f.name.toLowerCase() === base);
-  return full?.path ?? null;
+  if (full) return full.path;
+  // 3) alias declarado no front-matter (aliases:)
+  return resolveAlias(base);
 }
 
 /** Abre (ou foca) a aba de um arquivo, carregando o conteúdo via Rust.

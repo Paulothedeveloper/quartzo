@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.40.0",
+    date: "2026-06-27",
+    items: [
+      "Aliases de nota: declare aliases: [Apelido] no front-matter e use [[Apelido]] — o link resolve pra nota certa. Os apelidos também aparecem no autocomplete de [[.",
+    ],
+  },
+  {
     version: "0.39.0",
     date: "2026-06-27",
     items: [

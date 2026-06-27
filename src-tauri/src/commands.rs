@@ -275,6 +275,88 @@ fn parse_tags(content: &str) -> Vec<String> {
     tags
 }
 
+// ---- Aliases de front-matter (resolvíveis em [[wikilink]]) ----
+
+/// Devolve o miolo do bloco de front-matter (entre o 1º --- e o próximo ---).
+fn frontmatter_block(content: &str) -> Option<&str> {
+    let c = content.strip_prefix('\u{feff}').unwrap_or(content);
+    if !(c.starts_with("---\n") || c.starts_with("---\r\n")) {
+        return None;
+    }
+    let after = c.find('\n')? + 1;
+    let rest = &c[after..];
+    let end = rest.find("\n---")?;
+    Some(&rest[..end])
+}
+
+/// Extrai os aliases declarados no front-matter (aliases:/alias:),
+/// suportando lista em linha [a, b], escalar, e lista em bloco "- a".
+fn parse_aliases(content: &str) -> Vec<String> {
+    let fm = match frontmatter_block(content) {
+        Some(s) => s,
+        None => return vec![],
+    };
+    let lines: Vec<&str> = fm.lines().collect();
+    let mut out: Vec<String> = Vec::new();
+    let mut i = 0;
+    while i < lines.len() {
+        let trimmed = lines[i].trim_start();
+        let key = trimmed
+            .strip_prefix("aliases:")
+            .or_else(|| trimmed.strip_prefix("alias:"));
+        if let Some(rest) = key {
+            let val = rest.trim();
+            if val.is_empty() {
+                // lista em bloco nas linhas seguintes
+                let mut j = i + 1;
+                while j < lines.len() {
+                    let t = lines[j].trim_start();
+                    if let Some(item) = t.strip_prefix("- ") {
+                        out.push(unquote(item));
+                        j += 1;
+                    } else if lines[j].trim().is_empty() {
+                        j += 1;
+                    } else {
+                        break;
+                    }
+                }
+            } else if val.starts_with('[') {
+                let inner = val.trim_start_matches('[').trim_end_matches(']');
+                for part in inner.split(',') {
+                    let p = unquote(part);
+                    if !p.is_empty() {
+                        out.push(p);
+                    }
+                }
+            } else {
+                out.push(unquote(val));
+            }
+            break;
+        }
+        i += 1;
+    }
+    out.into_iter().filter(|s| !s.is_empty()).collect()
+}
+
+/// Índice de aliases do vault: pares (alias_minúsculo, caminho_da_nota).
+#[tauri::command]
+pub fn build_alias_index(vault_path: String) -> Result<Vec<(String, String)>, String> {
+    let root = Path::new(&vault_path);
+    if !root.is_dir() {
+        return Err(format!("Vault inválido: {vault_path}"));
+    }
+    let mut files = Vec::new();
+    collect_md(root, &mut files);
+    let mut out = Vec::new();
+    for f in &files {
+        let content = fs::read_to_string(f).unwrap_or_default();
+        for a in parse_aliases(&content) {
+            out.push((a.to_lowercase(), f.to_string_lossy().to_string()));
+        }
+    }
+    Ok(out)
+}
+
 /// Varre o vault e monta o índice de grafo (nós = notas, arestas = wikilinks/embeds).
 #[tauri::command]
 pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
