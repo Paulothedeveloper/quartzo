@@ -92,7 +92,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.25.0");
+  let appVersion = $state("0.26.0");
   $effect(() => {
     try {
       getVersion()
@@ -787,6 +787,15 @@
                   "Desligue para uma experiência mais direta.",
                   $settings.animations,
                   () => set("animations", !$settings.animations)
+                )}
+              </div>
+
+              <div class="card">
+                {@render toggleRow(
+                  "Grafo com física contínua",
+                  "Os nós se acomodam suavemente ao abrir e reagem quando você arrasta um deles (vizinhos se reorganizam). Em grafos muito grandes, o layout é pré-calculado automaticamente.",
+                  $settings.graphContinuous,
+                  () => set("graphContinuous", !$settings.graphContinuous)
                 )}
               </div>
 

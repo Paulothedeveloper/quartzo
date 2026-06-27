@@ -170,11 +170,23 @@ export function resolveWikilink(target: string): string | null {
   const clean = target.split("|")[0].split("#")[0].trim().toLowerCase();
   if (!clean) return null;
   const files = flatFiles();
+  // 0) wikilink por CAMINHO ("pasta/Nota"): casa pelo fim do caminho relativo
+  if (/[\\/]/.test(clean)) {
+    const norm = clean.replace(/\\/g, "/");
+    const withExt = norm.endsWith(".md") ? norm : `${norm}.md`;
+    const byPath = files.find((f) => {
+      const p = f.path.replace(/\\/g, "/").toLowerCase();
+      return p.endsWith(`/${withExt}`) || p.endsWith(`/${norm}`) || p === withExt || p === norm;
+    });
+    if (byPath) return byPath.path;
+    // se não casar como caminho, tenta o último segmento como nome
+  }
+  const base = clean.replace(/\\/g, "/").split("/").pop() ?? clean;
   // 1) match exato pelo nome sem extensão
-  const exact = files.find((f) => stripExt(f.name).toLowerCase() === clean);
+  const exact = files.find((f) => stripExt(f.name).toLowerCase() === base);
   if (exact) return exact.path;
   // 2) match pelo nome completo (com extensão)
-  const full = files.find((f) => f.name.toLowerCase() === clean);
+  const full = files.find((f) => f.name.toLowerCase() === base);
   return full?.path ?? null;
 }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { setContext, untrack } from "svelte";
+  import { setContext, untrack, onDestroy } from "svelte";
+  import { get } from "svelte/store";
   import {
     SvelteFlow,
     Background,
@@ -11,6 +12,7 @@
   import "@xyflow/svelte/dist/style.css";
   import { Maximize2 } from "@lucide/svelte";
   import { t } from "$lib/i18n";
+  import { settings } from "$lib/stores/settings";
   import {
     forceSimulation,
     forceManyBody,
@@ -55,6 +57,102 @@
   let neighbors = new Map<string, Set<string>>();
   let firstDraw = true; // anima o "draw" das arestas só na entrada
   let groupNodeIds = new Map<string, string[]>(); // pasta -> ids das notas (p/ zoom)
+
+  // ---- Física contínua (d3 ao vivo) ----
+  type SimNode = { id: string; x?: number; y?: number; fx?: number | null; fy?: number | null };
+  let sim: ReturnType<typeof forceSimulation<SimNode>> | null = null;
+  let simNodesRef: SimNode[] = [];
+  let simById = new Map<string, SimNode>();
+  let rNodesRef: RawGraphNode[] = [];
+  let degreeRef = new Map<string, number>();
+  onDestroy(() => sim?.stop());
+
+  function posFromSim(): Map<string, { x: number; y: number }> {
+    const m = new Map<string, { x: number; y: number }>();
+    for (const s of simNodesRef) m.set(s.id, { x: s.x ?? 0, y: s.y ?? 0 });
+    return m;
+  }
+
+  // Monta os nós (notas + lobos/regiões por pasta) a partir das posições atuais.
+  function buildNodes(pos: Map<string, { x: number; y: number }>): Node[] {
+    const noteNodes: Node[] = rNodesRef.map((n, i) => {
+      const deg = degreeRef.get(n.id) ?? 0;
+      const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
+      const p = pos.get(n.id) ?? { x: 0, y: 0 };
+      return {
+        id: n.id,
+        type: "note",
+        position: { x: p.x, y: p.y },
+        zIndex: 2,
+        data: { label: n.label, color: colorFor(n.group), size, path: n.path, group: n.group, index: i },
+      } satisfies Node;
+    });
+
+    groupNodeIds = new Map();
+    const bbox = new Map<string, { minX: number; minY: number; maxX: number; maxY: number; n: number }>();
+    for (const n of rNodesRef) {
+      const p = pos.get(n.id) ?? { x: 0, y: 0 };
+      const deg = degreeRef.get(n.id) ?? 0;
+      const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
+      if (!groupNodeIds.has(n.group)) groupNodeIds.set(n.group, []);
+      groupNodeIds.get(n.group)!.push(n.id);
+      const b = bbox.get(n.group) ?? { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, n: 0 };
+      b.minX = Math.min(b.minX, p.x);
+      b.minY = Math.min(b.minY, p.y);
+      b.maxX = Math.max(b.maxX, p.x + size);
+      b.maxY = Math.max(b.maxY, p.y + size);
+      b.n += 1;
+      bbox.set(n.group, b);
+    }
+    const PAD = 70;
+    const regionNodes: Node[] = [...bbox.entries()]
+      .filter(([, b]) => b.n >= 2)
+      .map(([group, b]) => ({
+        id: `region:${group}`,
+        type: "region",
+        position: { x: b.minX - PAD, y: b.minY - PAD },
+        draggable: false,
+        selectable: false,
+        connectable: false,
+        zIndex: 0,
+        data: {
+          label: group || "/",
+          color: colorFor(group),
+          w: b.maxX - b.minX + PAD * 2,
+          h: b.maxY - b.minY + PAD * 2,
+          count: b.n,
+          group,
+        },
+      })) satisfies Node[];
+
+    return [...regionNodes, ...noteNodes];
+  }
+
+  // Arrastar um nó: fixa no ponteiro e reaquece a simulação (vizinhos reagem).
+  function onDragStart(node: Node | null) {
+    if (!sim || !node) return;
+    const s = simById.get(node.id);
+    if (!s) return;
+    s.fx = node.position.x;
+    s.fy = node.position.y;
+    sim.alphaTarget(0.3).restart();
+  }
+  function onDrag(node: Node | null) {
+    if (!sim || !node) return;
+    const s = simById.get(node.id);
+    if (!s) return;
+    s.fx = node.position.x;
+    s.fy = node.position.y;
+  }
+  function onDragStop(node: Node | null) {
+    if (!node) return;
+    const s = simById.get(node.id);
+    if (s) {
+      s.fx = null;
+      s.fy = null;
+    }
+    sim?.alphaTarget(0);
+  }
 
   const gview = $state<GraphState>({ hoveredId: null, matched: null });
   let activeGroup = $state<string | null>(null);
@@ -120,6 +218,8 @@
   }
 
   function rebuild(rNodes: RawGraphNode[], rEdges: RawGraphEdge[]) {
+    sim?.stop();
+    sim = null;
     firstDraw = true; // redesenha as arestas a cada (re)carga de dados
     // cores por pasta (índice estável, ordenado)
     groupColors = new Map();
@@ -152,7 +252,6 @@
     const gx = (id: string) => groupPos.get(groupOf.get(id)!)?.x ?? 0;
     const gy = (id: string) => groupPos.get(groupOf.get(id)!)?.y ?? 0;
 
-    type SimNode = { id: string; x?: number; y?: number };
     // Posição inicial perto do cluster da pasta -> convergência mais limpa.
     const simNodes: SimNode[] = rNodes.map((n) => ({
       id: n.id,
@@ -161,7 +260,13 @@
     }));
     const simLinks = valid.map((e) => ({ source: e.source, target: e.target }));
 
-    const sim = forceSimulation(simNodes)
+    // refs usadas por buildNodes() e pelos handlers de arraste
+    rNodesRef = rNodes;
+    degreeRef = degree;
+    simNodesRef = simNodes;
+    simById = new Map(simNodes.map((s) => [s.id, s]));
+
+    const s = forceSimulation(simNodes)
       .force("charge", forceManyBody().strength(-230).distanceMax(520))
       .force(
         "link",
@@ -173,70 +278,38 @@
       .force("collide", forceCollide().radius(16).strength(0.9))
       // Agrupa por pasta (clusters visíveis) sem separar rígido demais.
       .force("x", forceX((d: any) => gx(d.id)).strength(0.16))
-      .force("y", forceY((d: any) => gy(d.id)).strength(0.16))
-      .stop();
-
-    const ticks = rNodes.length > 1000 ? 200 : rNodes.length > 300 ? 340 : 460;
-    for (let i = 0; i < ticks; i++) sim.tick();
-
-    const pos = new Map<string, { x: number; y: number }>();
-    for (const s of simNodes) pos.set(s.id, { x: s.x ?? 0, y: s.y ?? 0 });
-
-    const noteNodes: Node[] = rNodes.map((n, i) => {
-      const deg = degree.get(n.id) ?? 0;
-      const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
-      const p = pos.get(n.id)!;
-      return {
-        id: n.id,
-        type: "note",
-        position: { x: p.x, y: p.y },
-        zIndex: 2,
-        data: { label: n.label, color: colorFor(n.group), size, path: n.path, group: n.group, index: i },
-      } satisfies Node;
-    });
-
-    // ----- Lobos/regiões: um "halo" rotulado por pasta (cérebro / facetas do cristal) -----
-    groupNodeIds = new Map();
-    const bbox = new Map<string, { minX: number; minY: number; maxX: number; maxY: number; n: number }>();
-    rNodes.forEach((n) => {
-      const p = pos.get(n.id)!;
-      const deg = degree.get(n.id) ?? 0;
-      const size = Math.max(7, Math.min(7 + deg * 1.8, 22));
-      if (!groupNodeIds.has(n.group)) groupNodeIds.set(n.group, []);
-      groupNodeIds.get(n.group)!.push(n.id);
-      const b = bbox.get(n.group) ?? { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, n: 0 };
-      b.minX = Math.min(b.minX, p.x);
-      b.minY = Math.min(b.minY, p.y);
-      b.maxX = Math.max(b.maxX, p.x + size);
-      b.maxY = Math.max(b.maxY, p.y + size);
-      b.n += 1;
-      bbox.set(n.group, b);
-    });
-    const PAD = 70;
-    const regionNodes: Node[] = [...bbox.entries()]
-      .filter(([, b]) => b.n >= 2) // ignora pastas com 1 nota (sem lobo)
-      .map(([group, b]) => ({
-        id: `region:${group}`,
-        type: "region",
-        position: { x: b.minX - PAD, y: b.minY - PAD },
-        draggable: false,
-        selectable: false,
-        connectable: false,
-        zIndex: 0,
-        data: {
-          label: group || "/",
-          color: colorFor(group),
-          w: b.maxX - b.minX + PAD * 2,
-          h: b.maxY - b.minY + PAD * 2,
-          count: b.n,
-          group,
-        },
-      })) satisfies Node[];
-
-    nodes = [...regionNodes, ...noteNodes];
+      .force("y", forceY((d: any) => gy(d.id)).strength(0.16));
 
     baseEdges = valid.map((e) => ({ id: e.id, source: e.source, target: e.target, type: "bezier" }));
-    applyEdgeStyles();
+
+    // Contínuo (até ~600 nós): a simulação roda ao vivo, os nós se acomodam e
+    // reagem ao arraste; para sozinha quando estabiliza (alphaMin).
+    const continuous = get(settings).graphContinuous && rNodes.length <= 600;
+    if (continuous) {
+      sim = s;
+      let fitPending = true;
+      s.alphaDecay(0.035);
+      s.on("tick", () => {
+        nodes = buildNodes(posFromSim());
+      });
+      s.on("end", () => {
+        // enquadra uma única vez quando a 1ª acomodação termina (não a cada arraste)
+        if (fitPending && activeGroup === null) {
+          fitPending = false;
+          focusTarget = { ids: null, nonce: focusTarget.nonce + 1 };
+        }
+      });
+      nodes = buildNodes(posFromSim());
+      applyEdgeStyles();
+      s.alpha(1).restart();
+    } else {
+      // Pré-computa e congela (grafos grandes ou física contínua desligada).
+      s.stop();
+      const ticks = rNodes.length > 1000 ? 200 : rNodes.length > 300 ? 340 : 460;
+      for (let i = 0; i < ticks; i++) s.tick();
+      nodes = buildNodes(posFromSim());
+      applyEdgeStyles();
+    }
   }
 
   // Reconstrói quando os dados mudam.
@@ -295,6 +368,9 @@
     onnodeclick={({ node }) => {
       if (node.type === "region") focusGroup((node.data as any).group as string);
     }}
+    onnodedragstart={({ targetNode }) => onDragStart(targetNode)}
+    onnodedrag={({ targetNode }) => onDrag(targetNode)}
+    onnodedragstop={({ targetNode }) => onDragStop(targetNode)}
   >
     <Background bgColor="#0a0f1c" patternColor="#16223a" gap={28} size={1.2} />
     <Controls showLock={false} />

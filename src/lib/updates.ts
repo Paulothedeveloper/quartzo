@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.26.0",
+    date: "2026-06-26",
+    items: [
+      "Grafo com física contínua: os nós se acomodam suavemente ao abrir e reagem quando você arrasta um deles — os vizinhos se reorganizam. Liga/desliga em Configurações › Aparência.",
+      "Wikilinks por caminho: [[pasta/Nota]] resolve a nota certa mesmo quando há nomes repetidos em pastas diferentes (no editor, no preview e no grafo).",
+    ],
+  },
+  {
     version: "0.25.0",
     date: "2026-06-26",
     items: [

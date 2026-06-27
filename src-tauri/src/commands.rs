@@ -288,9 +288,18 @@ pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
 
     // mapa nome(minúsculo, sem extensão) -> caminho, para resolver wikilinks
     let mut by_stem: HashMap<String, String> = HashMap::new();
+    // mapa caminho-relativo(minúsculo, com / e sem .md) -> caminho, p/ wikilinks por caminho
+    let mut by_relpath: HashMap<String, String> = HashMap::new();
     for f in &files {
+        let full = f.to_string_lossy().to_string();
         let key = stem(f).to_lowercase();
-        by_stem.entry(key).or_insert_with(|| f.to_string_lossy().to_string());
+        by_stem.entry(key).or_insert_with(|| full.clone());
+        if let Ok(rel) = f.strip_prefix(root) {
+            let rel = rel.to_string_lossy().replace('\\', "/").to_lowercase();
+            let no_ext = rel.strip_suffix(".md").unwrap_or(&rel).to_string();
+            by_relpath.entry(rel).or_insert_with(|| full.clone());
+            by_relpath.entry(no_ext).or_insert_with(|| full.clone());
+        }
     }
 
     let mut nodes = Vec::with_capacity(files.len());
@@ -318,7 +327,16 @@ pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
         });
 
         for (target, is_embed) in parse_links(&content) {
-            if let Some(target_path) = by_stem.get(&target) {
+            // wikilink por caminho ("pasta/Nota") usa o mapa de caminho relativo;
+            // senão cai no nome (stem).
+            let resolved = if target.contains('/') {
+                let norm = target.replace('\\', "/");
+                let no_ext = norm.strip_suffix(".md").unwrap_or(&norm).to_string();
+                by_relpath.get(&no_ext).or_else(|| by_relpath.get(&norm))
+            } else {
+                by_stem.get(&target)
+            };
+            if let Some(target_path) = resolved {
                 if *target_path == path_str {
                     continue; // ignora auto-link
                 }
