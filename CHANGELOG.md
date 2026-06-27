@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.44.0 — 2026-06-27
+
+- **Configurações — layout:** a navegação lateral (Geral…Sobre) ganhou `overflow-y-auto` + `shrink-0` nos itens e o diálogo virou `h-[600px] max-h-[88vh]` — o **“Sobre” não fica mais colado na borda** e a lista rola direito em telas menores.
+- **Guia do usuário** (`docs/GUIA.md`, linkado no README): tutorial completo dos comandos e recursos (wikilinks/aliases/transclusão, backlinks/menções, relink, buscas, atalhos, views, grafo/canvas/rascunho, vídeo, Git, PRISMA, configurações).
+
 ## 0.43.0 — 2026-06-27
 
 - **Relink — corrigir links quebrados:** botão (ícone de elo partido) na barra do editor + comando na paleta. O `RelinkModal` detecta `[[links]]`/`![[anexos]]` da nota que não resolvem no vault e, para cada um, oferece **3 caminhos (escolha do usuário)**: **Buscar no vault** (por nome), **Escanear o PC** (Rust `scan_for_file` varre Desktop/Documentos/Downloads/Imagens/Vídeos/Música + vault, exato por nome, cap 100/prof. 6) ou **Escolher arquivo…** (diálogo). Ao escolher, reaponta o link; se o arquivo estiver **fora do vault**, é copiado pra `attachments/` (Rust `import_attachment`, com sufixo anti-colisão) e o link é refeito por nome — preservando `!`, alias e `#seção`. Grava no disco + atualiza o editor ao vivo.

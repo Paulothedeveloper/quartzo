@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.44.0",
+    date: "2026-06-27",
+    items: [
+      "Configurações: a lista lateral (Geral…Sobre) agora rola e não fica mais colada na borda; o painel se adapta a telas menores.",
+      "Novo Guia do usuário no GitHub explicando todos os comandos e recursos do app.",
+    ],
+  },
+  {
     version: "0.43.0",
     date: "2026-06-27",
     items: [

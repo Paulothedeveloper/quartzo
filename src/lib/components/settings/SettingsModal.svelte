@@ -93,7 +93,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.43.0");
+  let appVersion = $state("0.44.0");
   $effect(() => {
     try {
       getVersion()
@@ -393,7 +393,7 @@
     role="presentation"
   >
     <div
-      class="flex h-[560px] w-full max-w-[680px] overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+      class="flex h-[600px] max-h-[88vh] w-full max-w-[680px] overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
       transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
       role="dialog"
       aria-modal="true"
@@ -401,11 +401,11 @@
       tabindex="-1"
     >
       <!-- Rail de seções -->
-      <nav class="flex w-48 shrink-0 flex-col gap-1 border-r border-border bg-bg/40 p-3">
+      <nav class="flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-bg/40 px-3 py-3">
         <div class="px-2 pb-2 pt-1 text-sm font-semibold">{$t("common.settings")}</div>
         {#each tabs as tab (tab.id)}
           <button
-            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors {section ===
+            class="flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors {section ===
             tab.id
               ? 'bg-accent/15 text-accent-light'
               : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"

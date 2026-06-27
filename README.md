@@ -10,7 +10,7 @@
 
 <sub>Windows · Tauri 2 (Rust) + SvelteKit/Svelte 5 + TypeScript + Tailwind v4</sub>
 
-[**⬇ Baixar / Download**](https://github.com/Paulothedeveloper/quartzo/releases/latest) · [Releases](https://github.com/Paulothedeveloper/quartzo/releases) · [Issues](https://github.com/Paulothedeveloper/quartzo/issues)
+[**⬇ Baixar / Download**](https://github.com/Paulothedeveloper/quartzo/releases/latest) · [**📖 Guia do usuário**](docs/GUIA.md) · [Releases](https://github.com/Paulothedeveloper/quartzo/releases) · [Issues](https://github.com/Paulothedeveloper/quartzo/issues)
 
 **🇧🇷 [Português](#-português) · 🇺🇸 [English](#-english)**
 
