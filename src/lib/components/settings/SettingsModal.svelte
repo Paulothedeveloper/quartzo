@@ -93,7 +93,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.32.0");
+  let appVersion = $state("0.33.0");
   $effect(() => {
     try {
       getVersion()
@@ -288,16 +288,16 @@
   }
 
   // Passos do tutorial (numerados na UI).
-  const tutorialSteps: { title: string; body: string }[] = [
-    { title: "Abra um vault", body: "Clique no nome no topo da barra lateral → \"Abrir outra pasta…\" e escolha a pasta das suas notas. Ele fica salvo na lista para trocar depois." },
-    { title: "Crie e edite notas", body: "Use \"Nova nota\" na barra lateral. Escreva em Markdown; alterne Editor / Dividido / Leitura no canto superior direito. Salva sozinho." },
-    { title: "Conecte ideias", body: "Escreva [[Nome da nota]] para criar um link. Ctrl/Cmd+clique segue o link. Veja quem aponta para a nota no painel de Backlinks." },
-    { title: "Navegue rápido", body: "Ctrl+O pula para qualquer nota, Ctrl+Shift+F busca no conteúdo, Ctrl+Shift+O abre o Outline (cabeçalhos), Ctrl+K é a paleta de comandos." },
-    { title: "Visualize", body: "Ctrl+G abre o Grafo (mapa de conexões) e Ctrl+Shift+C o Canvas (quadro infinito com cards, imagens e setas)." },
-    { title: "Crie do seu jeito", body: "No editor há uma barra de ferramentas (negrito, títulos, listas, tarefas, tabela, código, callout, imagem, link…) e o menu \"/\". Você tem liberdade total pra montar a nota como quiser. Use também + Adicionar → Nova de tipo… para modelos prontos." },
-    { title: "Deixe com a sua cara", body: "Em Aparência troque o tema (claro/escuro) e ative CSS Snippets para personalizar. Em Atualizações você confere novas versões." },
-    { title: "Conecte com o PRISMA", body: "Em Configurações › Integrações você abre o PRISMA (sua biblioteca de mídia) e usa este vault como Base de Conhecimento dele — suas notas viram contexto pros planos de cor, que vão pro DaVinci via FCPXML. Quartzo (notas) → PRISMA (assets) → DaVinci." },
-  ];
+  const tutorialSteps = $derived<{ title: string; body: string }[]>([
+    { title: $t("tut.step1Title"), body: $t("tut.step1Body") },
+    { title: $t("tut.step2Title"), body: $t("tut.step2Body") },
+    { title: $t("tut.step3Title"), body: $t("tut.step3Body") },
+    { title: $t("tut.step4Title"), body: $t("tut.step4Body") },
+    { title: $t("tut.step5Title"), body: $t("tut.step5Body") },
+    { title: $t("tut.step6Title"), body: $t("tut.step6Body") },
+    { title: $t("tut.step7Title"), body: $t("tut.step7Body") },
+    { title: $t("tut.step8Title"), body: $t("tut.step8Body") },
+  ]);
 
   function set<K extends keyof Settings>(key: K, value: Settings[K]) {
     settings.update((s) => ({ ...s, [key]: value }));
@@ -306,10 +306,10 @@
   const vaultName = $derived($currentVaultPath ? ($currentVaultPath.split(/[\\/]/).pop() ?? "—") : "—");
 
   async function pickVault() {
-    const sel = await openDialog({ directory: true, multiple: false, title: "Abrir Vault" });
+    const sel = await openDialog({ directory: true, multiple: false, title: tr("set.openVaultTitle") });
     if (typeof sel !== "string") return;
     await setVault(sel);
-    showToast("Vault aberto", "success");
+    showToast(tr("set.vaultOpened"), "success");
   }
 
   // Reconstruir cache do vault (reindexa grafo + views + árvore).
@@ -322,28 +322,28 @@
       await refreshTree();
       await loadGraph(v);
       await loadQueryIndex(v, true);
-      showToast("Cache do vault reconstruído", "success");
+      showToast(tr("set.rebuildDone"), "success");
     } catch (e) {
-      showToast(`Erro ao reconstruir: ${e}`, "error");
+      showToast(tr("set.rebuildError", { error: `${e}` }), "error");
     } finally {
       rebuilding = false;
     }
   }
 
   const fonts: EditorFont[] = ["JetBrains Mono", "Fira Code", "Cascadia Code", "Consolas"];
-  const delays = [
-    { v: 500, label: "Rápido (500ms)" },
-    { v: 700, label: "Padrão (700ms)" },
-    { v: 800, label: "Relaxado (800ms)" },
-    { v: 1500, label: "Lento (1500ms)" },
-  ];
+  const delays = $derived([
+    { v: 500, label: $t("set.delayFast") },
+    { v: 700, label: $t("set.delayDefault") },
+    { v: 800, label: $t("set.delayRelaxed") },
+    { v: 1500, label: $t("set.delaySlow") },
+  ]);
   // ---- Atalhos editáveis ----
   let capturing = $state<string | null>(null);
   let shortcutFilter = $state("");
   const filteredShortcuts = $derived(
     shortcutFilter.trim()
       ? SHORTCUT_ACTIONS.filter((a) =>
-          a.label.toLowerCase().includes(shortcutFilter.trim().toLowerCase())
+          tr(`cmd.${a.id}`).toLowerCase().includes(shortcutFilter.trim().toLowerCase())
         )
       : SHORTCUT_ACTIONS
   );
@@ -378,7 +378,7 @@
   }
   function resetShortcuts() {
     settings.update((s) => ({ ...s, shortcuts: { ...DEFAULT_SHORTCUTS } }));
-    showToast("Atalhos restaurados", "success");
+    showToast(tr("set.shortcutsRestored"), "success");
   }
 </script>
 
@@ -436,24 +436,24 @@
             <div class="space-y-3">
               <div class="card">
                 <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
-                  Vault atual
+                  {$t("set.vaultCurrent")}
                 </div>
                 <div class="mt-1.5 text-sm font-medium">{vaultName}</div>
                 <div class="mt-0.5 truncate text-xs text-text-secondary">
-                  {$currentVaultPath ?? "Nenhum vault aberto"}
+                  {$currentVaultPath ?? $t("set.noVaultOpen")}
                 </div>
                 <button
                   onclick={pickVault}
                   class="mt-3 flex items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
                 >
-                  <FolderOpen size={15} /> Trocar vault
+                  <FolderOpen size={15} /> {$t("set.switchVault")}
                 </button>
               </div>
 
               <div class="card">
                 {@render toggleRow(
-                  "Abrir último vault ao iniciar",
-                  "Reabre automaticamente o vault aberto por último.",
+                  $t("set.autoOpenVault"),
+                  $t("set.autoOpenVaultDesc"),
                   $settings.autoOpenVault,
                   () => set("autoOpenVault", !$settings.autoOpenVault)
                 )}
@@ -482,11 +482,11 @@
             <div class="space-y-3">
               <div class="card">
                 {@render segmentRow(
-                  "Local padrão para novas notas",
+                  $t("set.newNoteLocation"),
                   $settings.newNoteLocation,
                   [
-                    { v: "root", label: "Raiz do vault" },
-                    { v: "current", label: "Pasta da nota atual" },
+                    { v: "root", label: $t("set.locRoot") },
+                    { v: "current", label: $t("set.locCurrent") },
                   ],
                   (v) => set("newNoteLocation", v as "root" | "current")
                 )}
@@ -494,8 +494,8 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Confirmar antes de excluir",
-                  "Pede confirmação antes de mover arquivos para a lixeira.",
+                  $t("set.confirmDelete"),
+                  $t("set.confirmDeleteDesc"),
                   $settings.confirmBeforeDelete,
                   () => set("confirmBeforeDelete", !$settings.confirmBeforeDelete)
                 )}
@@ -504,9 +504,9 @@
               <div class="card">
                 <div class="flex items-center justify-between gap-4">
                   <div>
-                    <div class="text-sm">Reconstruir cache do vault</div>
+                    <div class="text-sm">{$t("set.rebuildCache")}</div>
                     <div class="text-xs text-text-secondary">
-                      Reindexa o grafo, as views por front-matter e a árvore de arquivos.
+                      {$t("set.rebuildCacheDesc")}
                     </div>
                   </div>
                   <button
@@ -514,7 +514,7 @@
                     disabled={rebuilding || !$currentVaultPath}
                     class="inline-flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5 text-sm font-medium transition-all hover:bg-accent hover:text-bg active:scale-[0.97] disabled:opacity-50"
                   >
-                    <RefreshCw size={14} class={rebuilding ? "animate-spin" : ""} /> Reconstruir
+                    <RefreshCw size={14} class={rebuilding ? "animate-spin" : ""} /> {$t("set.rebuild")}
                   </button>
                 </div>
               </div>
@@ -522,14 +522,14 @@
           {:else if section === "plugins"}
             <div class="space-y-3">
               <p class="px-1 text-xs text-text-secondary">
-                Ative ou desative recursos do Quartzo, como os plugins nativos do Obsidian.
+                {$t("set.pluginsDesc")}
               </p>
               <div class="card">
                 {#each FEATURE_PLUGINS as f, i (f.id)}
                   {#if i > 0}<div class="divider"></div>{/if}
                   {@render toggleRow(
-                    f.label,
-                    f.desc,
+                    $t(`feat.${f.id}`),
+                    $t(`featd.${f.id}`),
                     $settings.features[f.id] ?? true,
                     () => setFeature(f.id, !($settings.features[f.id] ?? true))
                   )}
@@ -539,24 +539,24 @@
           {:else if section === "editor"}
             <div class="space-y-3">
               <div class="card">
-                {@render sliderRow("Tamanho da fonte", $settings.fontSize, 12, 20, 1, "px", (v) =>
+                {@render sliderRow($t("set.fontSize"), $settings.fontSize, 12, 20, 1, "px", (v) =>
                   set("fontSize", v)
                 )}
                 <div class="divider"></div>
-                {@render sliderRow("Altura da linha", $settings.lineHeight, 1.4, 2.2, 0.05, "", (v) =>
+                {@render sliderRow($t("set.lineHeight"), $settings.lineHeight, 1.4, 2.2, 0.05, "", (v) =>
                   set("lineHeight", v)
                 )}
                 <div class="divider"></div>
-                {@render selectRow("Fonte do editor", $settings.editorFont, fonts, (v) =>
+                {@render selectRow($t("set.editorFont"), $settings.editorFont, fonts, (v) =>
                   set("editorFont", v as EditorFont)
                 )}
                 <div class="divider"></div>
                 {@render segmentRow(
-                  "Tamanho do tab",
+                  $t("set.tabSize"),
                   String($settings.tabSize),
                   [
-                    { v: "2", label: "2 espaços" },
-                    { v: "4", label: "4 espaços" },
+                    { v: "2", label: $t("set.tab2") },
+                    { v: "4", label: $t("set.tab4") },
                   ],
                   (v) => set("tabSize", +v)
                 )}
@@ -564,29 +564,29 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Quebra de linha (word wrap)",
+                  $t("set.wordWrap"),
                   "",
                   $settings.wordWrap,
                   () => set("wordWrap", !$settings.wordWrap)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Mostrar números de linha",
+                  $t("set.lineNumbers"),
                   "",
                   $settings.lineNumbers,
                   () => set("lineNumbers", !$settings.lineNumbers)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Modo Vim",
-                  "Atalhos modais (hjkl, :w, etc) no editor.",
+                  $t("set.vimMode"),
+                  $t("set.vimModeDesc"),
                   $settings.vimMode,
                   () => set("vimMode", !$settings.vimMode)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  'Menu "/" de blocos',
-                  "Digite / no editor para inserir título, tabela, código, etc.",
+                  $t("set.slashMenu"),
+                  $t("set.slashMenuDesc"),
                   $settings.slashMenu,
                   () => set("slashMenu", !$settings.slashMenu)
                 )}
@@ -594,36 +594,36 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Margens de tamanho confortável",
-                  "Limita a largura do texto para leitura mais confortável.",
+                  $t("set.readableLineLength"),
+                  $t("set.readableLineLengthDesc"),
                   $settings.readableLineLength,
                   () => set("readableLineLength", !$settings.readableLineLength)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Criação em pares de símbolos",
-                  "Fecha automaticamente parênteses, aspas, ** e _ .",
+                  $t("set.closeBrackets"),
+                  $t("set.closeBracketsDesc"),
                   $settings.closeBrackets,
                   () => set("closeBrackets", !$settings.closeBrackets)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Verificação ortográfica",
-                  "Sublinha possíveis erros no editor (usa o corretor do sistema).",
+                  $t("set.spellcheck"),
+                  $t("set.spellcheckDesc"),
                   $settings.spellcheck,
                   () => set("spellcheck", !$settings.spellcheck)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Direita para esquerda (RTL)",
-                  "Direção do texto da direita para a esquerda.",
+                  $t("set.rtl"),
+                  $t("set.rtlDesc"),
                   $settings.rtl,
                   () => set("rtl", !$settings.rtl)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Mostrar status do editor",
-                  "Indicador de Salvando / Não salvo / Salvo na barra do editor.",
+                  $t("set.statusBar"),
+                  $t("set.statusBarDesc"),
                   $settings.statusBar,
                   () => set("statusBar", !$settings.statusBar)
                 )}
@@ -631,16 +631,16 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Espiar página (pré-visualizar ao passar o mouse)",
-                  "Mostra um cartão com o conteúdo da nota ao passar o mouse num [[wikilink]].",
+                  $t("set.hoverPreview"),
+                  $t("set.hoverPreviewDesc"),
                   $settings.hoverPreview,
                   () => set("hoverPreview", !$settings.hoverPreview)
                 )}
                 {#if $settings.hoverPreview}
                   <div class="divider"></div>
                   {@render toggleRow(
-                    "Exigir Ctrl para espiar",
-                    "Só pré-visualiza quando o Ctrl estiver pressionado.",
+                    $t("set.hoverPreviewCtrl"),
+                    $t("set.hoverPreviewCtrlDesc"),
                     $settings.hoverPreviewCtrl,
                     () => set("hoverPreviewCtrl", !$settings.hoverPreviewCtrl)
                   )}
@@ -649,8 +649,8 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Editor de Propriedades (front-matter)",
-                  "Mostra um painel no topo do editor para editar as propriedades (YAML) em campos, sem digitar YAML cru.",
+                  $t("set.propertiesPanel"),
+                  $t("set.propertiesPanelDesc"),
                   $settings.propertiesPanel,
                   () => set("propertiesPanel", !$settings.propertiesPanel)
                 )}
@@ -658,12 +658,12 @@
 
               <div class="card">
                 {@render segmentRow(
-                  "Modo inicial ao abrir nota",
+                  $t("set.defaultMode"),
                   $settings.defaultMode,
                   [
-                    { v: "edit", label: "Editor" },
-                    { v: "split", label: "Dividido" },
-                    { v: "read", label: "Leitura" },
+                    { v: "edit", label: $t("set.modeEdit") },
+                    { v: "split", label: $t("set.modeSplit") },
+                    { v: "read", label: $t("set.modeRead") },
                   ],
                   (v) => set("defaultMode", v as ViewMode)
                 )}
@@ -671,11 +671,11 @@
 
               <div class="card">
                 <div class="flex items-center justify-between gap-4">
-                  <div class="text-sm">Atraso do auto-save</div>
+                  <div class="text-sm">{$t("set.autoSaveDelay")}</div>
                   <select
                     value={$settings.autoSaveDelay}
                     onchange={(e) => set("autoSaveDelay", +e.currentTarget.value)}
-                    aria-label="Atraso do auto-save"
+                    aria-label={$t("set.autoSaveDelay")}
                     class="rounded-lg bg-elevated px-3 py-1.5 text-sm outline-none"
                   >
                     {#each delays as d (d.v)}
@@ -688,7 +688,7 @@
           {:else if section === "aparencia"}
             <div class="space-y-3">
               <div class="card">
-                <div class="mb-2.5 text-sm">Tema</div>
+                <div class="mb-2.5 text-sm">{$t("set.theme")}</div>
                 <div class="flex gap-2">
                   <button
                     onclick={() => set("theme", "dark")}
@@ -697,7 +697,7 @@
                       ? 'border-accent bg-accent/15 text-accent-light'
                       : 'border-border text-text-secondary hover:bg-elevated'}"
                   >
-                    {#if $settings.theme === "dark"}<Check size={14} class="mb-0.5 inline" />{/if} Escuro
+                    {#if $settings.theme === "dark"}<Check size={14} class="mb-0.5 inline" />{/if} {$t("set.themeDark")}
                   </button>
                   <button
                     onclick={() => set("theme", "light")}
@@ -706,20 +706,20 @@
                       ? 'border-accent bg-accent/15 text-accent-light'
                       : 'border-border text-text-secondary hover:bg-elevated'}"
                   >
-                    {#if $settings.theme === "light"}<Check size={14} class="mb-0.5 inline" />{/if} Claro
+                    {#if $settings.theme === "light"}<Check size={14} class="mb-0.5 inline" />{/if} {$t("set.themeLight")}
                   </button>
                 </div>
               </div>
 
               <div class="card">
                 <div class="mb-2.5 flex items-center justify-between">
-                  <div class="text-sm">Cor de destaque</div>
+                  <div class="text-sm">{$t("set.accentColor")}</div>
                   {#if $settings.accentColor}
                     <button
                       onclick={() => set("accentColor", "")}
                       class="text-xs text-text-secondary hover:text-accent-light"
                     >
-                      Restaurar
+                      {$t("set.restore")}
                     </button>
                   {/if}
                 </div>
@@ -738,7 +738,7 @@
                   {/each}
                   <label
                     class="flex h-7 cursor-pointer items-center gap-1.5 rounded-lg border border-border px-2 text-xs text-text-secondary hover:bg-elevated"
-                    title="Cor personalizada"
+                    title={$t("set.customColor")}
                   >
                     <Pipette size={13} />
                     <input
@@ -746,13 +746,13 @@
                       value={$settings.accentColor || "#67e8f9"}
                       oninput={(e) => set("accentColor", e.currentTarget.value)}
                       class="h-0 w-0 opacity-0"
-                      aria-label="Cor personalizada"
+                      aria-label={$t("set.customColor")}
                     />
                   </label>
                 </div>
                 <div class="divider"></div>
                 {@render sliderRow(
-                  "Zoom do app",
+                  $t("set.appZoom"),
                   Math.round($settings.appZoom * 100),
                   80,
                   140,
@@ -762,7 +762,7 @@
                 )}
                 <div class="divider"></div>
                 {@render sliderRow(
-                  "Tamanho da fonte da interface",
+                  $t("set.uiFontScale"),
                   Math.round($settings.uiFontScale * 100),
                   85,
                   125,
@@ -774,18 +774,18 @@
 
               <div class="card">
                 {@render segmentRow(
-                  "Densidade da interface",
+                  $t("set.density"),
                   $settings.density,
                   [
-                    { v: "comfortable", label: "Confortável" },
-                    { v: "compact", label: "Compacta" },
+                    { v: "comfortable", label: $t("set.densityComfortable") },
+                    { v: "compact", label: $t("set.densityCompact") },
                   ],
                   (v) => set("density", v as Density)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Animações",
-                  "Desligue para uma experiência mais direta.",
+                  $t("set.animations"),
+                  $t("set.animationsDesc"),
                   $settings.animations,
                   () => set("animations", !$settings.animations)
                 )}
@@ -793,8 +793,8 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Grafo com física contínua",
-                  "Os nós se acomodam suavemente ao abrir e reagem quando você arrasta um deles (vizinhos se reorganizam). Em grafos muito grandes, o layout é pré-calculado automaticamente.",
+                  $t("set.graphContinuous"),
+                  $t("set.graphContinuousDesc"),
                   $settings.graphContinuous,
                   () => set("graphContinuous", !$settings.graphContinuous)
                 )}
@@ -802,15 +802,15 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Efeitos sonoros (SFX)",
-                  "Sons cristalinos em cliques, toggles e ações.",
+                  $t("set.sfx"),
+                  $t("set.sfxDesc"),
                   $settings.sfx,
                   () => set("sfx", !$settings.sfx)
                 )}
                 {#if $settings.sfx}
                   <div class="divider"></div>
                   {@render sliderRow(
-                    "Volume",
+                    $t("set.volume"),
                     Math.round($settings.sfxVolume * 100),
                     0,
                     100,
@@ -823,18 +823,18 @@
 
               <div class="card">
                 <div class="mb-1 flex items-center justify-between gap-2">
-                  <div class="text-sm">CSS Snippets</div>
+                  <div class="text-sm">{$t("set.cssSnippets")}</div>
                   <div class="flex gap-1.5">
                     <button
                       onclick={() => $currentVaultPath && loadSnippets($currentVaultPath)}
-                      title="Recarregar"
+                      title={$t("set.reload")}
                       class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
                     >
                       <RefreshCw size={14} />
                     </button>
                     <button
                       onclick={openSnippetsFolder}
-                      title="Abrir pasta de snippets"
+                      title={$t("set.openSnippetsFolder")}
                       class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
                     >
                       <FolderInput size={14} />
@@ -842,15 +842,15 @@
                   </div>
                 </div>
                 <div class="text-xs text-text-secondary">
-                  Arquivos <code class="text-accent-light">.css</code> em
-                  <code class="text-accent-light">.quartzo/snippets</code> do vault. Ative para aplicar.
+                  {$t("set.snippetsDescBefore")} <code class="text-accent-light">.css</code> {$t("set.snippetsDescMid")}
+                  <code class="text-accent-light">.quartzo/snippets</code> {$t("set.snippetsDescAfter")}
                 </div>
                 <div class="mt-3 space-y-2">
                   {#if !$currentVaultPath}
-                    <div class="text-xs text-text-muted">Abra um vault para usar snippets.</div>
+                    <div class="text-xs text-text-muted">{$t("set.snippetsNoVault")}</div>
                   {:else if snippets.length === 0}
                     <div class="text-xs text-text-muted">
-                      Nenhum snippet ainda. Clique em <FolderInput size={12} class="inline" /> e crie um arquivo
+                      {$t("set.snippetsEmptyBefore")} <FolderInput size={12} class="inline" /> {$t("set.snippetsEmptyAfter")}
                       <code>.css</code>.
                     </div>
                   {:else}
@@ -870,29 +870,29 @@
             <div class="space-y-3">
               <div class="card">
                 {@render toggleRow(
-                  "Diagramas Mermaid",
-                  "Renderiza blocos ```mermaid (fluxogramas, sequência, etc).",
+                  $t("set.renderMermaid"),
+                  $t("set.renderMermaidDesc"),
                   $settings.renderMermaid,
                   () => set("renderMermaid", !$settings.renderMermaid)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Views dinâmicas (```query)",
-                  "Tabela, kanban e tarefas montadas a partir do front-matter.",
+                  $t("set.renderQueries"),
+                  $t("set.renderQueriesDesc"),
                   $settings.renderQueries,
                   () => set("renderQueries", !$settings.renderQueries)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Revisão de vídeo (```video)",
-                  "Player de vídeo local com timecodes clicáveis e export de marcadores.",
+                  $t("set.renderVideo"),
+                  $t("set.renderVideoDesc"),
                   $settings.renderVideo,
                   () => set("renderVideo", !$settings.renderVideo)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Equações (LaTeX/KaTeX)",
-                  "Renderiza $inline$ e $$bloco$$.",
+                  $t("set.renderMath"),
+                  $t("set.renderMathDesc"),
                   $settings.renderMath,
                   () => set("renderMath", !$settings.renderMath)
                 )}
@@ -900,28 +900,28 @@
 
               <div class="card">
                 {@render toggleRow(
-                  "Cor inline",
-                  "Mostra um quadradinho ao lado de #RRGGBB.",
+                  $t("set.inlineColors"),
+                  $t("set.inlineColorsDesc"),
                   $settings.inlineColors,
                   () => set("inlineColors", !$settings.inlineColors)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Botão copiar nos blocos de código",
+                  $t("set.codeCopyButton"),
                   "",
                   $settings.codeCopyButton,
                   () => set("codeCopyButton", !$settings.codeCopyButton)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(
-                  "Números de linha no código",
+                  $t("set.codeLineNumbers"),
                   "",
                   $settings.codeLineNumbers,
                   () => set("codeLineNumbers", !$settings.codeLineNumbers)
                 )}
                 <div class="divider"></div>
                 {@render sliderRow(
-                  "Cores ao extrair paleta",
+                  $t("set.paletteColors"),
                   $settings.paletteColors,
                   2,
                   12,
@@ -934,56 +934,56 @@
           {:else if section === "tipos"}
             <div class="space-y-3">
               <div class="card">
-                <div class="text-sm font-medium">Tipos de nota</div>
+                <div class="text-sm font-medium">{$t("set.noteTypes")}</div>
                 <div class="mt-1 text-xs leading-relaxed text-text-secondary">
-                  Modelos que criam notas com front-matter pronto (alimentam o kanban/tabela). Use por
-                  <strong>+ Adicionar → Nova de tipo…</strong>
+                  {$t("set.noteTypesDescBefore")}
+                  <strong>{$t("set.noteTypesDescStrong")}</strong>
                 </div>
               </div>
 
               {#if !$currentVaultPath}
-                <div class="card text-sm text-text-secondary">Abra um vault para editar os tipos.</div>
+                <div class="card text-sm text-text-secondary">{$t("set.typesNoVault")}</div>
               {:else}
-                {#each types as t, i (t.id)}
+                {#each types as nt, i (nt.id)}
                   <div class="card space-y-2">
                     <div class="flex items-center gap-2">
                       <input
-                        bind:value={t.emoji}
+                        bind:value={nt.emoji}
                         oninput={() => (typesDirty = true)}
-                        aria-label="Emoji"
+                        aria-label={$t("set.typeEmoji")}
                         class="w-10 rounded-lg bg-elevated px-2 py-1.5 text-center text-sm outline-none"
                       />
                       <input
-                        bind:value={t.name}
+                        bind:value={nt.name}
                         oninput={() => (typesDirty = true)}
-                        placeholder="Nome do tipo"
-                        aria-label="Nome"
+                        placeholder={$t("set.typeNamePlaceholder")}
+                        aria-label={$t("set.typeName")}
                         class="flex-1 rounded-lg bg-elevated px-3 py-1.5 text-sm outline-none"
                       />
-                      <button onclick={() => removeType(i)} title="Excluir tipo" class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-danger">
+                      <button onclick={() => removeType(i)} title={$t("set.typeDelete")} class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-danger">
                         <Trash2 size={15} />
                       </button>
                     </div>
                     <input
-                      bind:value={t.folder}
+                      bind:value={nt.folder}
                       oninput={() => (typesDirty = true)}
-                      placeholder="Pasta de destino (ex.: Projetos)"
-                      aria-label="Pasta"
+                      placeholder={$t("set.typeFolderPlaceholder")}
+                      aria-label={$t("set.typeFolder")}
                       class="w-full rounded-lg bg-elevated px-3 py-1.5 text-sm outline-none"
                     />
                     <input
-                      value={fieldsStr(t)}
-                      oninput={(e) => setFields(t, e.currentTarget.value)}
-                      placeholder="Campos: status, cliente, prazo, data={'{{date}}'}"
-                      aria-label="Campos"
+                      value={fieldsStr(nt)}
+                      oninput={(e) => setFields(nt, e.currentTarget.value)}
+                      placeholder={$t("set.typeFieldsPlaceholder")}
+                      aria-label={$t("set.typeFields")}
                       class="w-full rounded-lg bg-elevated px-3 py-1.5 font-mono text-xs outline-none"
                     />
                     <textarea
-                      bind:value={t.body}
+                      bind:value={nt.body}
                       oninput={() => (typesDirty = true)}
-                      placeholder="Corpo-modelo (Markdown)"
+                      placeholder={$t("set.typeBodyPlaceholder")}
                       rows="3"
-                      aria-label="Corpo"
+                      aria-label={$t("set.typeBody")}
                       class="w-full resize-y rounded-lg bg-elevated px-3 py-1.5 font-mono text-xs outline-none"
                     ></textarea>
                   </div>
@@ -994,20 +994,20 @@
                     onclick={addType}
                     class="flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5 text-sm text-text-primary transition-all hover:bg-elevated/70 active:scale-[0.97]"
                   >
-                    <Layers size={15} /> Adicionar tipo
+                    <Layers size={15} /> {$t("set.addType")}
                   </button>
                   <button
                     onclick={restoreTypes}
                     class="rounded-lg px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
                   >
-                    Restaurar padrões
+                    {$t("set.restoreDefaults")}
                   </button>
                   <button
                     onclick={saveTypes}
                     disabled={!typesDirty}
                     class="ml-auto flex items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-50"
                   >
-                    <Check size={15} /> Salvar tipos
+                    <Check size={15} /> {$t("set.saveTypes")}
                   </button>
                 </div>
               {/if}
@@ -1015,10 +1015,9 @@
           {:else if section === "nuvem"}
             <div class="space-y-3">
               <div class="card">
-                <div class="text-sm font-medium">Sincronização na nuvem</div>
+                <div class="text-sm font-medium">{$t("set.cloudSync")}</div>
                 <div class="mt-1 text-xs leading-relaxed text-text-secondary">
-                  Deixe o vault dentro de uma pasta do <strong>Google Drive</strong> (ou OneDrive) e
-                  o app oficial da nuvem sincroniza tudo automaticamente entre seus dispositivos.
+                  {$t("set.cloudSyncDescBefore")} <strong>Google Drive</strong> {$t("set.cloudSyncDescAfter")}
                 </div>
               </div>
 
@@ -1026,9 +1025,9 @@
                 <div class="card flex items-center gap-2.5">
                   <CheckCircle2 size={20} class="shrink-0 text-success" />
                   <div class="min-w-0">
-                    <div class="text-sm font-medium">Este vault já está na nuvem</div>
+                    <div class="text-sm font-medium">{$t("set.cloudAlready")}</div>
                     <div class="truncate text-xs text-text-secondary">
-                      {vaultInCloud.name} — sincroniza sozinho
+                      {$t("set.cloudAlreadySub", { name: vaultInCloud.name })}
                     </div>
                   </div>
                 </div>
@@ -1037,13 +1036,13 @@
                   <div class="flex items-start gap-2.5 text-sm text-text-secondary">
                     <AlertCircle size={18} class="mt-0.5 shrink-0 text-warning" />
                     <div>
-                      Nenhuma pasta de nuvem encontrada. Instale o
-                      <strong>Google Drive para Desktop</strong> (ou OneDrive), faça login e recarregue.
+                      {$t("set.cloudNoneBefore")}
+                      <strong>Google Drive para Desktop</strong> {$t("set.cloudNoneAfter")}
                       <button
                         onclick={() => openUrl("https://www.google.com/drive/download/")}
                         class="mt-1 flex items-center gap-1 text-xs text-accent-light hover:underline"
                       >
-                        Baixar Google Drive <ExternalLink size={11} />
+                        {$t("set.cloudDownloadDrive")} <ExternalLink size={11} />
                       </button>
                     </div>
                   </div>
@@ -1051,12 +1050,12 @@
                     onclick={loadClouds}
                     class="mt-3 flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5 text-sm text-text-primary transition-all hover:bg-elevated/70 active:scale-[0.97]"
                   >
-                    <RefreshCw size={14} /> Recarregar
+                    <RefreshCw size={14} /> {$t("set.reload")}
                   </button>
                 </div>
               {:else}
                 <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
-                  Mover este vault para
+                  {$t("set.cloudMoveTo")}
                 </div>
                 {#each cloudFolders as f (f.path)}
                   <div class="card flex items-center justify-between gap-3">
@@ -1074,12 +1073,12 @@
                       {:else}
                         <CloudUpload size={15} />
                       {/if}
-                      Mover
+                      {$t("set.cloudMove")}
                     </button>
                   </div>
                 {/each}
                 <div class="text-[11px] leading-relaxed text-text-muted">
-                  O original continua onde está (backup). O app passa a usar a cópia na nuvem, em
+                  {$t("set.cloudFootnoteBefore")}
                   <code>Quartzo/{$currentVaultPath?.split(/[\\/]/).pop() ?? ""}</code>.
                 </div>
               {/if}
@@ -1088,16 +1087,13 @@
             <div class="space-y-3">
               <div class="card">
                 <div class="flex items-center gap-2 text-sm font-medium">
-                  <Boxes size={16} class="text-accent" /> Ecossistema Quartzo
+                  <Boxes size={16} class="text-accent" /> {$t("set.ecosystem")}
                 </div>
                 <div class="mt-1.5 text-xs leading-relaxed text-text-secondary">
-                  O Quartzo é o <strong>cérebro</strong> (você escreve e organiza o conhecimento). O
-                  <strong>PRISMA</strong> é a sua biblioteca de mídia (DAM), que pode <strong>ler este vault
-                  como base de conhecimento</strong> e exportar clipes pro DaVinci (FCPXML). Assim suas notas
-                  daqui viram contexto pros planos de cor do PRISMA.
+                  {@html $t("set.ecosystemDesc")}
                 </div>
                 <div class="mt-2.5 text-[11px] leading-relaxed text-text-muted">
-                  Fluxo: Quartzo (notas) → PRISMA (assets + base de conhecimento) → DaVinci Resolve.
+                  {$t("set.ecosystemFlow")}
                 </div>
               </div>
 
@@ -1107,14 +1103,14 @@
                   <div class="min-w-0">
                     <div class="text-sm font-medium">PRISMA</div>
                     <div class="text-xs text-text-secondary">
-                      {prismaOk ? "Instalado neste computador" : "Não encontrado — instale o PRISMA"}
+                      {prismaOk ? $t("set.prismaInstalled") : $t("set.prismaNotFound")}
                     </div>
                   </div>
                   <button
                     onclick={openPrisma}
                     class="flex shrink-0 items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
                   >
-                    <Boxes size={15} /> Abrir PRISMA
+                    <Boxes size={15} /> {$t("set.openPrisma")}
                   </button>
                 </div>
               </div>
@@ -1123,10 +1119,9 @@
               <div class="card">
                 <div class="flex items-center justify-between gap-3">
                   <div class="min-w-0">
-                    <div class="text-sm font-medium">Anexar mídia do PRISMA</div>
+                    <div class="text-sm font-medium">{$t("set.attachMedia")}</div>
                     <div class="text-xs text-text-secondary">
-                      Insere na nota atual um link pra um asset da sua biblioteca (abre no PRISMA ou
-                      no arquivo). Também na paleta (Ctrl+K).
+                      {$t("set.attachMediaDesc")}
                     </div>
                   </div>
                   <button
@@ -1136,34 +1131,32 @@
                     }}
                     class="flex shrink-0 items-center gap-2 rounded-lg bg-elevated px-3 py-1.5 text-sm font-medium transition-all hover:bg-accent/15 hover:text-accent-light active:scale-[0.97]"
                   >
-                    <Boxes size={15} /> Anexar mídia…
+                    <Boxes size={15} /> {$t("set.attachMediaBtn")}
                   </button>
                 </div>
               </div>
 
               <!-- Conectar este vault como base de conhecimento -->
               <div class="card">
-                <div class="text-sm font-medium">Usar este vault no PRISMA</div>
+                <div class="text-sm font-medium">{$t("set.useVaultInPrisma")}</div>
                 <div class="mt-1 text-xs leading-relaxed text-text-secondary">
-                  No PRISMA, vá em <strong>Configurações › IA e busca › Base de conhecimento</strong> e cole o
-                  caminho abaixo. O PRISMA reindexará suas notas automaticamente (ao vivo).
+                  {@html $t("set.useVaultInPrismaDesc")}
                 </div>
                 <div class="mt-2 flex items-center gap-2">
                   <code class="min-w-0 flex-1 truncate rounded-lg bg-elevated px-3 py-1.5 text-xs">
-                    {$currentVaultPath ?? "Abra um vault primeiro"}
+                    {$currentVaultPath ?? $t("set.openVaultFirstInline")}
                   </code>
                   <button
                     onclick={copyVaultPath}
                     disabled={!$currentVaultPath}
-                    title="Copiar caminho"
+                    title={$t("set.copyPath")}
                     class="shrink-0 rounded-lg bg-elevated p-2 text-text-secondary transition-colors hover:bg-elevated/70 hover:text-text-primary disabled:opacity-50"
                   >
                     <Copy size={15} />
                   </button>
                 </div>
                 <div class="mt-2 text-[11px] leading-relaxed text-text-muted">
-                  Dica: deixe o vault numa pasta da nuvem (aba Nuvem) e aponte o PRISMA do notebook e do
-                  desktop pra ela — conhecimento sincronizado entre máquinas.
+                  {$t("set.useVaultTip")}
                 </div>
               </div>
 
@@ -1173,25 +1166,23 @@
                   <Clapperboard size={16} class="text-accent" /> DaVinci Resolve
                 </div>
                 <div class="mt-1.5 text-xs leading-relaxed text-text-secondary">
-                  O PRISMA gera o <strong>plano de cor</strong> citando as suas notas daqui e exporta a
-                  seleção como <strong>FCPXML</strong> pra abrir no DaVinci. Mantenha aqui suas notas de CST,
-                  LUTs e fluxo — elas alimentam todo o resto.
+                  {@html $t("set.davinciDesc")}
                 </div>
               </div>
             </div>
           {:else if section === "atalhos"}
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <span class="text-xs text-text-secondary">Clique no atalho e pressione a nova combinação (com Ctrl).</span>
+                <span class="text-xs text-text-secondary">{$t("set.shortcutsHint")}</span>
                 <button onclick={resetShortcuts} class="rounded-lg px-2.5 py-1 text-xs text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary">
-                  Restaurar padrões
+                  {$t("set.restoreDefaults")}
                 </button>
               </div>
               <div class="flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5">
                 <Search size={14} class="text-text-secondary" />
                 <input
                   bind:value={shortcutFilter}
-                  placeholder="Filtrar comandos…"
+                  placeholder={$t("set.filterCommands")}
                   class="w-full bg-transparent text-sm outline-none placeholder:text-text-secondary"
                 />
                 <span class="shrink-0 text-xs text-text-muted">{filteredShortcuts.length}</span>
@@ -1199,7 +1190,7 @@
               <div class="overflow-hidden rounded-xl border border-border">
                 {#each filteredShortcuts as a, i (a.id)}
                   <div class="flex items-center justify-between px-4 py-2.5 text-sm {i % 2 ? 'bg-bg/20' : ''}">
-                    <span class="text-text-secondary">{a.label}</span>
+                    <span class="text-text-secondary">{$t(`cmd.${a.id}`)}</span>
                     <button
                       onclick={() => startCapture(a.id)}
                       class="min-w-[96px] rounded-md border px-2 py-0.5 text-center font-mono text-xs transition-colors {capturing ===
@@ -1207,13 +1198,13 @@
                         ? 'border-accent bg-accent/15 text-accent-light'
                         : 'border-border bg-elevated text-text-primary hover:border-accent/50'}"
                     >
-                      {capturing === a.id ? "pressione…" : $settings.shortcuts[a.id] ? formatCombo($settings.shortcuts[a.id]) : "—"}
+                      {capturing === a.id ? $t("set.pressKeys") : $settings.shortcuts[a.id] ? formatCombo($settings.shortcuts[a.id]) : "—"}
                     </button>
                   </div>
                 {/each}
               </div>
               <div class="px-1 text-[11px] text-text-muted">
-                Fixos: <kbd class="font-mono">Ctrl+S</kbd> salvar · <kbd class="font-mono">Ctrl/Cmd+clique</kbd> seguir wikilink · <kbd class="font-mono">Esc</kbd> cancela a captura.
+                {$t("set.shortcutsFixed")} <kbd class="font-mono">Ctrl+S</kbd> {$t("set.shortcutsSave")} · <kbd class="font-mono">Ctrl/Cmd+clique</kbd> {$t("set.shortcutsFollowLink")} · <kbd class="font-mono">Esc</kbd> {$t("set.shortcutsCancelCapture")}
               </div>
             </div>
           {:else if section === "atualizacoes"}
@@ -1221,7 +1212,7 @@
               <div class="card">
                 <div class="flex items-center justify-between gap-4">
                   <div>
-                    <div class="text-sm font-medium">Versão instalada</div>
+                    <div class="text-sm font-medium">{$t("set.installedVersion")}</div>
                     <div class="mt-0.5 text-xs text-text-secondary">Quartzo {appVersion}</div>
                   </div>
                   <button
@@ -1230,9 +1221,9 @@
                     class="flex items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-60"
                   >
                     {#if checking}
-                      <Loader2 size={15} class="animate-spin" /> Buscando…
+                      <Loader2 size={15} class="animate-spin" /> {$t("set.checking")}
                     {:else}
-                      <RefreshCw size={15} /> Buscar atualização
+                      <RefreshCw size={15} /> {$t("set.checkUpdate")}
                     {/if}
                   </button>
                 </div>
@@ -1244,22 +1235,22 @@
                       <ArrowUpCircle size={18} class="mt-0.5 shrink-0 text-accent-light" />
                       <div class="min-w-0 flex-1">
                         <div class="text-sm font-medium text-accent-light">
-                          Nova versão disponível: {update.latest}
+                          {$t("set.updateAvailable", { version: update.latest ?? "" })}
                         </div>
                         <div class="text-xs text-text-secondary">
-                          Você está na {update.current}. Baixe a nova no GitHub.
+                          {$t("set.updateAvailableSub", { current: update.current ?? "" })}
                         </div>
                         <button
                           onclick={() => openReleases(update?.url)}
                           class="mt-2 flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
                         >
-                          <Download size={13} /> Baixar {update.latest}
+                          <Download size={13} /> {$t("set.download", { version: update.latest ?? "" })}
                         </button>
                       </div>
                     </div>
                   {:else if update.status === "latest"}
                     <div class="flex items-center gap-2.5 text-sm text-success">
-                      <CheckCircle2 size={18} /> Você já está na versão mais recente.
+                      <CheckCircle2 size={18} /> {$t("set.upToDate")}
                     </div>
                   {:else}
                     <div class="flex items-start gap-2.5 text-sm text-text-secondary">
@@ -1270,20 +1261,20 @@
                           onclick={() => openReleases()}
                           class="mt-1 flex items-center gap-1 text-xs text-accent-light hover:underline"
                         >
-                          Ver página de releases <ExternalLink size={11} />
+                          {$t("set.seeReleases")} <ExternalLink size={11} />
                         </button>
                       </div>
                     </div>
                   {/if}
                 {/if}
                 <div class="mt-2 text-[11px] text-text-muted">
-                  Verifica em github.com/{GITHUB_REPO}
+                  {$t("set.checksAt", { repo: GITHUB_REPO })}
                 </div>
               </div>
 
               <!-- Notas de atualização (changelog) -->
               <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
-                Notas de atualização
+                {$t("set.changelog")}
               </div>
               {#each CHANGELOG as entry (entry.version)}
                 <div class="card">
@@ -1307,9 +1298,9 @@
               <div class="card flex items-center gap-3">
                 <CrystalIllustration size={44} glow={0.5} />
                 <div>
-                  <div class="text-sm font-medium">Como usar o Quartzo</div>
+                  <div class="text-sm font-medium">{$t("set.tutorialTitle")}</div>
                   <div class="text-xs text-text-secondary">
-                    6 passos para dominar o essencial.
+                    {$t("set.tutorialSub")}
                   </div>
                 </div>
               </div>
@@ -1330,17 +1321,17 @@
                 onclick={() => (section = "atalhos")}
                 class="flex w-full items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
               >
-                <Keyboard size={15} /> Ver todos os atalhos
+                <Keyboard size={15} /> {$t("set.seeAllShortcuts")}
               </button>
             </div>
           {:else if section === "sobre"}
             <div class="flex h-full flex-col items-center justify-center text-center">
               <CrystalIllustration size={84} glow={0.55} />
               <div class="mt-4 text-xl font-semibold">Quartzo</div>
-              <div class="mt-1 text-sm text-text-secondary">Versão {appVersion}</div>
+              <div class="mt-1 text-sm text-text-secondary">{$t("about.version", { version: appVersion })}</div>
               <div class="mt-4 max-w-xs text-xs leading-relaxed text-text-muted">
-                Gerenciador de conhecimento pessoal local-first, em Markdown.
-                <br />Feito por Paulo com Claude · Tauri + Svelte + Rust.
+                {$t("about.tagline")}
+                <br />{$t("about.credits")}
               </div>
             </div>
           {/if}

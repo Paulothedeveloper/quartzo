@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.33.0 — 2026-06-27
+
+- **i18n do corpo das Configurações (conclusão):** todo o texto visível das Configurações agora é PT/EN/ES — descrições de cada opção, **Tutorial** (8 passos), **Sobre**, seções **Markdown/Aparência/Nuvem/Integrações/Atualizações**, os **Plugins nativos** (`feat.*`/`featd.*`) e os **nomes dos atalhos** (reaproveitando as chaves `cmd.*`). +178 chaves (×3 idiomas) via dict, `tutorialSteps`/`delays` viraram `$derived` para reagir à troca de idioma. **Marco: i18n do app concluída de ponta a ponta.**
+
 ## 0.32.0 — 2026-06-26
 
 - **Deep link `quartzo://note/<caminho>`:** o PRISMA (ou qualquer app) abre uma nota específica do Quartzo por link. Plugins `tauri-plugin-deep-link` + `tauri-plugin-single-instance` (foco na instância existente, sem abrir 2 janelas); `register_all()` registra o esquema no SO; handler decodifica o caminho e emite `deeplink:open-note` → o front resolve e abre a nota. Esquema declarado no `tauri.conf` + capability `deep-link:default`.

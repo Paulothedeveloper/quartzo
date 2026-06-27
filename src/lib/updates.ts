@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.33.0",
+    date: "2026-06-27",
+    items: [
+      "Configurações 100% traduzidas (PT/EN/ES): todas as descrições, o Tutorial, o Sobre, os Plugins nativos e os nomes dos atalhos agora seguem o idioma.",
+      "Marca: internacionalização concluída de ponta a ponta no app.",
+    ],
+  },
+  {
     version: "0.32.0",
     date: "2026-06-26",
     items: [
