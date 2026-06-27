@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.42.0",
+    date: "2026-06-27",
+    items: [
+      "Menções não-linkadas melhores: o termo aparece destacado no trecho e cada menção tem um botão “Linkar” que transforma a menção em [[link]] na nota de origem (pula código e links já existentes).",
+    ],
+  },
+  {
     version: "0.41.0",
     date: "2026-06-27",
     items: [

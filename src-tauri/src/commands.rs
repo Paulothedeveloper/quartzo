@@ -1441,6 +1441,91 @@ pub fn delete_to_trash(path: String) -> Result<(), String> {
     trash::delete(&path).map_err(|e| e.to_string())
 }
 
+fn is_word_char(c: char) -> bool {
+    c.is_alphanumeric() || c == '_'
+}
+
+/// Converte menções não-linkadas: numa nota, envolve as ocorrências (palavra
+/// inteira) de `target_name` em `[[ ]]`, pulando wikilinks e código já existentes.
+/// Retorna quantas foram linkadas.
+#[tauri::command]
+pub fn link_mention(path: String, target_name: String) -> Result<u32, String> {
+    let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    let chars: Vec<char> = content.chars().collect();
+    let lower: Vec<char> = content.to_lowercase().chars().collect();
+    let needle: Vec<char> = target_name.to_lowercase().chars().collect();
+    let nlen = needle.len();
+    if nlen == 0 {
+        return Ok(0);
+    }
+    let mut out = String::with_capacity(content.len() + 8);
+    let mut i = 0;
+    let mut count = 0u32;
+    while i < chars.len() {
+        // pula wikilinks [[...]]
+        if chars[i] == '[' && i + 1 < chars.len() && chars[i + 1] == '[' {
+            out.push_str("[[");
+            i += 2;
+            while i < chars.len() {
+                if chars[i] == ']' && i + 1 < chars.len() && chars[i + 1] == ']' {
+                    out.push_str("]]");
+                    i += 2;
+                    break;
+                }
+                out.push(chars[i]);
+                i += 1;
+            }
+            continue;
+        }
+        // pula bloco de código ```...```
+        if chars[i] == '`' && i + 2 < chars.len() && chars[i + 1] == '`' && chars[i + 2] == '`' {
+            out.push_str("```");
+            i += 3;
+            while i < chars.len() {
+                if chars[i] == '`' && i + 2 < chars.len() && chars[i + 1] == '`' && chars[i + 2] == '`' {
+                    out.push_str("```");
+                    i += 3;
+                    break;
+                }
+                out.push(chars[i]);
+                i += 1;
+            }
+            continue;
+        }
+        // pula código inline `...`
+        if chars[i] == '`' {
+            out.push('`');
+            i += 1;
+            while i < chars.len() && chars[i] != '`' {
+                out.push(chars[i]);
+                i += 1;
+            }
+            continue;
+        }
+        // casa a palavra inteira (case-insensitive)
+        if i + nlen <= chars.len() && lower[i..i + nlen] == needle[..] {
+            let before_ok = i == 0 || !is_word_char(chars[i - 1]);
+            let after_ok = i + nlen >= chars.len() || !is_word_char(chars[i + nlen]);
+            if before_ok && after_ok {
+                out.push_str("[[");
+                for c in &chars[i..i + nlen] {
+                    out.push(*c);
+                }
+                out.push_str("]]");
+                i += nlen;
+                count += 1;
+                continue;
+            }
+        }
+        out.push(chars[i]);
+        i += 1;
+    }
+    if count > 0 {
+        fs::write(&path, out).map_err(|e| e.to_string())?;
+    }
+    Ok(count)
+}
+
 // ---- Renomear nota atualizando os [[wikilinks]] que apontam pra ela ----
 
 /// Reescreve o miolo de um wikilink ([[alvo|alias#h]]) trocando o stem antigo

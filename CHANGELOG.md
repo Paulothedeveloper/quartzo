@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.42.0 — 2026-06-27
+
+- **Menções não-linkadas mais ricas:** no painel de Backlinks, cada menção mostra o **termo destacado** (`<mark>`) no trecho e ganha um botão **“Linkar”** que converte a menção em `[[link]]` na nota de origem. Rust `link_mention(path, target_name)` envolve as ocorrências (palavra inteira, case-insensitive) em `[[ ]]`, **pulando wikilinks e código** (inline e cercado) já existentes; re-sincroniza a aba aberta não-suja. i18n PT/EN/ES.
+
 ## 0.41.0 — 2026-06-27
 
 - **Transclusão de notas (`![[Nota]]`):** o embed de uma nota `.md` agora renderiza o **conteúdo dela inline**, num cartão com borda accent + título clicável (abre a nota). `enhance` cria um placeholder `.q-embed` e `renderEmbedsIn` (pós-render) lê e renderiza o corpo (profundidade 1 — sem re-embutir, evita recursão). `embedNotePath` resolve só `.md` (exclui imagens/vídeo/pdf), reaproveitando `resolveWikilink` (inclui aliases). Setting `embedNotes` (default on) + toggle em **Configurações › Markdown**.
