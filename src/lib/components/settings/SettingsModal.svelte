@@ -93,7 +93,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.40.0");
+  let appVersion = $state("0.41.0");
   $effect(() => {
     try {
       getVersion()
@@ -895,6 +895,13 @@
                   $t("set.renderVideoDesc"),
                   $settings.renderVideo,
                   () => set("renderVideo", !$settings.renderVideo)
+                )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  $t("set.embedNotes"),
+                  $t("set.embedNotesDesc"),
+                  $settings.embedNotes,
+                  () => set("embedNotes", !$settings.embedNotes)
                 )}
                 <div class="divider"></div>
                 {@render toggleRow(

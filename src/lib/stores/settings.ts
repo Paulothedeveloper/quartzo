@@ -33,6 +33,7 @@ export interface Settings {
   renderMermaid: boolean; // diagramas ```mermaid
   renderQueries: boolean; // views dinâmicas ```query (tabela/kanban/tarefas)
   renderVideo: boolean; // player de revisão ```video + timecodes clicáveis
+  embedNotes: boolean; // transclusão: ![[Nota]] renderiza o conteúdo inline
   renderMath: boolean; // KaTeX $...$  (visual; sempre tokeniza, controla exibição)
   inlineColors: boolean; // swatch ao lado de #RRGGBB
   codeCopyButton: boolean; // botão copiar nos blocos de código
@@ -123,6 +124,7 @@ export const DEFAULT_SETTINGS: Settings = {
   renderMermaid: true,
   renderQueries: true,
   renderVideo: true,
+  embedNotes: true,
   renderMath: true,
   inlineColors: true,
   codeCopyButton: true,

@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.41.0 — 2026-06-27
+
+- **Transclusão de notas (`![[Nota]]`):** o embed de uma nota `.md` agora renderiza o **conteúdo dela inline**, num cartão com borda accent + título clicável (abre a nota). `enhance` cria um placeholder `.q-embed` e `renderEmbedsIn` (pós-render) lê e renderiza o corpo (profundidade 1 — sem re-embutir, evita recursão). `embedNotePath` resolve só `.md` (exclui imagens/vídeo/pdf), reaproveitando `resolveWikilink` (inclui aliases). Setting `embedNotes` (default on) + toggle em **Configurações › Markdown**.
+
 ## 0.40.0 — 2026-06-27
 
 - **Aliases de front-matter:** `aliases: [Apelido, Outro]` (ou escalar / lista em bloco) na nota faz `[[Apelido]]` resolver pra ela. Rust `build_alias_index` (parser `parse_aliases`/`frontmatter_block`) → store `aliasIndex` (carregado por vault + no vault-changed); `resolveWikilink` cai no alias após nome/caminho; **autocomplete de `[[`** também sugere os aliases (com `↪ nota`).

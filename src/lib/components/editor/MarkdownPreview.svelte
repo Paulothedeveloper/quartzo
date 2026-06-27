@@ -224,6 +224,7 @@
     html: string,
     opts: {
       embedSrc?: (t: string) => string | null;
+      embedNote?: (t: string) => string | null;
       relSrc?: (s: string) => string | null;
       inlineColors?: boolean;
       codeCopy?: boolean;
@@ -253,11 +254,19 @@
         while ((m = re.exec(text))) {
           const src = opts.embedSrc(m[1]);
           if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+          const notePath = !src && opts.embedNote ? opts.embedNote(m[1]) : null;
           if (src) {
             const img = document.createElement("img");
             img.src = src;
             img.loading = "lazy";
             frag.appendChild(img);
+          } else if (notePath) {
+            // Transclusão de nota: placeholder preenchido após o render (async).
+            const div = document.createElement("div");
+            div.className = "q-embed";
+            div.dataset.embedPath = notePath;
+            div.dataset.embedTarget = m[1];
+            frag.appendChild(div);
           } else {
             frag.appendChild(document.createTextNode(m[0]));
           }
@@ -418,7 +427,7 @@
 <script lang="ts">
   import { openUrl } from "@tauri-apps/plugin-opener";
   import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-  import { flatFiles } from "$lib/vault-actions";
+  import { flatFiles, resolveWikilink } from "$lib/vault-actions";
   import { settings } from "$lib/stores/settings";
   import { showToast } from "$lib/stores/toast";
   import { currentVaultPath } from "$lib/stores/vault";
@@ -478,6 +487,13 @@
       files.find((x) => x.path.replace(/\\/g, "/").toLowerCase().endsWith("/" + lc));
     const abs = f?.path ?? (notePath ? joinPath(noteDir(notePath), clean) : null);
     return abs ? safeSrc(abs) : null;
+  }
+  // ![[Nota]] -> caminho da nota (.md) para transclusão; null se for imagem/inexistente
+  function embedNotePath(target: string): string | null {
+    const clean = target.split("|")[0].split("#")[0].trim();
+    if (!clean || IMG_EXT.test(clean) || /\.(mp4|webm|m4v|mov|ogg|ogv|pdf)$/i.test(clean)) return null;
+    const p = resolveWikilink(clean);
+    return p && /\.md$/i.test(p) ? p : null;
   }
   // ![](sub/img.png) -> resolve relativo à nota atual
   function relSrc(src: string): string | null {
@@ -552,6 +568,7 @@
       }
       let out = enhance(marked.parse(body) as string, {
         embedSrc,
+        embedNote: $settings.embedNotes ? embedNotePath : undefined,
         relSrc,
         inlineColors: $settings.inlineColors,
         codeCopy: $settings.codeCopyButton,
@@ -566,12 +583,49 @@
     }
   });
 
+  // Preenche os embeds de nota ![[Nota]] (transclusão) após o HTML ir pro DOM.
+  // Profundidade 1: o conteúdo embutido NÃO re-embute notas (evita recursão).
+  async function renderEmbedsIn(root: HTMLElement) {
+    const nodes = Array.from(
+      root.querySelectorAll<HTMLElement>(".q-embed[data-embed-path]:not([data-done])")
+    );
+    for (const el of nodes) {
+      el.dataset.done = "1";
+      const path = el.dataset.embedPath ?? "";
+      const target = el.dataset.embedTarget ?? "";
+      const name = (path.split(/[\\/]/).pop() ?? target).replace(/\.md$/i, "");
+      const title = document.createElement("div");
+      title.className = "q-embed-title";
+      title.dataset.embedOpen = path;
+      title.textContent = name;
+      try {
+        const raw = await invoke<string>("read_file", { path });
+        const body = parseFrontmatter(raw).body;
+        const inner = enhance(marked.parse(body) as string, {
+          embedSrc,
+          relSrc,
+          inlineColors: $settings.inlineColors,
+          codeCopy: $settings.codeCopyButton,
+          codeLineNumbers: $settings.codeLineNumbers,
+          timecodes: false,
+        });
+        el.innerHTML = `<div class="q-embed-body">${inner}</div>`;
+      } catch {
+        el.innerHTML = `<div class="q-embed-body q-embed-missing">${escapeHtml(target)}</div>`;
+      }
+      el.prepend(title);
+    }
+  }
+
   // Renderiza os diagramas Mermaid depois que o HTML é injetado no DOM.
   $effect(() => {
     html; // dependência: re-renderiza ao mudar conteúdo
     const root = rootEl;
-    if (!root || !$settings.renderMermaid) return;
-    queueMicrotask(() => renderMermaidIn(root));
+    if (!root) return;
+    queueMicrotask(() => {
+      if ($settings.renderMermaid) renderMermaidIn(root);
+      if ($settings.embedNotes) renderEmbedsIn(root);
+    });
   });
 
   // Carrega o índice de consulta ao entrar num vault.
@@ -646,6 +700,14 @@
       }
       return; // deixa o checkbox alternar visualmente
     }
+    // Abrir a nota embutida (clique no título da transclusão)
+    const embedOpen = el.closest<HTMLElement>(".q-embed-title[data-embed-open]");
+    if (embedOpen) {
+      e.preventDefault();
+      onOpenPath?.(embedOpen.getAttribute("data-embed-open")!);
+      return;
+    }
+
     // Abrir nota a partir de uma view ```query
     const qopen = el.closest<HTMLElement>("[data-qopen]");
     if (qopen) {
@@ -719,6 +781,45 @@
 </div>
 
 <style>
+  /* Transclusão de nota ![[Nota]] */
+  :global(.q-prose .q-embed) {
+    margin: 1rem 0;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+    overflow: hidden;
+  }
+  :global(.q-prose .q-embed-title) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--color-accent-light);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    cursor: pointer;
+    user-select: none;
+  }
+  :global(.q-prose .q-embed-title)::before {
+    content: "❏";
+    opacity: 0.8;
+  }
+  :global(.q-prose .q-embed-title:hover) {
+    color: var(--color-text-primary);
+  }
+  :global(.q-prose .q-embed-body) {
+    padding: 2px 14px 8px;
+  }
+  :global(.q-prose .q-embed-body > :first-child) {
+    margin-top: 0.4rem;
+  }
+  :global(.q-prose .q-embed-missing) {
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
   .q-props {
     margin-bottom: 1.4rem;
     border: 1px solid var(--color-border);

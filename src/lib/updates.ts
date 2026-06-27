@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.41.0",
+    date: "2026-06-27",
+    items: [
+      "Embutir notas (transclusão): ![[Nota]] agora mostra o conteúdo daquela nota inline, dentro de um cartão — clique no título pra abrir. Liga/desliga em Configurações › Markdown.",
+    ],
+  },
+  {
     version: "0.40.0",
     date: "2026-06-27",
     items: [
