@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.45.0 — 2026-06-27
+
+- **Salvar na nuvem acessível (QuickSave):** botão de **nuvem na barra de título** (com **badge** do nº de alterações pendentes) + **Ctrl+S** + comando na paleta (`cloud-save`) abrem um **popover** ancorado no topo-direito — sem precisar abrir nota nem ir nas Configurações. O painel lista os arquivos alterados com **checkbox por arquivo** (etiqueta +/−/→/• por estado), **“Selecionar tudo”**, mensagem opcional e um botão que troca de rótulo: **“Salvar tudo na nuvem”** (tudo marcado) ou **“Salvar N na nuvem”** (subconjunto). Ao salvar, faz commit e, se houver remoto, **push automático** (toast “Salvo na nuvem”); sem remoto, salva local e avisa. Mostra estado do remoto (sincronizado / N pra enviar / botão **Receber N**) e oferece **Configurar versões** quando o vault ainda não é repo.
+- **Backend:** novo comando Rust `git_commit_files(vault, message, files)` — faz `git add -A -- <files>` + `git commit -m … -- <files>` (commit **seletivo**; inclui os dois lados de renomeios); com `files` vazio cai no `git add -A` (salvar tudo). Store `gitSync` (status + remoto) compartilhada pelo badge e pelo painel, atualizada ao abrir/trocar de vault e no `vault-changed`. i18n PT/EN/ES.
+
 ## 0.44.0 — 2026-06-27
 
 - **Configurações — layout:** a navegação lateral (Geral…Sobre) ganhou `overflow-y-auto` + `shrink-0` nos itens e o diálogo virou `h-[600px] max-h-[88vh]` — o **“Sobre” não fica mais colado na borda** e a lista rola direito em telas menores.

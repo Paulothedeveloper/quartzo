@@ -1189,6 +1189,39 @@ pub fn git_commit(vault: String, message: String) -> Result<String, String> {
     run_git(&vault, &["commit", "-m", &msg])
 }
 
+/// Salva uma versão SÓ dos arquivos escolhidos (git add <files> + commit -- <files>).
+/// Se `files` vier vazio, salva tudo (equivale ao git_commit). Os caminhos são
+/// relativos ao vault. Retorna a saída do commit.
+#[tauri::command]
+pub fn git_commit_files(
+    vault: String,
+    message: String,
+    files: Vec<String>,
+) -> Result<String, String> {
+    let msg = if message.trim().is_empty() {
+        "Versão do Quartzo".to_string()
+    } else {
+        message
+    };
+    // Sem seleção (ou tudo selecionado) → salva tudo, igual ao git_commit.
+    if files.is_empty() {
+        run_git(&vault, &["add", "-A"])?;
+        return run_git(&vault, &["commit", "-m", &msg]);
+    }
+    // Prepara os caminhos só dos escolhidos (inclui adições, edições e remoções).
+    let mut add_args: Vec<&str> = vec!["add", "-A", "--"];
+    for f in &files {
+        add_args.push(f.as_str());
+    }
+    run_git(&vault, &add_args)?;
+    // Commit limitado aos caminhos escolhidos (ignora o que houver staged fora deles).
+    let mut commit_args: Vec<&str> = vec!["commit", "-m", &msg, "--"];
+    for f in &files {
+        commit_args.push(f.as_str());
+    }
+    run_git(&vault, &commit_args)
+}
+
 #[derive(Serialize, Clone)]
 pub struct GitCommit {
     pub hash: String,

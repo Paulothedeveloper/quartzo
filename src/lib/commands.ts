@@ -28,6 +28,7 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "toggle-backlinks", label: "Backlinks", defaultCombo: "ctrl+shift+b" },
   { id: "toggle-outline", label: "Outline (cabeçalhos)", defaultCombo: "ctrl+shift+o" },
   { id: "toggle-git", label: "Versões (Git)", defaultCombo: "ctrl+shift+g" },
+  { id: "cloud-save", label: "Salvar na nuvem…", defaultCombo: "ctrl+s" },
   { id: "toggle-sidebar", label: "Recolher/expandir sidebar", defaultCombo: "ctrl+\\" },
   { id: "pick-color", label: "Conta-gotas (cor da tela)", hint: "cor" },
   { id: "extract-palette", label: "Extrair paleta de imagem…", hint: "cor" },

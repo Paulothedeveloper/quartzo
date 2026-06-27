@@ -21,6 +21,9 @@ export const outlineOpen = writable(false);
 /** Painel de Git / versões aberto. */
 export const gitOpen = writable(false);
 
+/** Popover "Salvar na nuvem" (escolher arquivos e enviar) aberto. */
+export const quickSaveOpen = writable(false);
+
 /** Caminho da nota aberta no painel lateral direito (split). null = fechado. */
 export const rightPane = writable<string | null>(null);
 

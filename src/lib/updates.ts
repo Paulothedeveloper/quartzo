@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.45.0",
+    date: "2026-06-27",
+    items: [
+      "Salvar na nuvem direto da barra de título: o botão de nuvem (com contador de alterações pendentes) abre um painel rápido — não precisa mais ir nas Configurações.",
+      "Escolha o que salvar: marque/desmarque os arquivos alterados ou clique em “Salvar tudo na nuvem” de uma vez. Mensagem opcional para a versão.",
+      "Atalho Ctrl+S abre o painel Salvar na nuvem. Ao salvar, envia ao remoto automaticamente (e mostra se há versões novas pra receber).",
+    ],
+  },
+  {
     version: "0.44.0",
     date: "2026-06-27",
     items: [

@@ -13,10 +13,12 @@
     Layers,
     ChevronLeft,
     ChevronRight,
+    CloudUpload,
   } from "@lucide/svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { currentVaultPath } from "$lib/stores/vault";
-  import { settingsOpen, searchRequest, memoryOpen, typePickerRequest, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
+  import { settingsOpen, searchRequest, memoryOpen, typePickerRequest, quickSaveOpen, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
+  import { gitSync } from "$lib/stores/gitsync";
   import { createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
   import { canBack, canForward, navBack, navForward } from "$lib/stores/nav";
   import { showToast } from "$lib/stores/toast";
@@ -111,6 +113,20 @@
 
   <!-- Ações à direita -->
   <div class="qactions">
+    {#if $currentVaultPath}
+      <button
+        class="qicon qcloud"
+        class:on={$quickSaveOpen}
+        onclick={() => quickSaveOpen.update((v) => !v)}
+        title={$t("save.tooltip")}
+        aria-label={$t("save.title")}
+      >
+        <CloudUpload size={16} />
+        {#if $gitSync.isRepo && $gitSync.changed.length > 0}
+          <span class="qbadge">{$gitSync.changed.length > 99 ? "99+" : $gitSync.changed.length}</span>
+        {/if}
+      </button>
+    {/if}
     <button class="qicon" class:on={pinned} onclick={togglePin} title={$t("titlebar.alwaysOnTop")}>
       <Pin size={16} />
     </button>
@@ -264,6 +280,26 @@
   .qicon.on {
     background: rgba(103, 232, 249, 0.15);
     color: var(--color-accent-light);
+  }
+  .qcloud {
+    position: relative;
+  }
+  .qbadge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    color: #06121a;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 0 0 2px var(--color-surface);
   }
   .qadd {
     display: flex;

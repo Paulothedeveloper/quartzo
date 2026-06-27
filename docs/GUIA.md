@@ -113,10 +113,16 @@ em **CSV**. Formato pesado (H.265/ProRes/.mov) não toca? Botão **Gerar proxy
 
 ## 7. Versões (Git) e nuvem
 
-- **Versões (Git)** — Ctrl+Shift+G: versiona o vault localmente. Veja alterações
-  (com **diff** por arquivo), salve versões, e — se houver remoto — **Enviar/Receber**
-  (push/pull). **Snapshot automático** salva sozinho a cada N minutos. (Precisa do
-  Git instalado.)
+- **Salvar na nuvem** — **Ctrl+S** ou o **botão de nuvem** na barra de título (mostra
+  um contador das alterações pendentes): abre um painel rápido onde você **marca os
+  arquivos** que quer salvar — ou clica em **“Salvar tudo na nuvem”** de uma vez. Dá
+  um nome opcional à versão e pronto: ele faz o commit e, se houver remoto, **envia
+  sozinho**. Também mostra se há versões novas pra **Receber**. (Não precisa abrir
+  nota nem ir nas Configurações.)
+- **Versões (Git)** — Ctrl+Shift+G: o painel completo. Veja alterações (com **diff**
+  por arquivo), histórico, Enviar/Receber e **Snapshot automático** (salva sozinho a
+  cada N minutos). É aqui que você **inicia o versionamento** num vault novo. (Precisa
+  do Git instalado.)
 - **Nuvem** (*Configurações › Nuvem*): mova o vault pra uma pasta do Google Drive/
   OneDrive para sincronizar entre máquinas.
 
@@ -154,6 +160,7 @@ Canvas, Git, etc.), **Atalhos** (todos reconfiguráveis).
 | Nova nota | `Ctrl+N` |
 | Fechar aba | `Ctrl+W` |
 | Voltar / Avançar | `Alt+←` / `Alt+→` |
+| Salvar na nuvem | `Ctrl+S` |
 | Favoritar nota | `Ctrl+Shift+S` |
 | Grafo | `Ctrl+G` |
 | Canvas | `Ctrl+Shift+C` |

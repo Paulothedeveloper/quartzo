@@ -10,6 +10,7 @@
   import BacklinksPane from "$lib/components/layout/BacklinksPane.svelte";
   import OutlinePane from "$lib/components/layout/OutlinePane.svelte";
   import GitPane from "$lib/components/layout/GitPane.svelte";
+  import QuickSave from "$lib/components/layout/QuickSave.svelte";
   import WelcomeScreen from "$lib/components/layout/WelcomeScreen.svelte";
   import Toast from "$lib/components/ui/Toast.svelte";
   import CommandPalette, { type Command } from "$lib/components/ui/CommandPalette.svelte";
@@ -44,8 +45,10 @@
     typePickerRequest,
     prismaPickerOpen,
     relinkOpen,
+    quickSaveOpen,
     rightPane,
   } from "$lib/stores/ui";
+  import { refreshGitSync } from "$lib/stores/gitsync";
   import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
   import { syncAutoSnapshot } from "$lib/git-auto";
   import { recordNav, navBack, navForward, loadBookmarks, toggleBookmark } from "$lib/stores/nav";
@@ -184,6 +187,12 @@
     untrack(() => loadAliasIndex(v));
   });
 
+  // Status de sincronização (badge da nuvem) — relê ao abrir/trocar de vault.
+  $effect(() => {
+    $currentVaultPath;
+    untrack(refreshGitSync);
+  });
+
   // Snapshot automático do Git: reagenda quando o toggle/intervalo muda.
   $effect(() => {
     $settings.gitAutoSnapshot;
@@ -226,6 +235,7 @@
         loadQueryIndex(get(currentVaultPath), true); // atualiza as views ```query
         loadAliasIndex(get(currentVaultPath)); // atualiza aliases (front-matter)
         clearBacklinkCache(); // invalida cache de backlinks (arquivos mudaram)
+        refreshGitSync(); // atualiza o badge "Salvar na nuvem"
       }, 300);
     }).then((u) => (unlisten = u));
     return () => unlisten?.();
@@ -366,6 +376,10 @@
     "toggle-backlinks": () => backlinksOpen.update((v) => !v),
     "toggle-outline": () => outlineOpen.update((v) => !v),
     "toggle-git": () => gitOpen.update((v) => !v),
+    "cloud-save": () => {
+      if (get(currentVaultPath)) quickSaveOpen.update((v) => !v);
+      else showToast(tr("toast.openVaultFirst"), "info");
+    },
     "toggle-sidebar": () => sidebarCollapsed.update((v) => !v),
     "pick-color": pickColorCmd,
     "extract-palette": extractPaletteCmd,
@@ -587,3 +601,4 @@
 <PrismaPicker />
 <VaultManager />
 <RelinkModal />
+<QuickSave />
