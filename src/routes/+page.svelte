@@ -50,7 +50,7 @@
   import { loadQueryIndex } from "$lib/query";
   import { clearBacklinkCache } from "$lib/backlink-cache";
   import { saveTabs } from "$lib/tab-persist";
-  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir } from "$lib/vault-actions";
+  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink } from "$lib/vault-actions";
   import { insertAtCursor } from "$lib/stores/editor";
   import { pickColor, extractPalette, paletteToMarkdown, eyedropperSupported } from "$lib/color";
   import { printNote, exportNoteHtml } from "$lib/export";
@@ -172,6 +172,21 @@
   $effect(() => {
     let unlisten: (() => void) | undefined;
     let timer: ReturnType<typeof setTimeout> | null = null;
+    listen("deeplink:open-note", (e) => {
+      const rel = String((e as { payload?: unknown }).payload ?? "");
+      if (!rel) return;
+      const hit = resolveWikilink(rel);
+      if (hit) {
+        openNote(hit);
+        return;
+      }
+      const vault = get(currentVaultPath);
+      if (vault) {
+        let abs = `${vault.replace(/[\\/]+$/, "")}/${rel.replace(/^[\\/]+/, "")}`.replace(/\\/g, "/");
+        if (!/\.md$/i.test(abs)) abs += ".md";
+        openNote(abs);
+      }
+    });
     listen("vault-changed", () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
@@ -275,6 +290,25 @@
     }
   }
 
+  // Copia um link quartzo://note/<caminho-relativo> da nota ativa (pra colar no PRISMA etc.).
+  function copyQuartzoLink() {
+    const vault = get(currentVaultPath);
+    const active = get(activeTabPath);
+    if (!vault || !active) {
+      showToast(tr("toast.openVaultFirst"), "info");
+      return;
+    }
+    const v = vault.replace(/\\/g, "/").replace(/\/+$/, "");
+    let rel = active.replace(/\\/g, "/");
+    if (rel.toLowerCase().startsWith(v.toLowerCase() + "/")) rel = rel.slice(v.length + 1);
+    rel = rel.replace(/\.md$/i, "");
+    const link = `quartzo://note/${encodeURI(rel)}`;
+    navigator.clipboard
+      .writeText(link)
+      .then(() => showToast(tr("toast.linkCopied"), "success"))
+      .catch(() => showToast(tr("toast.copyFail"), "error"));
+  }
+
   // Registro único: id -> ação. Alimenta a Paleta de comandos E os atalhos.
   const actionMap: Record<string, () => void> = {
     palette: () => (paletteOpen = true),
@@ -307,6 +341,7 @@
     "export-html": () => exportNoteHtml(get(activeTabPath)?.split(/[\\/]/).pop() ?? "nota"),
     settings: () => settingsOpen.update((v) => !v),
     "prisma-attach": () => prismaPickerOpen.set(true),
+    "copy-quartzo-link": copyQuartzoLink,
   };
 
   const commands = $derived<Command[]>([

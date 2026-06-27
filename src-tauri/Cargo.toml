@@ -1,6 +1,6 @@
 [package]
 name = "lumina"
-version = "0.31.0"
+version = "0.32.0"
 description = "Quartzo"
 authors = ["you"]
 edition = "2021"
@@ -27,3 +27,6 @@ notify = "8.2.0"
 trash = "5.2.6"
 # Leitura read-only do banco do PRISMA (DAM) p/ anexar mídia nas notas.
 rusqlite = { version = "0.32", features = ["bundled"] }
+# Deep link quartzo:// (PRISMA/qualquer app abre uma nota) + instância única.
+tauri-plugin-deep-link = "2"
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }

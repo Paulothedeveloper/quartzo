@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.32.0",
+    date: "2026-06-26",
+    items: [
+      "Deep link quartzo://nota: o PRISMA (ou qualquer app) pode abrir uma nota específica do Quartzo por link. Instância única — não abre duas janelas.",
+      "Comando “Copiar link da nota (quartzo://)” na paleta (Ctrl+K) — cole no PRISMA pra criar o vínculo de volta.",
+      "Integração PRISMA ↔ Quartzo agora completa nos dois sentidos.",
+    ],
+  },
+  {
     version: "0.31.0",
     date: "2026-06-26",
     items: [

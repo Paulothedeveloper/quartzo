@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.32.0 — 2026-06-26
+
+- **Deep link `quartzo://note/<caminho>`:** o PRISMA (ou qualquer app) abre uma nota específica do Quartzo por link. Plugins `tauri-plugin-deep-link` + `tauri-plugin-single-instance` (foco na instância existente, sem abrir 2 janelas); `register_all()` registra o esquema no SO; handler decodifica o caminho e emite `deeplink:open-note` → o front resolve e abre a nota. Esquema declarado no `tauri.conf` + capability `deep-link:default`.
+- **Comando “Copiar link da nota (quartzo://)”** (paleta Ctrl+K) — copia `quartzo://note/<rel>` da nota ativa pra colar no PRISMA. Fecha o ciclo: PRISMA→Quartzo (`prisma://asset`) e Quartzo→PRISMA (`quartzo://note`).
+
 ## 0.31.0 — 2026-06-26
 
 - **Integração PRISMA — Anexar mídia:** novo seletor (`PrismaPicker`) que lê o banco do PRISMA **read-only** (`%APPDATA%\com.paulo.prisma\prisma.db` via rusqlite) e lista os assets com miniatura/busca; ao escolher, insere na nota atual `[arquivo](prisma://asset/<id>) ([abrir arquivo](file:///…))`. Acionável pela **paleta (Ctrl+K)** e por **Configurações › Integrações › Anexar mídia…**. Rust: `prisma_db_present`, `prisma_search_assets`.

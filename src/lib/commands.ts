@@ -35,6 +35,7 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "export-html", label: "Exportar nota como HTML…", hint: "exportar" },
   { id: "settings", label: "Configurações", defaultCombo: "ctrl+," },
   { id: "prisma-attach", label: "Anexar mídia do PRISMA…", hint: "PRISMA" },
+  { id: "copy-quartzo-link", label: "Copiar link da nota (quartzo://)" },
 ];
 
 /** Atalhos padrão derivados dos comandos que têm defaultCombo. */
