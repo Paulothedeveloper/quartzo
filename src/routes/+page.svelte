@@ -17,6 +17,7 @@
   import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
   import HoverPreview from "$lib/components/ui/HoverPreview.svelte";
   import PrismaPicker from "$lib/components/ui/PrismaPicker.svelte";
+  import VaultManager from "$lib/components/ui/VaultManager.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -541,3 +542,4 @@
 <ConfirmDialog />
 <HoverPreview />
 <PrismaPicker />
+<VaultManager />

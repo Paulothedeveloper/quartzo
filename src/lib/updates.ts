@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.35.0",
+    date: "2026-06-27",
+    items: [
+      "Gerenciar vaults: no menu do nome do vault → “Gerenciar vaults…”, agora dá pra renomear (apelido) e remover vaults da lista. Remover NÃO apaga a pasta do disco.",
+      "O apelido aparece na barra lateral e no menu de troca de vault.",
+    ],
+  },
+  {
     version: "0.34.0",
     date: "2026-06-27",
     items: [

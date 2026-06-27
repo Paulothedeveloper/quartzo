@@ -255,4 +255,35 @@ export function addRecentVault(path: string) {
 export function removeRecentVault(path: string) {
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(VAULTS, JSON.stringify(getRecentVaults().filter((p) => p !== path)));
+  // remove também o rótulo customizado, se houver
+  const labels = getVaultLabels();
+  if (labels[path]) {
+    delete labels[path];
+    localStorage.setItem(VAULT_LABELS, JSON.stringify(labels));
+  }
+}
+
+// --- Rótulos (apelidos) customizados por vault ---
+const VAULT_LABELS = "quartzo:vaultLabels";
+export function getVaultLabels(): Record<string, string> {
+  if (typeof localStorage === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(VAULT_LABELS) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+/** Nome a exibir para um vault: apelido customizado ou o nome da pasta. */
+export function vaultLabel(path: string): string {
+  const custom = getVaultLabels()[path];
+  if (custom && custom.trim()) return custom.trim();
+  return path.split(/[\\/]/).filter(Boolean).pop() ?? path;
+}
+/** Define (ou limpa, se vazio) o apelido de um vault. */
+export function setVaultLabel(path: string, label: string) {
+  if (typeof localStorage === "undefined") return;
+  const labels = getVaultLabels();
+  if (label.trim()) labels[path] = label.trim();
+  else delete labels[path];
+  localStorage.setItem(VAULT_LABELS, JSON.stringify(labels));
 }

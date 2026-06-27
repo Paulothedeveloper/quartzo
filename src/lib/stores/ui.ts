@@ -52,6 +52,9 @@ export const typePickerRequest = writable(false);
 /** Abre o seletor de mídia do PRISMA (anexar asset à nota atual). */
 export const prismaPickerOpen = writable(false);
 
+/** Abre o gerenciador de vaults (renomear / remover da lista). */
+export const vaultManagerOpen = writable(false);
+
 /** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
 export interface HoverPreviewState {
   path: string;

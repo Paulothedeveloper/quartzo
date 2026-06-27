@@ -19,14 +19,15 @@
     Pencil,
     ExternalLink,
     ClipboardCopy,
+    Settings2,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
   import { invoke } from "@tauri-apps/api/core";
   import { currentVaultPath, fileTree } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
-  import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
-  import { getRecentVaults, settings } from "$lib/stores/settings";
+  import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, type CtxMenuItem } from "$lib/stores/ui";
+  import { getRecentVaults, vaultLabel, settings } from "$lib/stores/settings";
   import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir } from "$lib/vault-actions";
   import type { FileNode } from "$lib/types";
   import FileTree from "./FileTree.svelte";
@@ -38,7 +39,7 @@
 
   let search = $state("");
   const vaultName = $derived(
-    $currentVaultPath ? ($currentVaultPath.split(/[\\/]/).pop() ?? "VAULT") : "VAULT"
+    $currentVaultPath ? vaultLabel($currentVaultPath) : "VAULT"
   );
 
   async function openVault() {
@@ -85,7 +86,7 @@
     const recents = getRecentVaults();
     for (const v of recents) {
       items.push({
-        label: v.split(/[\\/]/).pop() ?? v,
+        label: vaultLabel(v),
         icon: v === current ? Check : QuartzIcon,
         action: () => {
           if (v !== current) setVault(v).then(() => showToast(tr("sidebar.vaultOpened"), "success"));
@@ -93,7 +94,10 @@
       });
     }
     if (recents.length) items.push({ separator: true });
-    items.push({ label: tr("vault.openOther"), icon: FolderPlus, action: openVault });
+    items.push(
+      { label: tr("vault.manage"), icon: Settings2, action: () => vaultManagerOpen.set(true) },
+      { label: tr("vault.openOther"), icon: FolderPlus, action: openVault },
+    );
     ctxMenu.set({ x: rect.left, y: rect.bottom + 4, items });
   }
 

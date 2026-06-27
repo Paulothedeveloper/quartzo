@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.35.0 — 2026-06-27
+
+- **Gerenciar vaults (renomear + remover):** no menu do nome do vault (canto da barra lateral) há uma entrada **“Gerenciar vaults…”** que abre um modal (`VaultManager.svelte`) listando todos os vaults salvos — cada um com **apelido editável** (rename) e **remover da lista** (não apaga a pasta do disco). Apelido persistido em `quartzo:vaultLabels` (`vaultLabel`/`setVaultLabel`), usado também na barra lateral e no menu de troca. `removeRecentVault` agora também limpa o apelido.
+
 ## 0.34.0 — 2026-06-27
 
 - **Segurança (auditoria):** corrigido **path traversal** no deep link `quartzo://note/…` — o fallback montava o caminho sem neutralizar `..`, permitindo que um link malicioso (`..%2f..%2f…`) abrisse arquivos **fora do vault**. Agora os segmentos `.`/`..`/vazios são removidos e o alvo fica sempre dentro do vault (`+page.svelte`).
