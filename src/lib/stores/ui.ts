@@ -49,6 +49,9 @@ export const searchRequest = writable<string | null>(null);
 /** Pedido de abrir o seletor de "nova nota de tipo" (disparado pelo + Adicionar). */
 export const typePickerRequest = writable(false);
 
+/** Abre o seletor de mídia do PRISMA (anexar asset à nota atual). */
+export const prismaPickerOpen = writable(false);
+
 /** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
 export interface HoverPreviewState {
   path: string;

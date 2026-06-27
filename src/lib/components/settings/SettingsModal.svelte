@@ -44,6 +44,7 @@
   const ACCENTS = ["#67e8f9", "#38bdf8", "#a78bfa", "#34d399", "#fbbf24", "#f472b6", "#f87171"];
   import { currentVaultPath } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
+  import { prismaPickerOpen } from "$lib/stores/ui";
   import { setVault, refreshTree } from "$lib/vault-actions";
   import { loadGraph } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
@@ -92,7 +93,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.30.0");
+  let appVersion = $state("0.31.0");
   $effect(() => {
     try {
       getVersion()
@@ -1114,6 +1115,28 @@
                     class="flex shrink-0 items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
                   >
                     <Boxes size={15} /> Abrir PRISMA
+                  </button>
+                </div>
+              </div>
+
+              <!-- Anexar mídia do PRISMA numa nota -->
+              <div class="card">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium">Anexar mídia do PRISMA</div>
+                    <div class="text-xs text-text-secondary">
+                      Insere na nota atual um link pra um asset da sua biblioteca (abre no PRISMA ou
+                      no arquivo). Também na paleta (Ctrl+K).
+                    </div>
+                  </div>
+                  <button
+                    onclick={() => {
+                      open = false;
+                      prismaPickerOpen.set(true);
+                    }}
+                    class="flex shrink-0 items-center gap-2 rounded-lg bg-elevated px-3 py-1.5 text-sm font-medium transition-all hover:bg-accent/15 hover:text-accent-light active:scale-[0.97]"
+                  >
+                    <Boxes size={15} /> Anexar mídia…
                   </button>
                 </div>
               </div>

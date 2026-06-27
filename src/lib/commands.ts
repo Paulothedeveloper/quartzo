@@ -34,6 +34,7 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "print-pdf", label: "Imprimir / Salvar como PDF", hint: "exportar" },
   { id: "export-html", label: "Exportar nota como HTML…", hint: "exportar" },
   { id: "settings", label: "Configurações", defaultCombo: "ctrl+," },
+  { id: "prisma-attach", label: "Anexar mídia do PRISMA…", hint: "PRISMA" },
 ];
 
 /** Atalhos padrão derivados dos comandos que têm defaultCombo. */

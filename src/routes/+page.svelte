@@ -16,6 +16,7 @@
   import ContextMenu from "$lib/components/ui/ContextMenu.svelte";
   import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
   import HoverPreview from "$lib/components/ui/HoverPreview.svelte";
+  import PrismaPicker from "$lib/components/ui/PrismaPicker.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -39,6 +40,7 @@
     gitOpen,
     searchRequest,
     typePickerRequest,
+    prismaPickerOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
@@ -304,6 +306,7 @@
     "print-pdf": printNote,
     "export-html": () => exportNoteHtml(get(activeTabPath)?.split(/[\\/]/).pop() ?? "nota"),
     settings: () => settingsOpen.update((v) => !v),
+    "prisma-attach": () => prismaPickerOpen.set(true),
   };
 
   const commands = $derived<Command[]>([
@@ -494,3 +497,4 @@
 <MemoryModal bind:open={$memoryOpen} />
 <ConfirmDialog />
 <HoverPreview />
+<PrismaPicker />

@@ -947,6 +947,81 @@ pub fn prisma_installed() -> bool {
     candidates.iter().any(|c| c.exists())
 }
 
+// ==================== PRISMA: anexar mídia (lê o DAM read-only) ====================
+
+/// Caminho do banco do PRISMA (%APPDATA%\com.paulo.prisma\prisma.db).
+fn prisma_db_file() -> Option<PathBuf> {
+    let appdata = std::env::var("APPDATA").ok()?;
+    let p = Path::new(&appdata).join("com.paulo.prisma").join("prisma.db");
+    if p.exists() {
+        Some(p)
+    } else {
+        None
+    }
+}
+
+/// Há um banco do PRISMA legível neste computador?
+#[tauri::command]
+pub fn prisma_db_present() -> bool {
+    prisma_db_file().is_some()
+}
+
+#[derive(Serialize, Clone)]
+pub struct PrismaAsset {
+    pub id: i64,
+    pub path: String,
+    pub filename: String,
+    pub ext: String,
+    pub kind: String, // type no banco (video/image/audio/...)
+    pub thumbnail: Option<String>,
+    pub duration: Option<f64>,
+    pub width: Option<i64>,
+    pub height: Option<i64>,
+}
+
+/// Busca assets no banco do PRISMA (read-only, seguro mesmo com o PRISMA aberto).
+/// `query` vazio = mais recentes. Filtra a lixeira (trashed=0).
+#[tauri::command]
+pub fn prisma_search_assets(query: String, limit: i64) -> Result<Vec<PrismaAsset>, String> {
+    let db = prisma_db_file().ok_or("Banco do PRISMA não encontrado")?;
+    let conn = rusqlite::Connection::open_with_flags(
+        &db,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+    )
+    .map_err(|e| format!("Não foi possível abrir o banco do PRISMA: {e}"))?;
+
+    let lim = limit.clamp(1, 200);
+    let q = query.trim().to_lowercase();
+    let sql = "SELECT id, path, filename, ext, type, thumbnail_path, duration, width, height \
+               FROM assets \
+               WHERE COALESCE(trashed,0)=0 AND (?1='' OR LOWER(filename) LIKE '%'||?1||'%') \
+               ORDER BY modified_at DESC LIMIT ?2";
+    let mut stmt = conn.prepare(sql).map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map(rusqlite::params![q, lim], |r| {
+            Ok(PrismaAsset {
+                id: r.get(0)?,
+                path: r.get(1)?,
+                filename: r.get(2)?,
+                ext: r.get(3)?,
+                kind: r.get(4)?,
+                thumbnail: r.get::<_, Option<String>>(5)?,
+                duration: r.get::<_, Option<f64>>(6)?,
+                width: r.get::<_, Option<i64>>(7)?,
+                height: r.get::<_, Option<i64>>(8)?,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+
+    let mut out = Vec::new();
+    for row in rows {
+        if let Ok(a) = row {
+            out.push(a);
+        }
+    }
+    Ok(out)
+}
+
 // ==================== GIT (versionamento local) ====================
 
 #[cfg(windows)]

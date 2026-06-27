@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.31.0 — 2026-06-26
+
+- **Integração PRISMA — Anexar mídia:** novo seletor (`PrismaPicker`) que lê o banco do PRISMA **read-only** (`%APPDATA%\com.paulo.prisma\prisma.db` via rusqlite) e lista os assets com miniatura/busca; ao escolher, insere na nota atual `[arquivo](prisma://asset/<id>) ([abrir arquivo](file:///…))`. Acionável pela **paleta (Ctrl+K)** e por **Configurações › Integrações › Anexar mídia…**. Rust: `prisma_db_present`, `prisma_search_assets`.
+- **Links de app clicáveis:** `prisma://` e `quartzo://` (além de `file:`/`mailto:`) agora abrem ao clicar dentro das notas (antes só `http/https`).
+
 ## 0.30.0 — 2026-06-26
 
 - **Zoom do grafo fluido:** o `onlyRenderVisibleElements` agora só liga em grafos **enormes (>800 nós)** — em grafos normais ele causava **mount/unmount de nós a cada passo de zoom** (o lag do zoom). Sem ele, o zoom é só um transform de GPU. Além disso, no **modo leve** o **emoji do nó não é renderizado** (centenas de glyphs re-rasterizando a cada nível de zoom era um custo grande); o nó vira um círculo chapado colorido. Pan/zoom bem mais suaves.

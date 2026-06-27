@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.31.0",
+    date: "2026-06-26",
+    items: [
+      "Integração PRISMA — Anexar mídia: na paleta (Ctrl+K) ou em Configurações › Integrações, busque na biblioteca do PRISMA e insira na nota um link para o asset (abre no PRISMA ou no arquivo).",
+      "Links prisma:// (e quartzo://) agora abrem ao clicar dentro das notas.",
+    ],
+  },
+  {
     version: "0.30.0",
     date: "2026-06-26",
     items: [

@@ -678,9 +678,11 @@
     const link = el.closest<HTMLAnchorElement>("a[href]");
     if (link) {
       const href = link.getAttribute("href") ?? "";
-      if (/^https?:/i.test(href)) {
+      // http/https + esquemas de apps do ecossistema (prisma://, quartzo://) e
+      // file:// → entrega ao SO (abre o navegador / o PRISMA / o arquivo).
+      if (/^(https?|prisma|quartzo|mailto|file):/i.test(href)) {
         e.preventDefault();
-        await openUrl(href);
+        await openUrl(href).catch(() => showToast("Não foi possível abrir o link", "error"));
       }
     }
   }

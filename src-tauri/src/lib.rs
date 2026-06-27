@@ -4,7 +4,8 @@ use commands::{
     build_graph_index, create_folder, create_note, daily_note, delete_to_trash, get_backlinks,
     build_query_index, copy_vault_to_cloud, create_note_full, detect_cloud_folders,
     get_unlinked_mentions, git_commit, git_diff, git_init, git_log, git_pull, git_push, git_remote,
-    git_status, launch_prisma, prisma_installed, ffmpeg_available, make_video_proxy,
+    git_status, launch_prisma, prisma_installed, prisma_db_present, prisma_search_assets,
+    ffmpeg_available, make_video_proxy,
     list_css_snippets, list_tags, read_directory, read_file, read_image_base64, rename_path,
     save_canvas_image, save_memory, search_notes, start_vault_watch, toggle_task, write_file,
     WatchState,
@@ -51,6 +52,8 @@ pub fn run() {
             create_note_full,
             launch_prisma,
             prisma_installed,
+            prisma_db_present,
+            prisma_search_assets,
             ffmpeg_available,
             make_video_proxy
         ])
