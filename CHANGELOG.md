@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.38.0 — 2026-06-27
+
+- **Buscar e substituir na nota:** `@codemirror/search` integrado — **Ctrl+F** abre o painel (buscar, substituir, substituir tudo, próximo/anterior, regex/case) no topo do editor, **tematizado** (dark/cristal) via `lumTheme`. Botão de lupa na barra do editor (`openSearchPanel`) e realce de ocorrências (`highlightSelectionMatches`). `searchKeymap` adicionado ao editor.
+
 ## 0.37.0 — 2026-06-27
 
 - **Renomear nota atualiza os links (refactor-safe):** ao renomear uma `.md`, o Rust `rename_note(vault, path, newName)` renomeia o arquivo **e varre todas as notas do vault** reescrevendo os `[[wikilinks]]`/`![[embeds]]` que apontavam pra ela — preservando **apelido** (`|alias`), **heading** (`#seção`) e **caminho** (`pasta/Nota`), sem falsos-positivos (`Velhote` não vira `Novote`). O front (`renameEntry`) usa `rename_note` para `.md` (e `rename_path` para pastas), re-sincroniza as abas abertas **não-sujas** (e atualiza o CodeMirror ativo ao vivo) pra a auto-gravação não sobrescrever a correção. Toast informa quantas notas foram atualizadas.

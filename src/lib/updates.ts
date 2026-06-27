@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.38.0",
+    date: "2026-06-27",
+    items: [
+      "Buscar e substituir DENTRO da nota: Ctrl+F abre o painel (com substituir, próximo/anterior, tudo), no estilo do app. Também há um botão de lupa na barra do editor.",
+    ],
+  },
+  {
     version: "0.37.0",
     date: "2026-06-27",
     items: [

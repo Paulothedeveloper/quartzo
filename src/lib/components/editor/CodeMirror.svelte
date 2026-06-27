@@ -21,6 +21,7 @@
     type Completion,
   } from "@codemirror/autocomplete";
   import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+  import { search, searchKeymap, highlightSelectionMatches } from "@codemirror/search";
   import { syntaxHighlighting, HighlightStyle, bracketMatching, indentUnit } from "@codemirror/language";
   import { markdown } from "@codemirror/lang-markdown";
   import { languages } from "@codemirror/language-data";
@@ -91,6 +92,34 @@
       backgroundColor: "var(--cm-sel)",
       textDecoration: "underline",
     },
+    // Painel de Buscar/Substituir (Ctrl+F) com a cara do app (dark/cristal)
+    ".cm-panels": {
+      backgroundColor: "var(--color-surface)",
+      color: "var(--cm-text)",
+      borderBottom: "1px solid var(--color-border)",
+    },
+    ".cm-panel.cm-search": { padding: "8px 10px", fontFamily: "var(--font-sans)" },
+    ".cm-panel.cm-search label": { fontSize: "12px", color: "var(--color-text-secondary)" },
+    ".cm-textfield": {
+      backgroundColor: "var(--color-elevated)",
+      color: "var(--cm-text)",
+      border: "1px solid var(--color-border)",
+      borderRadius: "7px",
+      padding: "3px 8px",
+    },
+    ".cm-textfield:focus": { outline: "none", borderColor: "var(--color-accent)" },
+    ".cm-button": {
+      backgroundColor: "var(--color-elevated)",
+      backgroundImage: "none",
+      color: "var(--cm-text)",
+      border: "1px solid var(--color-border)",
+      borderRadius: "7px",
+      padding: "3px 9px",
+    },
+    ".cm-button:hover": { backgroundColor: "var(--color-accent)", color: "#06121a" },
+    ".cm-search .cm-button": { marginLeft: "4px" },
+    ".cm-searchMatch": { backgroundColor: "rgba(103,232,249,0.22)" },
+    ".cm-searchMatch-selected": { backgroundColor: "rgba(103,232,249,0.5)" },
   });
 
   const lumHighlight = HighlightStyle.define([
@@ -252,9 +281,11 @@
       syntaxHighlighting(lumHighlight),
       wikiPlugin,
       lumTheme,
+      search({ top: true }),
+      highlightSelectionMatches(),
       contentMaxComp.of(contentMaxExt(s)),
       fontComp.of(fontTheme(s)),
-      keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+      keymap.of([...searchKeymap, ...defaultKeymap, ...historyKeymap, indentWithTab]),
       EditorView.domEventHandlers({
         mouseover(e) {
           const wl = (e.target as HTMLElement).closest?.(".cm-wikilink");

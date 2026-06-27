@@ -1,10 +1,11 @@
 <script lang="ts">
   import {
-    PenLine, Columns2, BookOpen, Check, Loader2, Link2, List, Printer,
+    PenLine, Columns2, BookOpen, Check, Loader2, Link2, List, Printer, Search,
     Bold, Italic, Strikethrough, Code, Quote, ListOrdered, ListChecks,
     Heading1, Heading2, Table, SquareCode, Image as ImageIcon, Minus, Link as LinkIcon, Lightbulb,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
+  import { openSearchPanel } from "@codemirror/search";
   import { printNote } from "$lib/export";
   import { insertAtCursor, wrapSelection, toggleLinePrefix, activeEditorView } from "$lib/stores/editor";
   import { get } from "svelte/store";
@@ -53,6 +54,15 @@
     if (!path) return;
     markContent(path, value, true);
     scheduleSave(path, value);
+  }
+
+  // Abre o painel de Buscar/Substituir do CodeMirror (Ctrl+F).
+  function openFind() {
+    const view = get(activeEditorView);
+    if (view) {
+      view.focus();
+      openSearchPanel(view);
+    }
   }
 
   // Aplica uma reescrita programática (ex.: editor de Propriedades).
@@ -164,6 +174,17 @@
             <Check size={13} class="text-success" /> {$t("editor.saved")}
           {/if}
         </span>
+      {/if}
+
+      <!-- Buscar / substituir na nota (Ctrl+F) -->
+      {#if mode !== "read"}
+        <button
+          onclick={openFind}
+          title={$t("editor.findReplace")}
+          class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+        >
+          <Search size={15} />
+        </button>
       {/if}
 
       <!-- Exportar / imprimir (PDF) -->

@@ -55,6 +55,7 @@ export const dict: Record<Locale, Record<string, string>> = {
     "editor.unsaved": "Não salvo",
     "editor.saved": "Salvo",
     "editor.printPdf": "Imprimir / Salvar como PDF",
+    "editor.findReplace": "Buscar / Substituir na nota (Ctrl+F)",
     "editor.noFileOpen": "Nenhum arquivo aberto",
     "editor.noFileOpenSub": "Selecione uma nota no explorer à esquerda",
     // propriedades (front-matter)
@@ -547,6 +548,7 @@ export const dict: Record<Locale, Record<string, string>> = {
     "editor.unsaved": "Unsaved",
     "editor.saved": "Saved",
     "editor.printPdf": "Print / Save as PDF",
+    "editor.findReplace": "Find / Replace in note (Ctrl+F)",
     "editor.noFileOpen": "No file open",
     "editor.noFileOpenSub": "Select a note in the explorer on the left",
     "props.title": "Properties",
@@ -1013,6 +1015,7 @@ export const dict: Record<Locale, Record<string, string>> = {
     "editor.unsaved": "Sin guardar",
     "editor.saved": "Guardado",
     "editor.printPdf": "Imprimir / Guardar como PDF",
+    "editor.findReplace": "Buscar / Reemplazar en la nota (Ctrl+F)",
     "editor.noFileOpen": "Ningún archivo abierto",
     "editor.noFileOpenSub": "Selecciona una nota en el explorador a la izquierda",
     "props.title": "Propiedades",
