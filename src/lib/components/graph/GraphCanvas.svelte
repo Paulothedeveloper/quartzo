@@ -181,6 +181,10 @@
   // dar pan/zoom) e congela o layout. Visual quase idêntico de longe, MUITO
   // mais fluido. Limiar por nº de nós OU de arestas.
   let liteMode = $state(false);
+  // Só ligamos o culling (onlyRenderVisibleElements) em grafos ENORMES: ele
+  // monta/desmonta nós a cada passo de zoom (causa lag no zoom). Em grafos
+  // normais, renderizar tudo e deixar o zoom ser só transform GPU é mais suave.
+  let veryLarge = $state(false);
   let activeGroup = $state<string | null>(null);
   let focusTarget = $state<{ ids: string[] | null; nonce: number }>({ ids: null, nonce: 0 });
 
@@ -270,6 +274,7 @@
 
     // Grafo grande -> modo leve (sem efeitos pesados) + layout congelado.
     liteMode = rNodes.length > 150 || valid.length > 300;
+    veryLarge = rNodes.length > 800; // só aí vale cular (senão atrapalha o zoom)
 
     // Centros de cluster por pasta, distribuídos num círculo (folders se agrupam).
     const groupList = [...new Set(rNodes.map((n) => n.group))].sort();
@@ -409,7 +414,7 @@
     maxZoom={4}
     nodesConnectable={false}
     elementsSelectable={true}
-    onlyRenderVisibleElements={true}
+    onlyRenderVisibleElements={veryLarge}
     defaultEdgeOptions={{ type: "bezier" }}
     onnodeclick={({ node }) => {
       if (node.type === "region") focusGroup((node.data as any).group as string);

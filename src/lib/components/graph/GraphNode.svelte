@@ -47,7 +47,7 @@
   <Handle type="target" position={Position.Top} class="ghandle" />
   <Handle type="source" position={Position.Bottom} class="ghandle" />
   <span class="neuron" style="width:{data.size}px;height:{data.size}px">
-    {#if icon}
+    {#if icon && !data.lite}
       <span class="gicon" style="font-size:{Math.max(data.size * 0.55, 6)}px">{icon}</span>
     {/if}
   </span>

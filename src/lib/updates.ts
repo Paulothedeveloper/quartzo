@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.30.0",
+    date: "2026-06-26",
+    items: [
+      "Zoom do grafo mais fluido: parei de montar/desmontar nós a cada passo de zoom (só faço isso em grafos enormes, >800 notas) e, no modo leve, os emojis dos nós não são redesenhados a cada nível de zoom.",
+    ],
+  },
+  {
     version: "0.29.0",
     date: "2026-06-26",
     items: [

@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.30.0 — 2026-06-26
+
+- **Zoom do grafo fluido:** o `onlyRenderVisibleElements` agora só liga em grafos **enormes (>800 nós)** — em grafos normais ele causava **mount/unmount de nós a cada passo de zoom** (o lag do zoom). Sem ele, o zoom é só um transform de GPU. Além disso, no **modo leve** o **emoji do nó não é renderizado** (centenas de glyphs re-rasterizando a cada nível de zoom era um custo grande); o nó vira um círculo chapado colorido. Pan/zoom bem mais suaves.
+
 ## 0.29.0 — 2026-06-26
 
 - **Grafo ainda mais suave (modo leve v2):** (1) arestas **retas** em vez de bezier (geometria muito mais barata); (2) o **rótulo** só entra no DOM quando o nó está **sob o cursor** (antes eram centenas de `<span>` sempre presentes); (3) o hover **não restiliza todas as arestas** (era O(arestas) a cada movimento do mouse) — ficam no estilo base; (4) `transition: none` nos nós (dim instantâneo). Pan/zoom e hover bem mais leves em grafos grandes.
