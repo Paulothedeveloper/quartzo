@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.48.0",
+    date: "2026-06-27",
+    items: [
+      "Órfãs e recentes: nova visão do vault (menu do vault ou Ctrl+K → “Órfãs e recentes”) com duas abas — Recentes (notas modificadas por último) e Órfãs (notas sem nenhum link de entrada ou saída).",
+      "Cada item abre a nota num clique e tem atalho rápido pra fixar no topo ou favoritar.",
+    ],
+  },
+  {
     version: "0.47.0",
     date: "2026-06-27",
     items: [

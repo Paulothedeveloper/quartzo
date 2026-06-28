@@ -439,6 +439,103 @@ pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
     Ok(GraphData { nodes, edges })
 }
 
+// ---- Visão do vault: notas órfãs + recentes ----
+
+#[derive(Serialize, Clone)]
+pub struct NoteInfo {
+    pub path: String,
+    pub name: String,
+    pub rel: String,
+    pub modified: u64,
+}
+#[derive(Serialize, Clone)]
+pub struct VaultInsights {
+    pub orphans: Vec<NoteInfo>,
+    pub recents: Vec<NoteInfo>,
+    pub total: usize,
+}
+
+/// Órfãs (nenhum link de entrada nem de saída) + recentes (por data de modificação).
+/// A resolução de links espelha a do grafo (por nome ou por caminho relativo).
+#[tauri::command]
+pub fn vault_insights(vault: String, recent_limit: usize) -> Result<VaultInsights, String> {
+    let root = Path::new(&vault);
+    if !root.is_dir() {
+        return Err(format!("Vault inválido: {vault}"));
+    }
+    let mut files = Vec::new();
+    collect_md(root, &mut files);
+
+    // mapas de resolução (iguais ao build_graph_index)
+    let mut by_stem: HashMap<String, String> = HashMap::new();
+    let mut by_relpath: HashMap<String, String> = HashMap::new();
+    for f in &files {
+        let full = f.to_string_lossy().to_string();
+        by_stem.entry(stem(f).to_lowercase()).or_insert_with(|| full.clone());
+        if let Ok(rel) = f.strip_prefix(root) {
+            let rel = rel.to_string_lossy().replace('\\', "/").to_lowercase();
+            let no_ext = rel.strip_suffix(".md").unwrap_or(&rel).to_string();
+            by_relpath.entry(rel).or_insert_with(|| full.clone());
+            by_relpath.entry(no_ext).or_insert_with(|| full.clone());
+        }
+    }
+
+    // grau total (entrada + saída) por caminho
+    let mut degree: HashMap<String, usize> = HashMap::new();
+    for f in &files {
+        degree.insert(f.to_string_lossy().to_string(), 0);
+    }
+    for f in &files {
+        let path_str = f.to_string_lossy().to_string();
+        let content = fs::read_to_string(f).unwrap_or_default();
+        for (target, _embed) in parse_links(&content) {
+            let resolved = if target.contains('/') {
+                let norm = target.replace('\\', "/");
+                let no_ext = norm.strip_suffix(".md").unwrap_or(&norm).to_string();
+                by_relpath.get(&no_ext).or_else(|| by_relpath.get(&norm))
+            } else {
+                by_stem.get(&target)
+            };
+            if let Some(tp) = resolved {
+                if *tp == path_str {
+                    continue;
+                }
+                *degree.entry(path_str.clone()).or_insert(0) += 1;
+                *degree.entry(tp.clone()).or_insert(0) += 1;
+            }
+        }
+    }
+
+    let info = |f: &PathBuf| -> NoteInfo {
+        let modified = fs::metadata(f)
+            .and_then(|m| m.modified())
+            .ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        let rel = f.strip_prefix(root).unwrap_or(f).to_string_lossy().replace('\\', "/");
+        NoteInfo {
+            path: f.to_string_lossy().to_string(),
+            name: f.file_name().and_then(|n| n.to_str()).unwrap_or("").to_string(),
+            rel,
+            modified,
+        }
+    };
+
+    let mut orphans: Vec<NoteInfo> = files
+        .iter()
+        .filter(|f| degree.get(&f.to_string_lossy().to_string()).copied().unwrap_or(0) == 0)
+        .map(info)
+        .collect();
+    orphans.sort_by(|a, b| a.rel.to_lowercase().cmp(&b.rel.to_lowercase()));
+
+    let mut recents: Vec<NoteInfo> = files.iter().map(info).collect();
+    recents.sort_by(|a, b| b.modified.cmp(&a.modified));
+    recents.truncate(if recent_limit == 0 { 25 } else { recent_limit });
+
+    Ok(VaultInsights { orphans, recents, total: files.len() })
+}
+
 // ==================== MEMÓRIAS DO CLAUDE ====================
 
 fn sanitize_filename(s: &str) -> String {

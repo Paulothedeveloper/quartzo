@@ -72,6 +72,9 @@ export const relinkOpen = writable(false);
 /** Abre o limpador de notas duplicadas (mesmo conteúdo). */
 export const duplicatesOpen = writable(false);
 
+/** Abre a visão do vault (notas órfãs + recentes). */
+export const insightsOpen = writable(false);
+
 /** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
 export interface HoverPreviewState {
   path: string;

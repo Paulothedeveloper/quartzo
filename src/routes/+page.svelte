@@ -22,6 +22,7 @@
   import VaultManager from "$lib/components/ui/VaultManager.svelte";
   import RelinkModal from "$lib/components/ui/RelinkModal.svelte";
   import DuplicatesModal from "$lib/components/ui/DuplicatesModal.svelte";
+  import InsightsModal from "$lib/components/ui/InsightsModal.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -49,6 +50,7 @@
     relinkOpen,
     quickSaveOpen,
     duplicatesOpen,
+    insightsOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { refreshGitSync } from "$lib/stores/gitsync";
@@ -403,6 +405,10 @@
       if (get(currentVaultPath)) duplicatesOpen.set(true);
       else showToast(tr("toast.openVaultFirst"), "info");
     },
+    "vault-insights": () => {
+      if (get(currentVaultPath)) insightsOpen.set(true);
+      else showToast(tr("toast.openVaultFirst"), "info");
+    },
   };
 
   const commands = $derived<Command[]>([
@@ -611,4 +617,5 @@
 <VaultManager />
 <RelinkModal />
 <DuplicatesModal />
+<InsightsModal />
 <QuickSave />

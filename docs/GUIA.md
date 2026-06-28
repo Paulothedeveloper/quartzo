@@ -31,6 +31,10 @@ menu do vault → **Notas duplicadas…** (ou **Ctrl+K** → "Notas duplicadas")
 acha notas com **conteúdo idêntico**, deixa a **mais antiga** marcada pra manter e
 manda as cópias pra **Lixeira** num clique (recuperável).
 
+**Órfãs e recentes:** menu do vault → **Órfãs e recentes…** (ou **Ctrl+K**). Duas
+abas: **Recentes** (modificadas por último) e **Órfãs** (notas sem nenhum link de
+entrada ou saída — ilhas pra revisar). Clique abre a nota; dá pra fixar/favoritar ali.
+
 **Clique-direito numa nota** (na árvore de arquivos): **Abrir**, **Abrir ao lado**,
 **Fixar no topo**, **Favoritar**, **Renomear**, **Copiar caminho**, **Mostrar na
 pasta** e **Apagar**. **Fixar no topo** põe a nota numa seção **Fixadas** no alto da

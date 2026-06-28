@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.48.0 — 2026-06-27
+
+- **Visão do vault — órfãs e recentes:** novo `InsightsModal` (store `insightsOpen`, no menu do vault "Órfãs e recentes…" + comando `vault-insights` na paleta), com **abas Recentes/Órfãs**. Rust `vault_insights(vault, recent_limit)` varre os `.md` (reusa `collect_md`+`parse_links`+resolução por nome/caminho do grafo), calcula **grau total** (entrada+saída) de cada nota → **órfã = grau 0**, e devolve as **recentes por mtime** (top 30) com `path/name/rel/modified` (structs `NoteInfo`/`VaultInsights`). A UI lista cada nota (pasta + data nas recentes; "sem links" nas órfãs), abre num clique e tem botões de **fixar/favoritar** no hover. i18n `insights.*` PT/EN/ES.
+
 ## 0.47.0 — 2026-06-27
 
 - **Limpar notas duplicadas:** novo `DuplicatesModal` (store `duplicatesOpen`, no menu do vault "Notas duplicadas…" + comando `find-duplicates` na paleta). Rust `find_duplicate_notes(vault)` varre os `.md` (reusa `collect_md`), normaliza CRLF→LF + `trim_end`, agrupa por hash (`fnv1a`) e devolve grupos com 2+ arquivos (mais antigo primeiro). A UI lista cada grupo com a **mais antiga preservada** (desmarcada) e as cópias **pré-marcadas** pra Lixeira; remove via `delete_to_trash`, tira das abas abertas e re-escaneia. i18n `dup.*` PT/EN/ES.
