@@ -3,6 +3,13 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.55.0 — 2026-06-27
+
+- **Criar vault (faltava!):** `createVault()` em vault-actions — `askPrompt` do nome + (desktop) diálogo de pasta-pai / (mobile) `appLocalDataDir` → `ensure_dir` (Rust, novo) → `setVault`. Botões na **WelcomeScreen** (Criar + Abrir), no **menu de vaults** (Sidebar) e comando `new-vault` na paleta. i18n PT/EN/ES.
+- **Tutorial de 1ª abertura:** `TutorialOverlay.svelte` (store `tutorialOpen`) — tour de 8 passos reaproveitando `tut.step1..8` (no mobile pula o passo 8 = PRISMA). Abre sozinho na 1ª vez (flag `quartzo:tutorialDone`), navegável (setas/dots/Esc), reabre pelo comando `show-tutorial`. Sem emoji (regra do Manual); ícones lucide.
+- **Tela de entrada responsiva:** `h1` com `clamp` + `line-height 1.18` (degradê não corta descendentes), `.welcome` com `overflow:auto`, media queries escalam o cristal em alturas ≤760/560, safe-area no conteúdo.
+- **Android utilizável:** vault no app-storage (`openMobileVault`/`ensure_dir`), sidebar vira gaveta (`mobileNavOpen` + hambúrguer), semáforo/voltar-avançar/resizer escondidos, safe-area (Android 15). `platform.ts` (isMobile). Release inclui **APK + AAB assinados**.
+
 ## 0.54.0 — 2026-06-27
 
 - **Documento premium (PDF + HTML):** reescrita do `EXPORT_CSS` com visual editorial — **corpo serifado** (Iowan/Palatino/Georgia) + **títulos sans** (Inter), **letterhead** ("✦ Quartzo" + data) e **rodapé** discreto (nome da nota · Quartzo) injetados no `standaloneDoc`, **H1** com régua em **degradê** teal→ciano, H2 com hairline, **tabelas estilo revista** (cabeçalho em caps/tracking, filetes finos, sem bordas externas), citações com barra ciano + leve fundo, código em cartão suave, `hr` como **✦** centralizado, imagens arredondadas com hairline, `print-color-adjust:exact` + `page-break-inside:avoid` em pre/tabela/img/callout. Vale igual pro PDF (impressão) e pro export HTML. Validado por render no navegador.

@@ -1,7 +1,10 @@
 import { get } from "svelte/store";
 import { invoke } from "@tauri-apps/api/core";
 import { appLocalDataDir, join } from "@tauri-apps/api/path";
+import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { askPrompt } from "$lib/stores/ui";
+import { isMobile } from "$lib/platform";
 import { fileTree, currentVaultPath } from "$lib/stores/vault";
 import { openTabs, activeTabPath } from "$lib/stores/tabs";
 import { showToast } from "$lib/stores/toast";
@@ -148,6 +151,39 @@ export async function openMobileVault(): Promise<void> {
   const vault = await join(base, "Quartzo");
   await invoke("ensure_dir", { path: vault });
   await setVault(vault);
+}
+
+/** Cria um vault NOVO (pasta vazia) e abre. Desktop: escolhe onde + nome.
+ *  Mobile: cria no armazenamento do app (não há seletor de pasta). */
+export async function createVault(): Promise<void> {
+  const raw = await askPrompt({
+    title: tr("vault.createTitle"),
+    message: tr("vault.createHint"),
+    placeholder: tr("vault.createPlaceholder"),
+    confirmLabel: tr("vault.create"),
+  });
+  if (raw == null) return;
+  const safe = raw.replace(/[\\/:*?"<>|]/g, "-").trim();
+  if (!safe) {
+    showToast(tr("vault.createInvalid"), "error");
+    return;
+  }
+  let parent: string;
+  if (isMobile) {
+    parent = await appLocalDataDir();
+  } else {
+    const sel = await openDialog({ directory: true, multiple: false, title: tr("vault.createPickParent") });
+    if (typeof sel !== "string") return;
+    parent = sel;
+  }
+  const path = await join(parent, safe);
+  try {
+    await invoke("ensure_dir", { path });
+    await setVault(path);
+    showToast(tr("vault.created", { name: safe }), "success");
+  } catch (e) {
+    showToast(`${e}`, "error");
+  }
 }
 
 /** Achata a árvore num array só de arquivos. */

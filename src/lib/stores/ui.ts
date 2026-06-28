@@ -81,6 +81,9 @@ export const insightsOpen = writable(false);
 /** Modo foco/zen: esconde toda a interface e centraliza só o editor. */
 export const zenMode = writable(false);
 
+/** Tela de tutorial (passo a passo) — abre sozinha na 1ª vez e pelo comando. */
+export const tutorialOpen = writable(false);
+
 /** Painel "Bases": monta tabelas/consultas globais do vault por UI. */
 export const basesOpen = writable(false);
 

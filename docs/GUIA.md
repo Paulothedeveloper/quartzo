@@ -11,9 +11,11 @@ preso no app. Este guia cobre os comandos e recursos principais.
 
 ## 1. Começando
 
-1. **Abrir vault**: clique em **Abrir vault** na tela inicial (ou no nome do vault
-   na barra lateral → *Abrir outra pasta…*). É só apontar pra uma pasta — o Quartzo
-   lê e escreve `.md` nela.
+1. **Criar ou abrir vault**: na tela inicial, **Criar vault** (cria uma pasta nova
+   e abre) ou **Abrir vault** (aponta pra uma pasta existente). Também no nome do
+   vault na barra lateral → *Criar vault…* / *Abrir outra pasta…*, ou no Ctrl+K. O
+   Quartzo lê e escreve `.md` na pasta.
+   - Na **1ª vez** aparece um **tour rápido** (8 passos). Reabra em Ctrl+K → *Ver tutorial*.
 2. **Nova nota**: botão **Nova nota** na barra lateral, ou **Ctrl+N**.
 3. **Escrever**: digite em Markdown. Salva sozinho.
 4. **Modos** (canto superior direito): **Editor** · **Dividido** · **Leitura**.

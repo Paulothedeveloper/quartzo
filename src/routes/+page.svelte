@@ -23,6 +23,7 @@
   import RelinkModal from "$lib/components/ui/RelinkModal.svelte";
   import DuplicatesModal from "$lib/components/ui/DuplicatesModal.svelte";
   import InsightsModal from "$lib/components/ui/InsightsModal.svelte";
+  import TutorialOverlay from "$lib/components/ui/TutorialOverlay.svelte";
   import BasesView from "$lib/components/ui/BasesView.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
@@ -55,6 +56,7 @@
     zenMode,
     basesOpen,
     mobileNavOpen,
+    tutorialOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { refreshGitSync } from "$lib/stores/gitsync";
@@ -67,7 +69,7 @@
   import { loadAliasIndex } from "$lib/stores/aliases";
   import { clearBacklinkCache } from "$lib/backlink-cache";
   import { saveTabs } from "$lib/tab-persist";
-  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink, openMobileVault } from "$lib/vault-actions";
+  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink, openMobileVault, createVault } from "$lib/vault-actions";
   import { isMobile } from "$lib/platform";
   import { insertAtCursor } from "$lib/stores/editor";
   import { pickColor, extractPalette, paletteToMarkdown, eyedropperSupported } from "$lib/color";
@@ -176,6 +178,19 @@
         } catch {
           /* vault sumiu */
         }
+      }
+    });
+  });
+
+  // Tutorial na 1ª abertura (uma vez; depois só pelo comando "Ver tutorial").
+  $effect(() => {
+    untrack(() => {
+      try {
+        if (!localStorage.getItem("quartzo:tutorialDone")) {
+          setTimeout(() => tutorialOpen.set(true), 700);
+        }
+      } catch {
+        /* ignora */
       }
     });
   });
@@ -380,6 +395,8 @@
     "quick-switch": () => (quickOpen = true),
     "global-search": () => { searchInitial = ""; searchOpen = true; },
     "open-vault": openVault,
+    "new-vault": createVault,
+    "show-tutorial": () => tutorialOpen.set(true),
     "new-note": () => {
       if (get(currentVaultPath)) createNoteIn(newNoteDir());
       else showToast(tr("toast.openVaultFirst"), "info");
@@ -632,7 +649,7 @@
       </div>
     {:else}
       <div class="q-view-in min-h-0 flex-1">
-        <WelcomeScreen onOpenVault={openVault} />
+        <WelcomeScreen onOpenVault={openVault} onCreateVault={createVault} />
       </div>
     {/if}
   </main>
@@ -667,6 +684,7 @@
 <DuplicatesModal />
 <InsightsModal />
 <BasesView />
+<TutorialOverlay />
 <QuickSave />
 
 {#if $zenMode}

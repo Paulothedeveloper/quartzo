@@ -35,7 +35,7 @@
   import { showToast } from "$lib/stores/toast";
   import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, duplicatesOpen, insightsOpen, basesOpen, askPrompt, askConfirm, type CtxMenuItem } from "$lib/stores/ui";
   import { getRecentVaults, vaultLabel, setVaultLabel, removeRecentVault, getVaultLabels, settings } from "$lib/stores/settings";
-  import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
+  import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote, createVault } from "$lib/vault-actions";
   import { bookmarks, toggleBookmark, pinned, togglePin } from "$lib/stores/nav";
   import type { FileNode } from "$lib/types";
   import FileTree from "./FileTree.svelte";
@@ -148,7 +148,8 @@
     }
     items.push(
       { label: tr("vault.manage"), icon: Settings2, action: () => vaultManagerOpen.set(true) },
-      { label: tr("vault.openOther"), icon: FolderPlus, action: openVault },
+      { label: tr("vault.create"), icon: FolderPlus, action: createVault },
+      { label: tr("vault.openOther"), icon: FolderOpen, action: openVault },
     );
     ctxMenu.set({ x: rect.left, y: rect.bottom + 4, items });
   }

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { FolderOpen } from "@lucide/svelte";
+  import { FolderOpen, FolderPlus } from "@lucide/svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { t } from "$lib/i18n";
 
-  let { onOpenVault }: { onOpenVault?: () => void } = $props();
+  let { onOpenVault, onCreateVault }: { onOpenVault?: () => void; onCreateVault?: () => void } = $props();
 
   // partículas brilhantes (posições/tamanhos/tempos fixos = determinístico)
   const particles = [
@@ -44,9 +44,14 @@
     </div>
     <h1>{$t("welcome.titlePrefix")} <span class="grad">Quartzo</span></h1>
     <p class="sub">{$t("welcome.subtitleLine1")}<br />{$t("welcome.subtitleLine2")}</p>
-    <button class="cta" onclick={() => onOpenVault?.()}>
-      <FolderOpen size={19} /> {$t("welcome.openVault")}
-    </button>
+    <div class="ctarow">
+      <button class="cta" onclick={() => onCreateVault?.()}>
+        <FolderPlus size={19} /> {$t("welcome.createVault")}
+      </button>
+      <button class="cta cta-ghost" onclick={() => onOpenVault?.()}>
+        <FolderOpen size={18} /> {$t("welcome.openVault")}
+      </button>
+    </div>
     <p class="hint">
       {$t("welcome.hintBefore")} <kbd>Ctrl</kbd><kbd>K</kbd> {$t("welcome.hintAfter")}
     </p>
@@ -190,11 +195,17 @@
     font-size: 1.05rem;
     line-height: 1.6;
   }
+  .ctarow {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    justify-content: center;
+  }
   .cta {
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    margin-top: 2rem;
     padding: 0.85rem 1.9rem;
     border-radius: 14px;
     font-size: 1rem;
@@ -218,6 +229,16 @@
   }
   .cta:active {
     transform: translateY(0) scale(0.98);
+  }
+  .cta-ghost {
+    background: transparent;
+    color: #cbd5e1;
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.4);
+  }
+  .cta-ghost:hover {
+    filter: none;
+    background: rgba(148, 163, 184, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(165, 243, 252, 0.6);
   }
   .hint {
     margin-top: 1.4rem;

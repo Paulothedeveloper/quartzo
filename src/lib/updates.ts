@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.55.0",
+    date: "2026-06-27",
+    items: [
+      "Criar vault: agora dá pra CRIAR um vault do zero (não só abrir um existente) — botão na tela inicial, no menu de vaults e no Ctrl+K. Escolhe onde + nome e já abre.",
+      "Tutorial na 1ª abertura: um tour rápido (8 passos) apresentando vault, notas, links, navegação, grafo/canvas e personalização. Reabre pelo Ctrl+K → “Ver tutorial”.",
+      "Tela de entrada corrigida: o título não é mais cortado; conteúdo se ajusta a janelas baixas e respeita as bordas no mobile.",
+      "Android: app utilizável no celular (vault no armazenamento do app, sidebar em gaveta, sem barra de janela, safe-area). APK + AAB no GitHub.",
+    ],
+  },
+  {
     version: "0.54.0",
     date: "2026-06-27",
     items: [
