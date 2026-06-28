@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.57.0",
+    date: "2026-06-28",
+    items: [
+      "Grafo com IMPULSOS sinápticos: pontos de luz viajam pelas conexões, como energia passando de uma nota pra outra (neurônios se comunicando). Feito pra NÃO travar — só alguns impulsos por vez, revezando; o resto fica parado. Continua a 60 fps.",
+      "Mais idiomas: agora são 5 — Português, English, Español, Français e Deutsch. Troque em Configurações › Geral.",
+      "App mobile mais nativo: lista de notas navega por pastas (entra/volta) com toque longo pra ações (favoritar, fixar, renomear, apagar); editor com barra de formatação que sobe junto com o teclado; busca em tela cheia; e as telas de Configurações/Bases/etc. agora ocupam a tela toda no celular (sem mais cara de desktop espremido).",
+      "Explorador: ordene os tópicos como quiser — A→Z, Z→A, aleatório ou MANUAL (arraste pra reposicionar; a ordem fica salva por vault). Botão de ordenação no topo da lista.",
+    ],
+  },
+  {
     version: "0.56.0",
     date: "2026-06-28",
     items: [

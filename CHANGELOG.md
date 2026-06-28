@@ -3,6 +3,13 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.57.0 — 2026-06-28
+
+- **Grafo — impulsos sinápticos (energia viajando pelas arestas):** novo custom edge `SynapseEdge` desenha, além do traço, um **impulso de luz** que viaja do nó de origem pro de destino via **SVG `animateMotion` (SMIL)** — animado pelo browser, fora da thread principal. **Anti-lag (a parte crítica):** só **~12-14 arestas pulsam por vez**, revezando a cada **~1.9s** (timer de baixa frequência); as demais ficam estáticas (zero repaint). Layout segue **congelado**. Duração/fase variam por hash do id (não sincronizam). Desliga no **modo leve** (grafos grandes) e com **"reduzir animações"** (`html.no-anim`). Medido (headless/software): **FPS ocioso COM os impulsos = 60** — não voltou ao loop. Visual base preservado.
+- **i18n — 5 idiomas:** adicionados **fr-FR** e **de-DE** (dicionário completo, **paridade exata de 622 chaves** com os demais). `Locale`/`LOCALES`/`detect()` atualizados. Agora: pt · en · es · fr · de.
+- **Mobile nativo (F1–F4):** `MobileNoteList` (navegação **drill-down** por pastas + **long-press → BottomSheet** de ações; cancela ao rolar), `MobileEditor` (casca própria + **barra de formatação acima do teclado** via `visualViewport`, com safe-area), `MobileSearch` (busca **full-screen** reusando `search_notes`), e **modais em tela cheia no mobile** (Configurações/Bases/Insights/Duplicadas/Memória) com a nav do Settings virando **abas no topo** (`qmodal-*`/`qsettings-*` + regras `html.mobile`). Reusa o conteúdo (CodeMirror/preview), casca de navegação própria — não é o desktop espremido.
+- **Explorador — ordenar/reordenar tópicos:** store `explorerSort` com modos **A→Z / Z→A / Aleatório / Manual** (persistido por vault) + **arrastar pra reposicionar** no modo manual (HTML5 DnD, ordem salva). Botão de ordenação no cabeçalho da lista. i18n `sort.*` nos 5 idiomas.
+
 ## 0.56.0 — 2026-06-28
 
 - **App mobile nativo (Fase A) — `MobileShell.svelte`:** no Android/iOS o `+page` renderiza a `MobileShell` no lugar do layout desktop (mesma lógica/stores/Rust). **Barra de abas inferior** (Notas/Buscar/Grafo/Mais), **lista de notas** com busca por nome (FileTree), **editor em tela cheia** ao tocar a nota (barra com voltar + nome; toolbar do desktop escondida via `html.mobile`), **FAB (+)** pra nova nota (posicionado acima da barra), aba **Grafo** (touch) e **Mais** (Nota do dia, Memória, Canvas, Rascunho, Bases, Órfãs, Duplicadas, Criar/Abrir/Gerenciar vault, Tutorial, Configurações). Tutorial com cópia mobile (`tutm.*`). i18n `mobile.*`. Não é mais o desktop em 9:16.
