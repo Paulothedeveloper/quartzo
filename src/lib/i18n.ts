@@ -1,12 +1,14 @@
 import { derived, get, writable } from "svelte/store";
 import { dict } from "./i18n-dict";
 
-export type Locale = "pt" | "en" | "es";
+export type Locale = "pt" | "en" | "es" | "fr" | "de";
 
 export const LOCALES: { id: Locale; label: string; flag: string }[] = [
   { id: "pt", label: "Português", flag: "🇧🇷" },
   { id: "en", label: "English", flag: "🇺🇸" },
   { id: "es", label: "Español", flag: "🇪🇸" },
+  { id: "fr", label: "Français", flag: "🇫🇷" },
+  { id: "de", label: "Deutsch", flag: "🇩🇪" },
 ];
 
 const KEY = "quartzo:locale";
@@ -14,12 +16,14 @@ const KEY = "quartzo:locale";
 function detect(): Locale {
   if (typeof localStorage !== "undefined") {
     const saved = localStorage.getItem(KEY);
-    if (saved === "pt" || saved === "en" || saved === "es") return saved;
+    if (saved === "pt" || saved === "en" || saved === "es" || saved === "fr" || saved === "de") return saved;
   }
   if (typeof navigator !== "undefined") {
     const n = (navigator.language || "").toLowerCase();
     if (n.startsWith("pt")) return "pt";
     if (n.startsWith("es")) return "es";
+    if (n.startsWith("fr")) return "fr";
+    if (n.startsWith("de")) return "de";
     if (n.startsWith("en")) return "en";
   }
   return "pt";
