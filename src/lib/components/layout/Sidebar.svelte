@@ -228,6 +228,7 @@
 
   // Menu de ordenação do explorador (A→Z, Z→A, aleatório, manual).
   function openSortMenu(e: MouseEvent) {
+    e.stopPropagation(); // senão o mesmo clique sobe à window e fecha o menu na hora
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const cur = get(sortMode);
     const mk = (id: SortMode, label: string, icon: any): CtxMenuItem => ({
