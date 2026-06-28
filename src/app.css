@@ -246,51 +246,8 @@ html.theme-light .callout-quote .callout-title { color: #475569; }
 }
 
 /* ==================== IMPRESSÃO / PDF ==================== */
-@page {
-  margin: 1.6cm;
-}
-@media print {
-  body.q-printing * {
-    visibility: hidden !important;
-  }
-  body.q-printing .q-prose,
-  body.q-printing .q-prose * {
-    visibility: visible !important;
-  }
-  body.q-printing .q-prose {
-    position: absolute;
-    inset: 0;
-    height: auto;
-    max-width: 100% !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    color: #1f2733 !important;
-    background: #fff !important;
-  }
-  body.q-printing .q-prose h1,
-  body.q-printing .q-prose h2,
-  body.q-printing .q-prose h3,
-  body.q-printing .q-prose h4,
-  body.q-printing .q-prose strong {
-    color: #0f172a !important;
-  }
-  body.q-printing .q-prose a,
-  body.q-printing .q-prose .wikilink {
-    color: #0e7490 !important;
-  }
-  body.q-printing .q-prose pre {
-    background: #f1f5f9 !important;
-    border-color: #e2e8f0 !important;
-  }
-  body.q-printing .q-prose :not(pre) > code {
-    background: #eef2f7 !important;
-    color: #be123c !important;
-  }
-  body.q-printing .q-code-copy,
-  body.q-printing .q-ln-gutter {
-    display: none !important;
-  }
-}
+/* A impressão usa um documento isolado (iframe) montado em export.ts (printNote),
+   com CSS próprio — sem o layout do app vazar. Por isso não há regras .q-printing aqui. */
 
 /* Handle de redimensionar a barra lateral */
 .q-resizer {

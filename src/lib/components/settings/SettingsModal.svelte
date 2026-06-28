@@ -93,7 +93,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.52.0");
+  let appVersion = $state("0.53.0");
   $effect(() => {
     try {
       getVersion()

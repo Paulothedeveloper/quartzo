@@ -11,20 +11,73 @@ function activeProse(): HTMLElement | null {
   return document.querySelector<HTMLElement>(".q-prose");
 }
 
-/** Imprime/salva a nota como PDF (usa o diálogo do sistema; escolha "Salvar como PDF"). */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function noteTitle(): string {
+  return (get(activeTabPath)?.split(/[\\/]/).pop() ?? "nota").replace(/\.md$/i, "");
+}
+
+/** Documento HTML autônomo (limpo, claro, centralizado) a partir do conteúdo renderizado. */
+function standaloneDoc(innerHTML: string, title: string): string {
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>${EXPORT_CSS}
+@page { margin: 16mm; }
+@media print { html, body { background: #fff; } .wrap { max-width: 100%; margin: 0; padding: 0; } }
+</style>
+</head>
+<body><div class="wrap">${innerHTML}</div></body>
+</html>`;
+}
+
+/** Imprime/salva a nota como PDF num documento ISOLADO (iframe) — sem o layout do app
+ *  vazar, com o título certo. Use o diálogo do sistema e escolha "Salvar como PDF". */
 export function printNote() {
-  if (!activeProse()) {
-    showToast("Abra a nota em Leitura ou Dividido para exportar", "info");
+  const prose = activeProse();
+  if (!prose) {
+    showToast(tr("export.openReadingFirst"), "info");
     return;
   }
-  const done = () => {
-    document.body.classList.remove("q-printing");
-    window.removeEventListener("afterprint", done);
+  const clone = prose.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll(".q-code-copy, .q-ln-gutter").forEach((e) => e.remove());
+  const doc = standaloneDoc(clone.innerHTML, noteTitle());
+
+  const iframe = document.createElement("iframe");
+  iframe.setAttribute("aria-hidden", "true");
+  iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+  document.body.appendChild(iframe);
+  const cw = iframe.contentWindow;
+  const idoc = cw?.document;
+  if (!cw || !idoc) {
+    iframe.remove();
+    return;
+  }
+  idoc.open();
+  idoc.write(doc);
+  idoc.close();
+  const go = () => {
+    try {
+      cw.focus();
+      cw.print();
+    } catch {
+      /* ignora */
+    } finally {
+      setTimeout(() => iframe.remove(), 1500);
+    }
   };
-  window.addEventListener("afterprint", done);
-  document.body.classList.add("q-printing");
-  // pequeno atraso garante que o CSS de impressão aplicou
-  setTimeout(() => window.print(), 60);
+  // espera o documento (e imagens) montarem
+  if (idoc.readyState === "complete") setTimeout(go, 300);
+  else iframe.onload = () => setTimeout(go, 300);
 }
 
 const EXPORT_CSS = `
@@ -56,23 +109,13 @@ const EXPORT_CSS = `
 export async function exportNoteHtml(name: string) {
   const prose = activeProse();
   if (!prose) {
-    showToast("Abra a nota em Leitura ou Dividido para exportar", "info");
+    showToast(tr("export.openReadingFirst"), "info");
     return;
   }
   const clone = prose.cloneNode(true) as HTMLElement;
   clone.querySelectorAll(".q-code-copy, .q-ln-gutter").forEach((e) => e.remove());
   const title = (name || "nota").replace(/\.md$/i, "");
-  const doc = `<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title}</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<style>${EXPORT_CSS}</style>
-</head>
-<body><div class="wrap">${clone.innerHTML}</div></body>
-</html>`;
+  const doc = standaloneDoc(clone.innerHTML, title);
   try {
     const path = await save({
       defaultPath: `${title}.html`,

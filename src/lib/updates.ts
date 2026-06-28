@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.53.0",
+    date: "2026-06-27",
+    items: [
+      "PDF/Impressão corrigidos: antes o PDF saía com o conteúdo jogado pra um lado e o título errado (“Tauri + SvelteKit…”). Agora a impressão usa um documento isolado e limpo, com o texto ocupando a página inteira e o título igual ao nome da nota.",
+    ],
+  },
+  {
     version: "0.52.0",
     date: "2026-06-27",
     items: [
