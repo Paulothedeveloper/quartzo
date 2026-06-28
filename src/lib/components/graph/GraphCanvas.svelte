@@ -154,14 +154,18 @@
     return [...cachedRegions, ...noteNodes];
   }
 
-  // Arrastar um nó: fixa no ponteiro e reaquece a simulação (vizinhos reagem).
+  // Arrastar um nó: fixa no ponteiro. Se a física contínua estiver ligada,
+  // reaquece a simulação de leve (vizinhos reagem) — e ela esfria/para sozinha
+  // ao soltar. Se estiver desligada, o SvelteFlow move só aquele nó (sem loop).
+  let dragWarm = false;
   function onDragStart(node: Node | null) {
     if (!sim || !node) return;
     const s = simById.get(node.id);
     if (!s) return;
     s.fx = node.position.x;
     s.fy = node.position.y;
-    sim.alphaTarget(0.3).restart();
+    dragWarm = get(settings).graphContinuous && !liteMode;
+    if (dragWarm) sim.alphaTarget(0.3).restart();
   }
   function onDrag(node: Node | null) {
     if (!sim || !node) return;
@@ -169,15 +173,25 @@
     if (!s) return;
     s.fx = node.position.x;
     s.fy = node.position.y;
+    // Sem reaquecimento: acompanha o nó na hora (sim parado, sem ticks).
+    if (!dragWarm) {
+      s.x = node.position.x;
+      s.y = node.position.y;
+      nodes = buildNodes(posFromSim(), false);
+    }
   }
   function onDragStop(node: Node | null) {
     if (!node) return;
     const s = simById.get(node.id);
     if (s) {
+      // Mantém a posição solta (evita "snap back" num rebuild futuro).
+      s.x = node.position.x;
+      s.y = node.position.y;
       s.fx = null;
       s.fy = null;
     }
-    sim?.alphaTarget(0);
+    if (dragWarm) sim?.alphaTarget(0); // deixa esfriar até parar (on "end")
+    dragWarm = false;
   }
 
   const gview = $state<GraphState>({ hoveredId: null, matched: null });
@@ -226,25 +240,30 @@
       let opacity: number;
       let stroke = "rgba(103,232,249,0.38)"; // sinapse: ciano suave
       let width = 0.9;
+      // "strong" = aresta em destaque (incidente ao hover, ou dentro do filtro).
+      let strong = false;
       if (h !== null) {
-        const strong = e.source === h || e.target === h;
+        strong = e.source === h || e.target === h;
         opacity = strong ? 1 : 0.04;
         if (strong) {
           stroke = "#67e8f9";
           width = 2.2;
         }
       } else if (matched) {
-        const on = matched.has(e.source) && matched.has(e.target);
-        opacity = on ? 0.9 : 0.04;
-        if (on) {
+        strong = matched.has(e.source) && matched.has(e.target);
+        opacity = strong ? 0.9 : 0.04;
+        if (strong) {
           stroke = "#67e8f9";
           width = 1.8;
         }
       } else {
         opacity = 0.5;
       }
-      // No modo leve, sem glow nem animação de "desenho" (caros em massa).
-      const glow = liteMode ? "" : "filter:drop-shadow(0 0 1px rgba(103,232,249,0.5));";
+      // Glow (filtro SVG) é o que mais trava no pan/zoom quando aplicado em
+      // TODAS as arestas — re-rasteriza cada path a cada frame. Agora só as
+      // arestas DESTACADAS recebem glow (poucas); as demais ficam só com o
+      // traço ciano (composita na GPU, sem repaint). Visual idêntico de longe.
+      const glow = strong && !liteMode ? "filter:drop-shadow(0 0 2px rgba(103,232,249,0.8));" : "";
       const draw =
         drawOnce && !liteMode
           ? "stroke-dasharray:8000;stroke-dashoffset:8000;animation:edge-draw 0.9s var(--ease-out,ease) forwards;"
@@ -332,59 +351,54 @@
       type: liteMode ? "straight" : "bezier",
     }));
 
-    // Contínuo só em grafos pequenos (≤150 nós): a simulação roda ao vivo, os
-    // nós se acomodam e reagem ao arraste. Acima disso, congela (fica fluido).
-    const continuous = get(settings).graphContinuous && !liteMode;
-    if (continuous) {
-      sim = s;
-      tickCount = 0;
-      let fitPending = true;
-      s.alphaDecay(0.035);
-      s.on("tick", () => {
-        tickCount++;
-        // Lobos (caro) só a cada 6 ticks; notas (posições) a cada tick.
-        nodes = buildNodes(posFromSim(), tickCount % 6 === 0);
-      });
-      s.on("end", () => {
-        nodes = buildNodes(posFromSim(), true); // acerta os lobos no repouso
-        // enquadra uma única vez quando a 1ª acomodação termina (não a cada arraste)
-        if (fitPending && activeGroup === null) {
-          fitPending = false;
-          focusTarget = { ids: null, nonce: focusTarget.nonce + 1 };
-        }
-      });
+    // ===== LAYOUT SEMPRE CONGELADO (pan/zoom liso) =====
+    // A física ao VIVO era a causa do travamento: ela reconciliava os ~100 nós
+    // pelo SvelteFlow ~60x/s por vários segundos ao abrir (e em máquina com
+    // throttle térmico isso vira lag permanente). Agora o layout é pré-computado
+    // e CONGELA — idêntico no visual, mas sem loop de repaint. A simulação só
+    // reaquece de leve ao ARRASTAR um nó (se ligado nas configs) e esfria/para
+    // sozinha ao soltar. `sim` fica disponível (parado) para isso.
+    sim = s;
+    tickCount = 0;
+    s.alphaDecay(0.06); // se reaquecer (arraste), esfria rápido e PARA
+    // O "tick" só dispara pelo timer interno do d3 — ou seja, apenas durante o
+    // reaquecimento por arraste. No pré-cálculo abaixo usamos s.tick() manual,
+    // que NÃO emite "tick"/"end" (não cria loop).
+    s.on("tick", () => {
+      tickCount++;
+      nodes = buildNodes(posFromSim(), tickCount % 6 === 0); // lobos a cada 6
+    });
+    s.on("end", () => {
+      nodes = buildNodes(posFromSim(), true); // acerta os lobos ao repousar
+    });
+
+    const settleAndFreeze = () => {
+      s.stop(); // garante que não há timer rodando -> nada anima parado
       nodes = buildNodes(posFromSim(), true);
       applyEdgeStyles();
-      s.alpha(1).restart();
+      focusTarget = { ids: null, nonce: focusTarget.nonce + 1 }; // enquadra 1x
+    };
+
+    if (rNodes.length > 300) {
+      // GRANDE: pré-computa em LOTES via requestAnimationFrame pra NÃO congelar
+      // a thread principal (era o "travar" ao abrir vault grande).
+      const total = rNodes.length > 1500 ? 160 : rNodes.length > 800 ? 230 : 320;
+      const myGen = layoutGen;
+      let done = 0;
+      // posições parciais enquanto pré-calcula (feedback), sem emitir "tick"
+      const run = () => {
+        if (myGen !== layoutGen) return; // dados recarregaram -> aborta
+        const batch = Math.min(25, total - done);
+        for (let k = 0; k < batch; k++) s.tick();
+        done += batch;
+        if (done >= total) settleAndFreeze();
+        else requestAnimationFrame(run);
+      };
+      run();
     } else {
-      // Pré-computa e congela (grafos grandes ou física contínua desligada).
-      s.stop();
-      if (rNodes.length > 300) {
-        // GRANDE: roda os ticks em LOTES via requestAnimationFrame pra NÃO
-        // congelar a thread principal (era o "travar" ao abrir vault grande).
-        const total = rNodes.length > 1500 ? 160 : rNodes.length > 800 ? 230 : 320;
-        const myGen = layoutGen;
-        let done = 0;
-        const run = () => {
-          if (myGen !== layoutGen) return; // dados recarregaram -> aborta
-          const batch = Math.min(25, total - done);
-          for (let k = 0; k < batch; k++) s.tick();
-          done += batch;
-          if (done >= total) {
-            nodes = buildNodes(posFromSim(), true);
-            applyEdgeStyles();
-            focusTarget = { ids: null, nonce: focusTarget.nonce + 1 }; // enquadra ao fim
-          } else {
-            requestAnimationFrame(run);
-          }
-        };
-        run();
-      } else {
-        const ticks = 460;
-        for (let i = 0; i < ticks; i++) s.tick();
-        nodes = buildNodes(posFromSim(), true);
-        applyEdgeStyles();
-      }
+      // Pequeno/médio: pré-computa de uma vez (rápido) e congela.
+      for (let i = 0; i < 460; i++) s.tick();
+      settleAndFreeze();
     }
   }
 
@@ -551,9 +565,15 @@
   .graph-wrap :global(.svelte-flow) {
     background-color: #0a0f1c;
   }
-  /* arestas com leve brilho cristalino (as destacadas ficam mais fortes pelo stroke) */
+  /* promove o viewport a uma camada própria de GPU: o pan vira um translate
+     composto (sem repaint dos nós/arestas). Não muda nada visual. */
+  .graph-wrap :global(.svelte-flow__viewport) {
+    will-change: transform;
+  }
+  /* arestas: SEM filtro SVG no estado base (filtro em massa re-rasteriza a cada
+     frame de pan/zoom = o maior travamento). O brilho fica só nas destacadas,
+     aplicado inline via JS (poucas por vez). Aqui só a transição do traço. */
   .graph-wrap :global(.svelte-flow__edge-path) {
-    filter: drop-shadow(0 0 2.5px rgba(103, 232, 249, 0.35));
     transition: stroke 0.22s var(--ease-out, ease), stroke-width 0.22s var(--ease-out, ease);
   }
   .graph-wrap :global(.svelte-flow__minimap) {

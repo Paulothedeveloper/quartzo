@@ -16,7 +16,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-06-28",
     items: [
       "App mobile DE VERDADE (não mais o desktop espremido): barra de abas embaixo (Notas, Buscar, Grafo, Mais), lista de notas com busca, editor em tela cheia ao abrir a nota e botão flutuante (+) pra criar. Ícone de cristal no app.",
-      "Grafo otimizado pra vaults grandes: o layout agora é calculado em lotes (não trava mais ao abrir um vault com muitas notas) e só desenha o que está visível mais cedo — pan e zoom bem mais fluidos.",
+      "Grafo: travamento eliminado de vez. A física ficava rodando ao vivo o tempo todo (o grafo repintava mesmo parado, sem você mexer) — agora o layout abre pronto e CONGELA, então pan e zoom ficam lisos. A física só reage de leve quando você ARRASTA um nó (e para sozinha ao soltar). Mesmo visual, muito mais fluido.",
       "Menu de vaults mostra o caminho embaixo do nome (distingue vaults com o mesmo nome em pastas diferentes) e a lista atualiza na hora ao remover/renomear.",
       "Salvar todos os vaults de uma vez na nuvem: novo botão em Configurações › Nuvem (commit + push em cada vault com repositório/remoto), além do salvar individual.",
       "Ícone do app (logo de cristal) aplicado no Android.",
