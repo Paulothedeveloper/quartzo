@@ -439,16 +439,7 @@ pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
     Ok(GraphData { nodes, edges })
 }
 
-// ---- Exportar com Pandoc (DOCX/PDF/ODT…) ----
-
-/// Pandoc está instalado no PATH?
-#[tauri::command]
-pub fn pandoc_available() -> bool {
-    let mut cmd = Command::new("pandoc");
-    cmd.arg("--version");
-    no_window(&mut cmd);
-    cmd.output().map(|o| o.status.success()).unwrap_or(false)
-}
+// ---- Exportar DOCX (gerador nativo, sem ferramentas externas) ----
 
 fn leaf_name(s: &str) -> String {
     s.rsplit(['/', '\\']).next().unwrap_or(s).trim().to_string()
@@ -519,9 +510,10 @@ fn expand_md(content: &str, by_stem: &HashMap<String, String>, depth: u8) -> Str
     out
 }
 
-/// Exporta a nota (achatada) via Pandoc. O formato é inferido pela extensão do `dest`.
+/// Exporta a nota como **.docx** usando o gerador nativo (sem apps externos).
+/// Achata a nota (expande embeds, troca wikilinks por texto) e gera o OOXML.
 #[tauri::command]
-pub fn export_pandoc(vault: String, note_path: String, dest: String) -> Result<(), String> {
+pub fn export_docx(vault: String, note_path: String, dest: String) -> Result<(), String> {
     let note = Path::new(&note_path);
     let content = fs::read_to_string(note).map_err(|e| e.to_string())?;
 
@@ -536,30 +528,12 @@ pub fn export_pandoc(vault: String, note_path: String, dest: String) -> Result<(
     }
 
     let flat = expand_md(&strip_frontmatter(&content), &by_stem, 1);
-    let tmp = std::env::temp_dir().join(format!("quartzo-export-{:x}.md", fnv1a(&note_path)));
-    fs::write(&tmp, &flat).map_err(|e| e.to_string())?;
-
-    let note_dir = note
-        .parent()
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_else(|| vault.clone());
-    let sep = if cfg!(windows) { ";" } else { ":" };
-    let rp = format!("{note_dir}{sep}{vault}");
-
-    let mut cmd = Command::new("pandoc");
-    cmd.arg(&tmp)
-        .arg("-o")
-        .arg(&dest)
-        .arg("--standalone")
-        .arg(format!("--resource-path={rp}"));
-    no_window(&mut cmd);
-    let result = cmd.output();
-    let _ = fs::remove_file(&tmp);
-    match result {
-        Ok(out) if out.status.success() => Ok(()),
-        Ok(out) => Err(String::from_utf8_lossy(&out.stderr).trim().to_string()),
-        Err(e) => Err(format!("Pandoc não encontrado: {e}")),
+    let mut base_dirs = Vec::new();
+    if let Some(d) = note.parent() {
+        base_dirs.push(d.to_path_buf());
     }
+    base_dirs.push(root.to_path_buf());
+    crate::docx::write_docx(&flat, base_dirs, Path::new(&dest))
 }
 
 // ---- Bases salvas (consultas nomeadas em .quartzo/bases.json) ----

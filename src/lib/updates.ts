@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.52.0",
+    date: "2026-06-27",
+    items: [
+      "Exportar Word agora é 100% nosso: troquei o Pandoc (que era um programa externo) por um gerador de .docx embutido no próprio Quartzo — não precisa instalar nada. Ctrl+K → “Exportar como Word (.docx)”.",
+      "O .docx sai com títulos, negrito/itálico/riscado, listas, tabelas, blocos de código, citações, linhas e imagens embutidas. (PDF continua pela impressão do sistema; HTML também é nativo.)",
+    ],
+  },
+  {
     version: "0.51.0",
     date: "2026-06-27",
     items: [

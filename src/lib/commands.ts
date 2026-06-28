@@ -34,7 +34,7 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "extract-palette", label: "Extrair paleta de imagem…", hint: "cor" },
   { id: "print-pdf", label: "Imprimir / Salvar como PDF", hint: "exportar" },
   { id: "export-html", label: "Exportar nota como HTML…", hint: "exportar" },
-  { id: "export-doc", label: "Exportar com Pandoc (DOCX/PDF/ODT)…", hint: "exportar" },
+  { id: "export-doc", label: "Exportar como Word (.docx)…", hint: "exportar" },
   { id: "settings", label: "Configurações", defaultCombo: "ctrl+," },
   { id: "prisma-attach", label: "Anexar mídia do PRISMA…", hint: "PRISMA" },
   { id: "copy-quartzo-link", label: "Copiar link da nota (quartzo://)" },

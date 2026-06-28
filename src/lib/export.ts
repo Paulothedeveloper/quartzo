@@ -86,25 +86,12 @@ export async function exportNoteHtml(name: string) {
   }
 }
 
-/** Pandoc está instalado no sistema? */
-export async function pandocAvailable(): Promise<boolean> {
-  try {
-    return await invoke<boolean>("pandoc_available");
-  } catch {
-    return false;
-  }
-}
-
-/** Exporta a nota ativa via Pandoc — o formato vem da extensão escolhida no diálogo. */
-export async function exportPandoc() {
+/** Exporta a nota ativa como .docx (gerador nativo — sem ferramentas externas). */
+export async function exportDocx() {
   const vault = get(currentVaultPath);
   const note = get(activeTabPath);
   if (!vault || !note) {
     showToast(tr("toast.openVaultFirst"), "info");
-    return;
-  }
-  if (!(await pandocAvailable())) {
-    showToast(tr("export.pandocMissing"), "error");
     return;
   }
   const base = (note.split(/[\\/]/).pop() ?? "nota").replace(/\.md$/i, "");
@@ -112,23 +99,17 @@ export async function exportPandoc() {
   try {
     dest = await save({
       defaultPath: `${base}.docx`,
-      filters: [
-        { name: "Word (DOCX)", extensions: ["docx"] },
-        { name: "OpenDocument (ODT)", extensions: ["odt"] },
-        { name: "PDF", extensions: ["pdf"] },
-        { name: "Rich Text (RTF)", extensions: ["rtf"] },
-        { name: "EPUB", extensions: ["epub"] },
-      ],
+      filters: [{ name: "Word (DOCX)", extensions: ["docx"] }],
     });
   } catch {
     dest = null;
   }
   if (!dest) return;
-  showToast(tr("export.pandocRunning"), "info");
+  showToast(tr("export.docxRunning"), "info");
   try {
-    await invoke("export_pandoc", { vault, notePath: note, dest });
-    showToast(tr("export.pandocDone"), "success");
+    await invoke("export_docx", { vault, notePath: note, dest });
+    showToast(tr("export.docxDone"), "success");
   } catch (e) {
-    showToast(tr("export.pandocError", { error: String(e) }), "error");
+    showToast(tr("export.docxError", { error: String(e) }), "error");
   }
 }

@@ -157,10 +157,12 @@ em **CSV**. Formato pesado (H.265/ProRes/.mov) não toca? Botão **Gerar proxy
   do Git instalado.)
 - **Nuvem** (*Configurações › Nuvem*): mova o vault pra uma pasta do Google Drive/
   OneDrive para sincronizar entre máquinas.
-- **Exportar com Pandoc** (**Ctrl+K → "Exportar com Pandoc"**): gera **DOCX, PDF,
-  ODT, RTF ou EPUB** da nota — o formato vem da extensão que você escolher ao salvar.
+- **Exportar como Word** (**Ctrl+K → "Exportar como Word (.docx)"**): gera um **.docx**
+  da nota com o **gerador embutido do próprio Quartzo** — não precisa instalar nada.
+  Sai com títulos, negrito/itálico, listas, **tabelas**, código, citações e imagens.
   Ele "achata" a nota antes (expande `![[embeds]]` e troca `[[wikilinks]]` por texto).
-  Requer o **Pandoc** instalado (pandoc.org); para PDF, também um motor (LaTeX/wkhtmltopdf).
+- **PDF**: use **Imprimir / Salvar como PDF** (impressão do sistema). **HTML**: *Exportar
+  nota como HTML* — ambos nativos, sem ferramentas externas.
 
 ---
 

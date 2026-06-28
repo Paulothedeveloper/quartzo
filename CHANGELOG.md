@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.52.0 — 2026-06-27
+
+- **Export DOCX nativo (sem ferramentas externas) — substitui o Pandoc:** a pedido (tudo tem que ser do próprio app), removi a dependência do **Pandoc** e escrevi um **gerador de DOCX em Rust** (`src-tauri/src/docx.rs`) usando `pulldown-cmark` (parser) + `zip` (empacotamento OOXML) — **libs compiladas no binário, nada que o usuário instale**. `export_docx(vault, note_path, dest)` achata a nota (reusa `expand_md`/`strip_frontmatter`) e gera o `.docx` com: títulos (estilos Heading1–6), **negrito/itálico/riscado**, `código` inline + blocos de código (Consolas+shading), listas (numeradas/marcadores com indentação), **tabelas** com bordas, citações (estilo Quote), regras horizontais e **imagens embutidas** (detecção de dimensão PNG/JPEG/GIF → EMU, com `word/media` + rels + content-types). `export.ts` agora tem `exportDocx` (diálogo .docx); comando `export-doc` = "Exportar como Word (.docx)". Removidos `pandoc_available`/`export_pandoc`. Teste `cargo test` valida o pacote (partes OOXML, XML balanceado, título/tabela/negrito/mono). i18n `export.docx*` PT/EN/ES. **PDF** segue pela impressão do sistema e **HTML** pelo export nativo.
+
 ## 0.51.0 — 2026-06-27
 
 - **Exportar com Pandoc (DOCX/PDF/ODT/RTF/EPUB):** comando `export-doc` (paleta) + `exportPandoc` em `export.ts`. Rust `pandoc_available()` e `export_pandoc(vault, note_path, dest)` — o formato é inferido pela extensão escolhida no diálogo de salvar. Antes de chamar o Pandoc, a nota é **achatada** (`expand_md`): expande `![[embeds]]` inline (profundidade 1, reusando o índice de stems do vault) e troca `[[wikilinks]]`/`[[a|alias]]`/`[[a#h]]` pelo **texto** (alias ou nome), além de remover o front-matter (`strip_frontmatter`). Roda `pandoc tmp.md -o dest --standalone --resource-path=<pasta da nota>;<vault>` (acha imagens relativas), com `no_window` no Windows; erros do Pandoc voltam como toast. Se o Pandoc não estiver instalado, avisa. i18n `export.*` PT/EN/ES.

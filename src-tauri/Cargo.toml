@@ -1,6 +1,6 @@
 [package]
 name = "lumina"
-version = "0.51.0"
+version = "0.52.0"
 description = "Quartzo"
 authors = ["you"]
 edition = "2021"
@@ -30,3 +30,6 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 # Deep link quartzo:// (PRISMA/qualquer app abre uma nota) + instância única.
 tauri-plugin-deep-link = "2"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
+# Exportador DOCX nativo (gerado pelo próprio app — sem ferramentas externas).
+zip = { version = "2", default-features = false, features = ["deflate"] }
+pulldown-cmark = { version = "0.12", default-features = false }

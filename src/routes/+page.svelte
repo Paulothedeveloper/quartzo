@@ -69,7 +69,7 @@
   import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink } from "$lib/vault-actions";
   import { insertAtCursor } from "$lib/stores/editor";
   import { pickColor, extractPalette, paletteToMarkdown, eyedropperSupported } from "$lib/color";
-  import { printNote, exportNoteHtml, exportPandoc } from "$lib/export";
+  import { printNote, exportNoteHtml, exportDocx } from "$lib/export";
   import { createTypedNote, loadNoteTypes, type NoteType } from "$lib/types-notes";
   import { sfx } from "$lib/sfx";
   import { t, tr } from "$lib/i18n";
@@ -395,7 +395,7 @@
     "extract-palette": extractPaletteCmd,
     "print-pdf": printNote,
     "export-html": () => exportNoteHtml(get(activeTabPath)?.split(/[\\/]/).pop() ?? "nota"),
-    "export-doc": exportPandoc,
+    "export-doc": exportDocx,
     settings: () => settingsOpen.update((v) => !v),
     "prisma-attach": () => prismaPickerOpen.set(true),
     "copy-quartzo-link": copyQuartzoLink,
