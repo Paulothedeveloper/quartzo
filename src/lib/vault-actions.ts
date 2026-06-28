@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { invoke } from "@tauri-apps/api/core";
+import { appLocalDataDir, join } from "@tauri-apps/api/path";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { fileTree, currentVaultPath } from "$lib/stores/vault";
 import { openTabs, activeTabPath } from "$lib/stores/tabs";
@@ -138,6 +139,15 @@ export async function setVault(path: string): Promise<void> {
       );
     }
   }
+}
+
+/** Abre (criando se preciso) o vault do app no armazenamento privado — fluxo do
+ *  Android/iOS, onde não há seletor de pasta arbitrária (scoped storage). */
+export async function openMobileVault(): Promise<void> {
+  const base = await appLocalDataDir();
+  const vault = await join(base, "Quartzo");
+  await invoke("ensure_dir", { path: vault });
+  await setVault(vault);
 }
 
 /** Achata a árvore num array só de arquivos. */

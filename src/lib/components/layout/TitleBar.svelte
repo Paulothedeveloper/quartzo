@@ -14,11 +14,13 @@
     ChevronLeft,
     ChevronRight,
     CloudUpload,
+    Menu,
   } from "@lucide/svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { currentVaultPath } from "$lib/stores/vault";
-  import { settingsOpen, searchRequest, memoryOpen, typePickerRequest, quickSaveOpen, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
+  import { settingsOpen, searchRequest, memoryOpen, typePickerRequest, quickSaveOpen, mobileNavOpen, ctxMenu, type CtxMenuItem } from "$lib/stores/ui";
   import { gitSync } from "$lib/stores/gitsync";
+  import { isMobile } from "$lib/platform";
   import { createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
   import { canBack, canForward, navBack, navForward } from "$lib/stores/nav";
   import { showToast } from "$lib/stores/toast";
@@ -70,6 +72,11 @@
 </script>
 
 <div class="qtitlebar" data-tauri-drag-region>
+  {#if isMobile}
+    <button class="qham" onclick={() => mobileNavOpen.update((v) => !v)} aria-label="Menu" title="Menu">
+      <Menu size={20} />
+    </button>
+  {/if}
   <!-- Semáforo (fechar / minimizar / maximizar) -->
   <div class="qtraffic">
     <button class="tl tl-close" onclick={() => win("close")} title={$t("titlebar.close")} aria-label={$t("titlebar.close")}></button>
@@ -113,7 +120,7 @@
 
   <!-- Ações à direita -->
   <div class="qactions">
-    {#if $currentVaultPath}
+    {#if $currentVaultPath && !isMobile}
       <button
         class="qicon qcloud"
         class:on={$quickSaveOpen}
@@ -127,9 +134,11 @@
         {/if}
       </button>
     {/if}
-    <button class="qicon" class:on={pinned} onclick={togglePin} title={$t("titlebar.alwaysOnTop")}>
-      <Pin size={16} />
-    </button>
+    {#if !isMobile}
+      <button class="qicon" class:on={pinned} onclick={togglePin} title={$t("titlebar.alwaysOnTop")}>
+        <Pin size={16} />
+      </button>
+    {/if}
     <button class="qicon" onclick={() => settingsOpen.set(true)} title={$t("titlebar.settingsTooltip")}>
       <SlidersHorizontal size={16} />
     </button>
@@ -272,6 +281,18 @@
     border-radius: 9px;
     color: var(--color-text-secondary);
     transition: background 0.15s var(--ease-out, ease), color 0.15s var(--ease-out, ease);
+  }
+  .qham {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+  .qham:active {
+    background: var(--color-elevated);
   }
   .qicon:hover {
     background: var(--color-elevated);

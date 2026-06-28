@@ -1694,6 +1694,13 @@ pub fn rename_path(path: String, new_name: String) -> Result<String, String> {
     Ok(dest.to_string_lossy().to_string())
 }
 
+/// Garante que um diretório existe (cria recursivamente). Idempotente.
+/// Usado no Android pra criar o vault no armazenamento privado do app.
+#[tauri::command]
+pub fn ensure_dir(path: String) -> Result<(), String> {
+    std::fs::create_dir_all(&path).map_err(|e| e.to_string())
+}
+
 /// Move um arquivo/pasta para a Lixeira (recuperável). Só desktop (crate `trash`).
 #[cfg(desktop)]
 #[tauri::command]

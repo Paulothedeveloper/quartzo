@@ -54,6 +54,7 @@
     insightsOpen,
     zenMode,
     basesOpen,
+    mobileNavOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { refreshGitSync } from "$lib/stores/gitsync";
@@ -66,7 +67,8 @@
   import { loadAliasIndex } from "$lib/stores/aliases";
   import { clearBacklinkCache } from "$lib/backlink-cache";
   import { saveTabs } from "$lib/tab-persist";
-  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink } from "$lib/vault-actions";
+  import { openNote, setVault, refreshTree, flatFiles, openDailyNote, createNamedNote, createNoteIn, createFolderIn, newNoteDir, resolveWikilink, openMobileVault } from "$lib/vault-actions";
+  import { isMobile } from "$lib/platform";
   import { insertAtCursor } from "$lib/stores/editor";
   import { pickColor, extractPalette, paletteToMarkdown, eyedropperSupported } from "$lib/color";
   import { printNote, exportNoteHtml, exportDocx } from "$lib/export";
@@ -257,6 +259,7 @@
     if (path) {
       openNote(path);
       selectedFile.set(null);
+      if (isMobile) mobileNavOpen.set(false); // fecha a gaveta ao abrir
     }
   });
 
@@ -289,6 +292,16 @@
   });
 
   async function openVault() {
+    // No mobile não há seletor de pasta arbitrária: usa o vault do app (app-storage).
+    if (isMobile) {
+      try {
+        await openMobileVault();
+        showToast(tr("toast.vaultOpened"), "success");
+      } catch (e) {
+        showToast(`${e}`, "error");
+      }
+      return;
+    }
     const sel = await openDialog({ directory: true, multiple: false, title: tr("dialog.openVault") });
     if (typeof sel !== "string") return;
     await setVault(sel);
@@ -532,7 +545,11 @@
 
 <div class="flex h-screen w-screen flex-col overflow-hidden" class:app-zen={$zenMode}>
   <TitleBar />
-  <div class="flex min-h-0 flex-1">
+  <div class="app-body flex min-h-0 flex-1" class:nav-open={$mobileNavOpen}>
+  {#if $mobileNavOpen}
+    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+    <div class="app-drawer-backdrop" onclick={() => mobileNavOpen.set(false)}></div>
+  {/if}
   <aside
     class="app-sidebar shrink-0 border-r border-border bg-gradient-to-b from-surface to-[#131c2e] {dragWidth ==
     null

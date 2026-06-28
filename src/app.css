@@ -1037,3 +1037,49 @@ textarea,
   color: var(--color-text-primary);
   background: var(--color-elevated);
 }
+
+/* ==================== MOBILE (Android/iOS) — UI touch ==================== */
+/* Sem decoração de janela: esconde semáforo, voltar/avançar e o resizer. */
+html.mobile .qtraffic,
+html.mobile .qnav,
+html.mobile .q-resizer { display: none !important; }
+/* Title bar respeita o status bar (safe-area) e não é arrastável como janela. */
+html.mobile .qtitlebar {
+  height: auto;
+  min-height: 52px;
+  padding-top: calc(env(safe-area-inset-top) + 4px);
+  gap: 8px;
+}
+/* Busca central vira inline (no desktop é absolute-centered). */
+html.mobile .qsearch {
+  position: static;
+  left: auto;
+  transform: none;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* A sidebar vira GAVETA sobreposta. */
+html.mobile .app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 80;
+  width: min(82vw, 320px) !important;
+  transform: translateX(-100%);
+  transition: transform 0.24s var(--ease-out, ease);
+  box-shadow: 0 0 44px rgba(0, 0, 0, 0.5);
+  padding-top: env(safe-area-inset-top);
+}
+html.mobile .app-body.nav-open .app-sidebar { transform: translateX(0); }
+.app-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.45);
+  animation: q-fade-in 0.18s ease;
+}
+@keyframes q-fade-in { from { opacity: 0; } to { opacity: 1; } }
+/* Respiro pra barra de gestos embaixo. */
+html.mobile .q-view-in { padding-bottom: env(safe-area-inset-bottom); }

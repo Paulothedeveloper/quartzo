@@ -6,6 +6,9 @@ export const showGraph = writable(false);
 /** Sidebar recolhida (rail de ícones de 64px). */
 export const sidebarCollapsed = writable(false);
 
+/** Gaveta da sidebar aberta (só mobile — a sidebar vira overlay). */
+export const mobileNavOpen = writable(false);
+
 /** Modal de configurações aberto. */
 export const settingsOpen = writable(false);
 

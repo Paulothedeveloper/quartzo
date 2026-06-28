@@ -3,8 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tauri + SvelteKit + Typescript App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Quartzo</title>
+    <script>
+      // marca a plataforma cedo (antes do render) p/ a UI touch não piscar
+      try {
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          document.documentElement.classList.add("mobile");
+        }
+      } catch (e) {}
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">
