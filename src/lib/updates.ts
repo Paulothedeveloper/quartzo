@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.54.0",
+    date: "2026-06-27",
+    items: [
+      "PDF/HTML com cara premium: novo visual editorial — cabeçalho com a marca + data, título grande com régua em degradê, corpo em tipografia serifada, tabelas estilo revista, citações e blocos de código refinados e um rodapé discreto com o nome da nota.",
+    ],
+  },
+  {
     version: "0.53.0",
     date: "2026-06-27",
     items: [

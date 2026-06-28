@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.54.0 — 2026-06-27
+
+- **Documento premium (PDF + HTML):** reescrita do `EXPORT_CSS` com visual editorial — **corpo serifado** (Iowan/Palatino/Georgia) + **títulos sans** (Inter), **letterhead** ("✦ Quartzo" + data) e **rodapé** discreto (nome da nota · Quartzo) injetados no `standaloneDoc`, **H1** com régua em **degradê** teal→ciano, H2 com hairline, **tabelas estilo revista** (cabeçalho em caps/tracking, filetes finos, sem bordas externas), citações com barra ciano + leve fundo, código em cartão suave, `hr` como **✦** centralizado, imagens arredondadas com hairline, `print-color-adjust:exact` + `page-break-inside:avoid` em pre/tabela/img/callout. Vale igual pro PDF (impressão) e pro export HTML. Validado por render no navegador.
+
 ## 0.53.0 — 2026-06-27
 
 - **Impressão/PDF refeita (documento isolado):** o `printNote` antigo usava `body.q-printing .q-prose { position:absolute; inset:0 }` — o `.q-prose` se posicionava dentro da **coluna do editor**, então o PDF saía com o conteúdo deslocado pra direita e o título do webview ("Tauri + SvelteKit…"). Agora `printNote` monta um **documento HTML autônomo** (mesmo `standaloneDoc`/`EXPORT_CSS` do export HTML, reusado), injeta num **iframe oculto**, define `title` = nome da nota e chama `print()` ali — **sem o layout do app vazar**, texto ocupando a página inteira, com `@page { margin:16mm }`. Removido o bloco morto `@media print .q-printing` do app.css. `exportNoteHtml` também passou a reusar `standaloneDoc`. Toast "abra em Leitura/Dividido" virou i18n `export.openReadingFirst` PT/EN/ES. (Cabeçalho/rodapé extra do diálogo de impressão é controle do sistema — desligável em "Cabeçalhos e rodapés".)
