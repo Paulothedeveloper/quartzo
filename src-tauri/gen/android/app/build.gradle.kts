@@ -13,9 +13,27 @@ val tauriProperties = Properties().apply {
     }
 }
 
+// Assinatura de release: lê key.properties (git-ignored; keystore fora do repo).
+val keystoreProperties = Properties().apply {
+    val f = file("key.properties")
+    if (f.exists()) {
+        f.inputStream().use { load(it) }
+    }
+}
+
 android {
     compileSdk = 36
     namespace = "com.quartzo.app"
+    signingConfigs {
+        create("release") {
+            if (keystoreProperties.isNotEmpty()) {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
         applicationId = "com.quartzo.app"
@@ -37,12 +55,12 @@ android {
             }
         }
         getByName("release") {
-            isMinifyEnabled = true
-            proguardFiles(
-                *fileTree(".") { include("**/*.pro") }
-                    .plus(getDefaultProguardFile("proguard-android-optimize.txt"))
-                    .toList().toTypedArray()
-            )
+            // Tauri é WebView-heavy: R8/minify sem proguard quebra (ClassNotFound).
+            // Mantido desligado por ora (Manual do Claude); ligar só com regras.
+            isMinifyEnabled = false
+            if (keystoreProperties.isNotEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     kotlinOptions {

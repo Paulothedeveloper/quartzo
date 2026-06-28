@@ -39,6 +39,14 @@
   const step = $derived(steps[Math.min(i, steps.length - 1)]);
   const isLast = $derived(i >= steps.length - 1);
 
+  // Passos que falam de atalhos/sidebar do desktop têm variante mobile (tutm.*).
+  const MOBILE_OVERRIDES = [1, 4, 5];
+  const bodyKey = $derived(
+    isMobile && MOBILE_OVERRIDES.includes(step.n)
+      ? `tutm.step${step.n}Body`
+      : `tut.step${step.n}Body`
+  );
+
   function finish() {
     try {
       localStorage.setItem(TUTORIAL_FLAG, "1");
@@ -97,7 +105,7 @@
             {/key}
           </div>
           <h2 class="tut-title">{$t(`tut.step${step.n}Title`)}</h2>
-          <p class="tut-body">{$t(`tut.step${step.n}Body`)}</p>
+          <p class="tut-body">{$t(bodyKey)}</p>
         </div>
       {/key}
 

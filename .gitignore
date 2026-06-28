@@ -22,3 +22,8 @@ vite.config.ts.timestamp-*
 /DESIGN.md
 /PRODUCT.md
 /COMMIT_MSG.txt
+
+# segredos de assinatura Android — NUNCA commitar (Manual do Claude)
+key.properties
+*.jks
+*.keystore
