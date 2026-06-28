@@ -202,50 +202,7 @@
     color: var(--color-text-primary);
     letter-spacing: -0.01em;
   }
-  .msh-back {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    margin-left: -6px;
-    border-radius: 9px;
-    color: var(--color-text-secondary);
-  }
-  .msh-back:active { background: var(--color-elevated); }
-  .msh-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .msh-editor { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .msh-fill { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-  .msh-searchbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 12px 6px;
-    padding: 9px 12px;
-    border-radius: 10px;
-    background: var(--color-elevated);
-    color: var(--color-text-secondary);
-  }
-  .msh-searchbar input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 0.95rem;
-    color: var(--color-text-primary);
-  }
-  .msh-list {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    padding: 4px 8px 12px;
-  }
   .msh-more {
     flex: 1;
     overflow: auto;
