@@ -27,6 +27,11 @@
     Pin,
     Compass,
     Table2,
+    ArrowUpDown,
+    ArrowDownAZ,
+    ArrowDownZA,
+    Shuffle,
+    GripVertical,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
@@ -35,6 +40,8 @@
   import { showToast } from "$lib/stores/toast";
   import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, duplicatesOpen, insightsOpen, basesOpen, askPrompt, askConfirm, type CtxMenuItem } from "$lib/stores/ui";
   import { getRecentVaults, vaultLabel, setVaultLabel, removeRecentVault, getVaultLabels, recentVaults, settings } from "$lib/stores/settings";
+  import { sortMode, reshuffle, type SortMode } from "$lib/stores/explorerSort";
+  import { get } from "svelte/store";
   import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote, createVault } from "$lib/vault-actions";
   import { bookmarks, toggleBookmark, pinned, togglePin } from "$lib/stores/nav";
   import type { FileNode } from "$lib/types";
@@ -218,6 +225,27 @@
       $settings.features.sketch ||
       $settings.features.git
   );
+
+  // Menu de ordenação do explorador (A→Z, Z→A, aleatório, manual).
+  function openSortMenu(e: MouseEvent) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const cur = get(sortMode);
+    const mk = (id: SortMode, label: string, icon: any): CtxMenuItem => ({
+      label: (cur === id ? "✓ " : "") + label,
+      icon,
+      action: () => sortMode.set(id),
+    });
+    const items: CtxMenuItem[] = [
+      mk("az", tr("sort.az"), ArrowDownAZ),
+      mk("za", tr("sort.za"), ArrowDownZA),
+      mk("random", tr("sort.random"), Shuffle),
+      mk("manual", tr("sort.manual"), GripVertical),
+    ];
+    if (cur === "random") {
+      items.push({ separator: true }, { label: tr("sort.reshuffle"), icon: Shuffle, action: () => reshuffle() });
+    }
+    ctxMenu.set({ x: Math.max(8, rect.right - 184), y: rect.bottom + 4, items });
+  }
 </script>
 
 {#if $sidebarCollapsed}
@@ -324,6 +352,21 @@
         <ChevronsUpDown size={12} class="shrink-0 text-text-muted" />
       </button>
       {#if $currentVaultPath}
+        <button
+          onclick={openSortMenu}
+          title={$t("sort.title")}
+          class="shrink-0 rounded-md p-1 transition-colors hover:bg-elevated hover:text-text-primary {$sortMode !== 'az' ? 'text-accent-light' : 'text-text-secondary'}"
+        >
+          {#if $sortMode === "manual"}
+            <GripVertical size={13} />
+          {:else if $sortMode === "random"}
+            <Shuffle size={13} />
+          {:else if $sortMode === "za"}
+            <ArrowDownZA size={13} />
+          {:else}
+            <ArrowUpDown size={13} />
+          {/if}
+        </button>
         <button
           onclick={refreshTree}
           title={$t("sidebar.refresh")}

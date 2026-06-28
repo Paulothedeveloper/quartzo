@@ -34,11 +34,52 @@
   } from "$lib/vault-actions";
   import type { FileNode } from "$lib/types";
   import { tr } from "$lib/i18n";
+  import {
+    sortMode, sortSeed, customOrderRev, sortNodes, getOrder, setOrder, dirOf,
+  } from "$lib/stores/explorerSort";
   import Self from "./FileTree.svelte";
 
   let { nodes = [], depth = 0 }: { nodes?: FileNode[]; depth?: number } = $props();
 
   let expanded = $state<Set<string>>(new Set());
+
+  // Pasta-pai deste nível (todos os irmãos têm o mesmo dir).
+  const parentPath = $derived(nodes.length ? dirOf(nodes[0].path) : "");
+  // Nós já ordenados conforme o modo (reage a modo/semente/ordem manual).
+  const view = $derived.by(() => {
+    void $customOrderRev; // dependência: re-sorta quando a ordem manual muda
+    return sortNodes(nodes, $sortMode, $sortSeed, getOrder(parentPath));
+  });
+
+  // ---- arrastar pra reordenar (só no modo manual) ----
+  let dragPath = $state<string | null>(null);
+  let overPath = $state<string | null>(null);
+  function onDragStart(e: DragEvent, node: FileNode) {
+    dragPath = node.path;
+    if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
+  }
+  function onDragOver(e: DragEvent, node: FileNode) {
+    if (!dragPath || $sortMode !== "manual") return;
+    e.preventDefault();
+    overPath = node.path;
+  }
+  function onDrop(node: FileNode) {
+    if (!dragPath || dragPath === node.path) { dragPath = null; overPath = null; return; }
+    const paths = view.map((n) => n.path);
+    const from = paths.indexOf(dragPath);
+    const to = paths.indexOf(node.path);
+    if (from >= 0 && to >= 0) {
+      paths.splice(from, 1);
+      paths.splice(to, 0, dragPath);
+      setOrder(parentPath, paths);
+    }
+    dragPath = null;
+    overPath = null;
+  }
+  function onDragEnd() {
+    dragPath = null;
+    overPath = null;
+  }
 
   function toggle(path: string) {
     const next = new Set(expanded);
@@ -114,7 +155,7 @@
   }
 </script>
 
-{#each nodes as node (node.path)}
+{#each view as node (node.path)}
   {@const Icon = iconFor(node)}
   {#if $renamingPath === node.path}
     <div
@@ -136,10 +177,17 @@
       class="group flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-left text-sm transition-all duration-150 ease-out hover:bg-elevated active:scale-[0.99] {$activeTabPath ===
       node.path
         ? 'bg-accent/12 text-accent-light'
-        : 'text-text-primary/90 hover:text-text-primary'}"
+        : 'text-text-primary/90 hover:text-text-primary'} {overPath === node.path && dragPath
+        ? 'drop-target'
+        : ''} {dragPath === node.path ? 'opacity-50' : ''}"
       style="padding-left: {depth * 14 + 6}px"
+      draggable={$sortMode === "manual" && $renamingPath !== node.path}
       onclick={() => pick(node)}
       oncontextmenu={(e) => openMenu(e, node)}
+      ondragstart={(e) => onDragStart(e, node)}
+      ondragover={(e) => onDragOver(e, node)}
+      ondrop={() => onDrop(node)}
+      ondragend={onDragEnd}
     >
       {#if node.is_dir}
         <ChevronRight
@@ -162,3 +210,10 @@
     </div>
   {/if}
 {/each}
+
+<style>
+  /* indicador de alvo ao arrastar (modo manual) */
+  :global(.drop-target) {
+    box-shadow: inset 0 2px 0 0 var(--color-accent);
+  }
+</style>
