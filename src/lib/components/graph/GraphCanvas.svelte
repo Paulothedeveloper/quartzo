@@ -23,6 +23,7 @@
   } from "d3-force";
   import GraphNode from "./GraphNode.svelte";
   import RegionNode from "./RegionNode.svelte";
+  import SynapseEdge from "./SynapseEdge.svelte";
   import GraphFocus from "./GraphFocus.svelte";
   import { GRAPH_CTX, type GraphCtx, type GraphState } from "./context";
   import type { RawGraphNode, RawGraphEdge } from "$lib/stores/graph";
@@ -71,9 +72,14 @@
   let cachedRegions: Node[] = [];
   let tickCount = 0;
   let layoutGen = 0; // invalida o pré-cálculo em lotes se os dados recarregarem
+  // impulsos sinápticos (decl. cedo pra uso no onDestroy)
+  let pulsingIds = new Set<string>();
+  let allEdgeIds: string[] = [];
+  let pulseTimer: ReturnType<typeof setInterval> | null = null;
   onDestroy(() => {
     layoutGen++;
     sim?.stop();
+    if (pulseTimer) clearInterval(pulseTimer);
   });
 
   function posFromSim(): Map<string, { x: number; y: number }> {
@@ -206,6 +212,42 @@
   let activeGroup = $state<string | null>(null);
   let focusTarget = $state<{ ids: string[] | null; nonce: number }>({ ids: null, nonce: 0 });
 
+  // ---- Impulsos sinápticos (energia viajando pelas arestas) ----
+  // Só ALGUMAS arestas pulsam por vez (~12), revezando a cada ~2s. As demais
+  // ficam estáticas (zero repaint). SMIL (animateMotion) anima no browser, fora
+  // da thread principal. Desligado no modo leve e com "reduzir animações".
+  function pulsesAllowed(): boolean {
+    if (liteMode || allEdgeIds.length === 0) return false;
+    if (typeof document !== "undefined" && document.documentElement.classList.contains("no-anim"))
+      return false;
+    return true;
+  }
+  function tickPulses() {
+    if (!pulsesAllowed()) {
+      if (pulsingIds.size) { pulsingIds = new Set(); applyEdgeStyles(); }
+      return;
+    }
+    const count = Math.min(14, Math.max(3, Math.round(allEdgeIds.length * 0.12)));
+    const next = new Set<string>();
+    let guard = 0;
+    while (next.size < count && guard < count * 12) {
+      // índice pseudo-aleatório estável o suficiente (sem Math.random global)
+      const k = (tickCount * 2654435761 + next.size * 40503 + guard * 97 + allEdgeIds.length) >>> 0;
+      next.add(allEdgeIds[k % allEdgeIds.length]);
+      guard++;
+    }
+    tickCount++;
+    pulsingIds = next;
+    applyEdgeStyles();
+  }
+  function startPulses() {
+    if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; }
+    pulsingIds = new Set();
+    if (!pulsesAllowed()) return;
+    tickPulses();
+    pulseTimer = setInterval(tickPulses, 1900);
+  }
+
   function focusGroup(group: string) {
     const ids = groupNodeIds.get(group) ?? [];
     activeGroup = group;
@@ -230,6 +272,7 @@
   });
 
   const nodeTypes = { note: GraphNode, region: RegionNode };
+  const edgeTypes = { synapse: SynapseEdge };
 
   function applyEdgeStyles() {
     const h = gview.hoveredId;
@@ -268,13 +311,19 @@
         drawOnce && !liteMode
           ? "stroke-dasharray:8000;stroke-dashoffset:8000;animation:edge-draw 0.9s var(--ease-out,ease) forwards;"
           : "";
-      return { ...e, style: `stroke:${stroke};stroke-width:${width};opacity:${opacity};${glow}${draw}` };
+      return {
+        ...e,
+        data: { ...(e.data as any), pulse: pulsingIds.has(e.id) },
+        style: `stroke:${stroke};stroke-width:${width};opacity:${opacity};${glow}${draw}`,
+      };
     });
   }
 
   function rebuild(rNodes: RawGraphNode[], rEdges: RawGraphEdge[]) {
     sim?.stop();
     sim = null;
+    if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; }
+    pulsingIds = new Set();
     layoutGen++; // invalida qualquer pré-cálculo em lotes ainda rodando
     firstDraw = true; // redesenha as arestas a cada (re)carga de dados
     // cores por pasta (índice estável, ordenado)
@@ -343,13 +392,16 @@
       .force("x", forceX((d: any) => gx(d.id)).strength(0.16))
       .force("y", forceY((d: any) => gy(d.id)).strength(0.16));
 
-    // Arestas retas no modo leve (geometria bem mais barata que bezier).
+    // Custom edge "synapse" (desenha a aresta + impulso opcional). Reta no modo
+    // leve (geometria mais barata) via data.straight.
     baseEdges = valid.map((e) => ({
       id: e.id,
       source: e.source,
       target: e.target,
-      type: liteMode ? "straight" : "bezier",
+      type: "synapse",
+      data: { straight: liteMode },
     }));
+    allEdgeIds = valid.map((e) => e.id);
 
     // ===== LAYOUT SEMPRE CONGELADO (pan/zoom liso) =====
     // A física ao VIVO era a causa do travamento: ela reconciliava os ~100 nós
@@ -376,6 +428,7 @@
       s.stop(); // garante que não há timer rodando -> nada anima parado
       nodes = buildNodes(posFromSim(), true);
       applyEdgeStyles();
+      startPulses(); // começa os impulsos sinápticos (poucos por vez, revezando)
       focusTarget = { ids: null, nonce: focusTarget.nonce + 1 }; // enquadra 1x
     };
 
@@ -451,6 +504,7 @@
     bind:nodes
     bind:edges
     {nodeTypes}
+    {edgeTypes}
     colorMode="dark"
     fitView
     minZoom={0.05}
@@ -458,7 +512,7 @@
     nodesConnectable={false}
     elementsSelectable={true}
     onlyRenderVisibleElements={veryLarge}
-    defaultEdgeOptions={{ type: "bezier" }}
+    defaultEdgeOptions={{ type: "synapse" }}
     onnodeclick={({ node }) => {
       if (node.type === "region") focusGroup((node.data as any).group as string);
     }}
