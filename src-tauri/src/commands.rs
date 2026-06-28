@@ -439,6 +439,32 @@ pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
     Ok(GraphData { nodes, edges })
 }
 
+// ---- Bases salvas (consultas nomeadas em .quartzo/bases.json) ----
+
+fn bases_file(vault: &str) -> PathBuf {
+    Path::new(vault).join(".quartzo").join("bases.json")
+}
+
+/// Lê o JSON das bases salvas (ou "[]" se não existir).
+#[tauri::command]
+pub fn load_bases(vault: String) -> Result<String, String> {
+    let p = bases_file(&vault);
+    match fs::read_to_string(&p) {
+        Ok(s) => Ok(s),
+        Err(_) => Ok("[]".to_string()),
+    }
+}
+
+/// Grava o JSON das bases salvas (cria .quartzo/ se preciso).
+#[tauri::command]
+pub fn save_bases(vault: String, json: String) -> Result<(), String> {
+    let p = bases_file(&vault);
+    if let Some(dir) = p.parent() {
+        fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    }
+    fs::write(&p, json).map_err(|e| e.to_string())
+}
+
 // ---- Visão do vault: notas órfãs + recentes ----
 
 #[derive(Serialize, Clone)]

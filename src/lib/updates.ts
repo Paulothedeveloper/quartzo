@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.50.0",
+    date: "2026-06-27",
+    items: [
+      "Bases (tabelas do vault): novo painel (menu do vault ou Ctrl+K → “Bases”) pra montar uma tabela/quadro/lista/cartões com TODAS as notas do vault filtradas por propriedade — escolha fonte (pasta/tag), colunas, filtro (com operadores =, ≠, >, <, contém, existe), ordenação e limite, por menus.",
+      "Salve consultas com nome (ficam em .quartzo/bases.json) e reabra com um clique.",
+      "Os blocos ```query nas notas também ganharam os novos operadores e a visão “cards”.",
+    ],
+  },
+  {
     version: "0.49.0",
     date: "2026-06-27",
     items: [

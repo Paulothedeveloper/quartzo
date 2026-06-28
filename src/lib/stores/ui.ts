@@ -78,6 +78,9 @@ export const insightsOpen = writable(false);
 /** Modo foco/zen: esconde toda a interface e centraliza só o editor. */
 export const zenMode = writable(false);
 
+/** Painel "Bases": monta tabelas/consultas globais do vault por UI. */
+export const basesOpen = writable(false);
+
 /** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
 export interface HoverPreviewState {
   path: string;

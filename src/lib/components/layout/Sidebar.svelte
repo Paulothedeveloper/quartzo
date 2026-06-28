@@ -26,13 +26,14 @@
     CopyX,
     Pin,
     Compass,
+    Table2,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
   import { invoke } from "@tauri-apps/api/core";
   import { currentVaultPath, fileTree } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
-  import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, duplicatesOpen, insightsOpen, askPrompt, askConfirm, type CtxMenuItem } from "$lib/stores/ui";
+  import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, duplicatesOpen, insightsOpen, basesOpen, askPrompt, askConfirm, type CtxMenuItem } from "$lib/stores/ui";
   import { getRecentVaults, vaultLabel, setVaultLabel, removeRecentVault, getVaultLabels, settings } from "$lib/stores/settings";
   import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
   import { bookmarks, toggleBookmark, pinned, togglePin } from "$lib/stores/nav";
@@ -140,6 +141,7 @@
     if (recents.length) items.push({ separator: true });
     if (current) {
       items.push(
+        { label: tr("bases.menu"), icon: Table2, action: () => basesOpen.set(true) },
         { label: tr("insights.menu"), icon: Compass, action: () => insightsOpen.set(true) },
         { label: tr("dup.menu"), icon: CopyX, action: () => duplicatesOpen.set(true) },
       );

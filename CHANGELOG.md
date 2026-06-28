@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.50.0 — 2026-06-27
+
+- **Bases — tabelas globais do vault (estilo Dataview):** novo `BasesView` (store `basesOpen`, menu do vault "Bases (tabelas)…" + comando `bases`). Monta por **UI** uma consulta sobre TODAS as notas: fonte (pasta/tag), **colunas** (chips das propriedades descobertas no índice), **filtro** (campo + operador + valor), **ordenação** (campo + ↑/↓), **visão** (tabela/cartões/quadro/lista) e limite — renderizando ao vivo pelo mesmo motor das views ` ```query ` (`buildQueryView`). **Bases salvas** com nome em `.quartzo/bases.json` (Rust `load_bases`/`save_bases`), reaplicáveis num clique.
+- **Engine de query estendida:** `parseWhere` + `filterNotes` agora suportam operadores **`=`, `!=`, `>`, `<`, `>=`, `<=`, `contains`, `exists`** (numérico quando ambos são número, senão texto) e **ordenação asc/desc** (`sort campo desc`). Nova **visão `cards`** (galeria de cartões: título + propriedades) em `buildQueryView` + CSS `q-qcards`. Tudo retrocompatível com os blocos ` ```query ` existentes. i18n `bases.*` PT/EN/ES.
+
 ## 0.49.0 — 2026-06-27
 
 - **Modo foco / zen:** store `zenMode` + comando `toggle-zen` (paleta, hint "foco"; configurável em Atalhos). Classe `.app-zen` no container raiz esconde `.qtitlebar`, `.app-sidebar`, `.q-resizer`, `.q-editor-tabs` e `.q-editor-toolbar` e centraliza `.q-main` (`max-width:900px;margin:auto`). Ao entrar, fecha painéis (outline/backlinks/git/rightPane). Sai com **Esc** (handler global) ou **botão flutuante** discreto (`.zen-exit`, canto sup. dir.). SFX de abrir/fechar. i18n PT/EN/ES.

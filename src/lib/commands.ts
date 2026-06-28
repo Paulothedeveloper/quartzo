@@ -44,6 +44,7 @@ export const COMMAND_DEFS: CommandDef[] = [
   { id: "find-duplicates", label: "Notas duplicadas…", hint: "limpeza" },
   { id: "vault-insights", label: "Órfãs e recentes…", hint: "vault" },
   { id: "toggle-zen", label: "Modo foco (zen)", hint: "foco" },
+  { id: "bases", label: "Bases (tabelas do vault)…", hint: "vault" },
 ];
 
 /** Atalhos padrão derivados dos comandos que têm defaultCombo. */

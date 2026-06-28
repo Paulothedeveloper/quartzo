@@ -23,6 +23,7 @@
   import RelinkModal from "$lib/components/ui/RelinkModal.svelte";
   import DuplicatesModal from "$lib/components/ui/DuplicatesModal.svelte";
   import InsightsModal from "$lib/components/ui/InsightsModal.svelte";
+  import BasesView from "$lib/components/ui/BasesView.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -52,6 +53,7 @@
     duplicatesOpen,
     insightsOpen,
     zenMode,
+    basesOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { refreshGitSync } from "$lib/stores/gitsync";
@@ -411,6 +413,10 @@
       if (get(currentVaultPath)) insightsOpen.set(true);
       else showToast(tr("toast.openVaultFirst"), "info");
     },
+    "bases": () => {
+      if (get(currentVaultPath)) basesOpen.set(true);
+      else showToast(tr("toast.openVaultFirst"), "info");
+    },
     "toggle-zen": () => {
       const on = !get(zenMode);
       if (on) {
@@ -642,6 +648,7 @@
 <RelinkModal />
 <DuplicatesModal />
 <InsightsModal />
+<BasesView />
 <QuickSave />
 
 {#if $zenMode}

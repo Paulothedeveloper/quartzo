@@ -37,17 +37,33 @@ export async function loadQueryIndex(vault: string | null, force = false): Promi
   }
 }
 
-export type QueryView = "table" | "board" | "list" | "tasks";
+export type QueryView = "table" | "board" | "list" | "tasks" | "cards";
+export type WhereOp = "=" | "!=" | ">" | "<" | ">=" | "<=" | "contains" | "exists";
 export interface QueryConfig {
   view: QueryView;
   folder?: string;
   tag?: string;
   whereKey?: string;
+  whereOp?: WhereOp;
   whereVal?: string;
   group: string;
   fields: string[];
   sort?: string;
+  sortDir?: "asc" | "desc";
   limit?: number;
+}
+
+/** Quebra "campo op valor" (ou "campo=valor") em {key, op, val}. */
+export function parseWhere(v: string): { key: string; op: WhereOp; val: string } {
+  const word = v.match(/^(.+?)\s+(contains|exists)\b\s*(.*)$/i);
+  if (word) {
+    return { key: word[1].trim(), op: word[2].toLowerCase() as WhereOp, val: word[3].trim().toLowerCase() };
+  }
+  for (const op of ["!=", ">=", "<=", ">", "<", "="] as const) {
+    const i = v.indexOf(op);
+    if (i >= 0) return { key: v.slice(0, i).trim(), op, val: v.slice(i + op.length).trim().toLowerCase() };
+  }
+  return { key: v.trim(), op: "exists", val: "" };
 }
 
 export function parseQueryConfig(text: string): QueryConfig {
@@ -59,19 +75,21 @@ export function parseQueryConfig(text: string): QueryConfig {
     if (i < 0) continue;
     const k = line.slice(0, i).trim().toLowerCase();
     const v = line.slice(i + 1).trim();
-    if (k === "view") cfg.view = (["table", "board", "list", "tasks"].includes(v) ? v : "table") as QueryView;
+    if (k === "view") cfg.view = (["table", "board", "list", "tasks", "cards"].includes(v) ? v : "table") as QueryView;
     else if (k === "folder" || k === "from") cfg.folder = v;
     else if (k === "tag") cfg.tag = v.replace(/^#/, "");
     else if (k === "group") cfg.group = v || "status";
     else if (k === "fields") cfg.fields = v.split(",").map((s) => s.trim()).filter(Boolean);
-    else if (k === "sort") cfg.sort = v;
-    else if (k === "limit") cfg.limit = parseInt(v, 10) || undefined;
+    else if (k === "sort") {
+      const parts = v.split(/\s+/);
+      cfg.sort = parts[0];
+      cfg.sortDir = parts[1]?.toLowerCase() === "desc" ? "desc" : "asc";
+    } else if (k === "limit") cfg.limit = parseInt(v, 10) || undefined;
     else if (k === "where") {
-      const eq = v.indexOf("=");
-      if (eq >= 0) {
-        cfg.whereKey = v.slice(0, eq).trim();
-        cfg.whereVal = v.slice(eq + 1).trim().toLowerCase();
-      } else cfg.whereKey = v.trim();
+      const w = parseWhere(v);
+      cfg.whereKey = w.key;
+      cfg.whereOp = w.op;
+      cfg.whereVal = w.val;
     }
   }
   return cfg;
@@ -92,16 +110,41 @@ export function filterNotes(index: QueryNote[], cfg: QueryConfig): QueryNote[] {
     res = res.filter((n) => n.tags.some((t) => t.toLowerCase() === tg));
   }
   if (cfg.whereKey) {
+    const op = cfg.whereOp ?? "=";
+    const target = cfg.whereVal ?? "";
     res = res.filter((n) => {
-      const vals = n.props[cfg.whereKey!];
-      if (!vals || !vals.length) return false;
-      if (cfg.whereVal == null) return true;
-      return vals.some((v) => v.toLowerCase() === cfg.whereVal);
+      const vals = (n.props[cfg.whereKey!] ?? []).map((v) => v.toLowerCase());
+      if (op === "exists") return vals.length > 0;
+      if (op === "!=") return !vals.some((v) => v === target);
+      if (!vals.length) return false;
+      return vals.some((v) => {
+        switch (op) {
+          case "=":
+            return v === target;
+          case "contains":
+            return v.includes(target);
+          case ">":
+          case "<":
+          case ">=":
+          case "<=": {
+            const a = parseFloat(v);
+            const b = parseFloat(target);
+            const cmp = !isNaN(a) && !isNaN(b) ? a - b : v.localeCompare(target);
+            if (op === ">") return cmp > 0;
+            if (op === "<") return cmp < 0;
+            if (op === ">=") return cmp >= 0;
+            return cmp <= 0;
+          }
+          default:
+            return v === target;
+        }
+      });
     });
   }
-  res.sort((a, b) =>
-    cfg.sort ? first(a, cfg.sort).localeCompare(first(b, cfg.sort)) : a.name.localeCompare(b.name)
-  );
+  res.sort((a, b) => {
+    const cmp = cfg.sort ? first(a, cfg.sort).localeCompare(first(b, cfg.sort)) : a.name.localeCompare(b.name);
+    return cfg.sortDir === "desc" ? -cmp : cmp;
+  });
   if (cfg.limit) res = res.slice(0, cfg.limit);
   return res;
 }
@@ -211,6 +254,29 @@ export function buildQueryView(text: string, index: QueryNote[]): HTMLElement {
     wrap.appendChild(head(notes.length));
     if (!notes.length) wrap.appendChild(el("div", "q-qempty-msg", "Nenhuma nota encontrada."));
     else wrap.appendChild(ul);
+    return wrap;
+  }
+
+  if (cfg.view === "cards") {
+    const grid = el("div", "q-qcards");
+    for (const n of notes) {
+      const card = el("div", "q-qcardg");
+      card.appendChild(link(n, "q-qcardg-title"));
+      const meta = el("div", "q-qcardg-meta");
+      for (const f of cfg.fields) {
+        const row = el("div", "q-qcardg-row");
+        row.appendChild(el("span", "q-qcardg-k", f));
+        const vbox = el("span", "q-qcardg-v");
+        chips(n, f, vbox);
+        row.appendChild(vbox);
+        meta.appendChild(row);
+      }
+      if (meta.childNodes.length) card.appendChild(meta);
+      grid.appendChild(card);
+    }
+    wrap.appendChild(head(notes.length));
+    if (!notes.length) wrap.appendChild(el("div", "q-qempty-msg", "Nenhuma nota encontrada."));
+    else wrap.appendChild(grid);
     return wrap;
   }
 

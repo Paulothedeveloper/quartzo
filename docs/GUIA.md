@@ -40,6 +40,14 @@ abas e painéis) e deixa só o editor centralizado, pra escrever sem distração
 com **Esc** ou no botão flutuante no canto. (Pode atribuir um atalho em Configurações
 › Atalhos.)
 
+**Bases (tabelas do vault):** menu do vault → **Bases (tabelas)…** (ou **Ctrl+K**).
+Monte uma visão de TODAS as notas por **propriedade** do front-matter: escolha a
+**visão** (Tabela / Cartões / Quadro / Lista), a **fonte** (Pasta ou Tag), as
+**Colunas**, um **Filtro** (campo + operador `=, ≠, >, <, contém, existe` + valor),
+a **Ordenação** e o limite — tudo por menus. **Salve** consultas com nome (botão
+*Salvar base*) e reabra clicando no chip. (Os mesmos recursos valem nos blocos
+` ```query ` dentro das notas.)
+
 **Clique-direito numa nota** (na árvore de arquivos): **Abrir**, **Abrir ao lado**,
 **Fixar no topo**, **Favoritar**, **Renomear**, **Copiar caminho**, **Mostrar na
 pasta** e **Apagar**. **Fixar no topo** põe a nota numa seção **Fixadas** no alto da
