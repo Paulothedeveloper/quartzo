@@ -439,6 +439,129 @@ pub fn build_graph_index(vault_path: String) -> Result<GraphData, String> {
     Ok(GraphData { nodes, edges })
 }
 
+// ---- Exportar com Pandoc (DOCX/PDF/ODT…) ----
+
+/// Pandoc está instalado no PATH?
+#[tauri::command]
+pub fn pandoc_available() -> bool {
+    let mut cmd = Command::new("pandoc");
+    cmd.arg("--version");
+    no_window(&mut cmd);
+    cmd.output().map(|o| o.status.success()).unwrap_or(false)
+}
+
+fn leaf_name(s: &str) -> String {
+    s.rsplit(['/', '\\']).next().unwrap_or(s).trim().to_string()
+}
+
+/// Remove o bloco de front-matter (---) do começo, pra não vazar no documento.
+fn strip_frontmatter(content: &str) -> String {
+    let c = content.strip_prefix('\u{feff}').unwrap_or(content);
+    if c.starts_with("---\n") || c.starts_with("---\r\n") {
+        if let Some(after) = c.find('\n') {
+            let rest = &c[after + 1..];
+            if let Some(end) = rest.find("\n---") {
+                let close = after + 1 + end + 4; // logo após "\n---"
+                let tail = &c[close..];
+                let nl = tail.find('\n').map(|x| close + x + 1).unwrap_or(c.len());
+                return c[nl..].to_string();
+            }
+        }
+    }
+    content.to_string()
+}
+
+/// "Achata" o markdown pra exportar: expande ![[embeds]] (profundidade limitada) e
+/// troca [[wikilinks]] pelo texto (alias ou nome do alvo). Mantém imagens/links normais.
+fn expand_md(content: &str, by_stem: &HashMap<String, String>, depth: u8) -> String {
+    let mut out = String::with_capacity(content.len());
+    let bytes = content.as_bytes();
+    let mut i = 0;
+    while i < content.len() {
+        if let Some(rel) = content[i..].find("[[") {
+            let start = i + rel;
+            out.push_str(&content[i..start]);
+            let is_embed = start > 0 && bytes[start - 1] == b'!';
+            if is_embed {
+                out.pop(); // tira o '!' já copiado
+            }
+            if let Some(erel) = content[start + 2..].find("]]") {
+                let end = start + 2 + erel;
+                let inner = &content[start + 2..end];
+                let no_alias = inner.split('|').next().unwrap_or("");
+                let alias = inner.split('|').nth(1).map(|s| s.trim().to_string());
+                let target = no_alias.split('#').next().unwrap_or("").trim();
+                if is_embed && depth > 0 {
+                    if let Some(p) = by_stem.get(&target.to_lowercase()) {
+                        if let Ok(sub) = fs::read_to_string(p) {
+                            out.push_str("\n\n");
+                            out.push_str(&expand_md(&strip_frontmatter(&sub), by_stem, depth - 1));
+                            out.push_str("\n\n");
+                        } else {
+                            out.push_str(&alias.unwrap_or_else(|| leaf_name(target)));
+                        }
+                    } else {
+                        out.push_str(&alias.unwrap_or_else(|| leaf_name(target)));
+                    }
+                } else {
+                    out.push_str(&alias.unwrap_or_else(|| leaf_name(target)));
+                }
+                i = end + 2;
+            } else {
+                out.push_str(&content[start..]);
+                break;
+            }
+        } else {
+            out.push_str(&content[i..]);
+            break;
+        }
+    }
+    out
+}
+
+/// Exporta a nota (achatada) via Pandoc. O formato é inferido pela extensão do `dest`.
+#[tauri::command]
+pub fn export_pandoc(vault: String, note_path: String, dest: String) -> Result<(), String> {
+    let note = Path::new(&note_path);
+    let content = fs::read_to_string(note).map_err(|e| e.to_string())?;
+
+    let root = Path::new(&vault);
+    let mut files = Vec::new();
+    collect_md(root, &mut files);
+    let mut by_stem: HashMap<String, String> = HashMap::new();
+    for f in &files {
+        by_stem
+            .entry(stem(f).to_lowercase())
+            .or_insert_with(|| f.to_string_lossy().to_string());
+    }
+
+    let flat = expand_md(&strip_frontmatter(&content), &by_stem, 1);
+    let tmp = std::env::temp_dir().join(format!("quartzo-export-{:x}.md", fnv1a(&note_path)));
+    fs::write(&tmp, &flat).map_err(|e| e.to_string())?;
+
+    let note_dir = note
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|| vault.clone());
+    let sep = if cfg!(windows) { ";" } else { ":" };
+    let rp = format!("{note_dir}{sep}{vault}");
+
+    let mut cmd = Command::new("pandoc");
+    cmd.arg(&tmp)
+        .arg("-o")
+        .arg(&dest)
+        .arg("--standalone")
+        .arg(format!("--resource-path={rp}"));
+    no_window(&mut cmd);
+    let result = cmd.output();
+    let _ = fs::remove_file(&tmp);
+    match result {
+        Ok(out) if out.status.success() => Ok(()),
+        Ok(out) => Err(String::from_utf8_lossy(&out.stderr).trim().to_string()),
+        Err(e) => Err(format!("Pandoc não encontrado: {e}")),
+    }
+}
+
 // ---- Bases salvas (consultas nomeadas em .quartzo/bases.json) ----
 
 fn bases_file(vault: &str) -> PathBuf {

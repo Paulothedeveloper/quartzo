@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.51.0",
+    date: "2026-06-27",
+    items: [
+      "Exportar com Pandoc: Ctrl+K → “Exportar com Pandoc” gera DOCX, PDF, ODT, RTF ou EPUB da nota (formato escolhido no diálogo de salvar). Antes de exportar, ele “achata” a nota — expande os ![[embeds]] e troca os [[wikilinks]] pelo texto. (Requer o Pandoc instalado.)",
+    ],
+  },
+  {
     version: "0.50.0",
     date: "2026-06-27",
     items: [

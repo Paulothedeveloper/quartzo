@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.51.0 — 2026-06-27
+
+- **Exportar com Pandoc (DOCX/PDF/ODT/RTF/EPUB):** comando `export-doc` (paleta) + `exportPandoc` em `export.ts`. Rust `pandoc_available()` e `export_pandoc(vault, note_path, dest)` — o formato é inferido pela extensão escolhida no diálogo de salvar. Antes de chamar o Pandoc, a nota é **achatada** (`expand_md`): expande `![[embeds]]` inline (profundidade 1, reusando o índice de stems do vault) e troca `[[wikilinks]]`/`[[a|alias]]`/`[[a#h]]` pelo **texto** (alias ou nome), além de remover o front-matter (`strip_frontmatter`). Roda `pandoc tmp.md -o dest --standalone --resource-path=<pasta da nota>;<vault>` (acha imagens relativas), com `no_window` no Windows; erros do Pandoc voltam como toast. Se o Pandoc não estiver instalado, avisa. i18n `export.*` PT/EN/ES.
+
 ## 0.50.0 — 2026-06-27
 
 - **Bases — tabelas globais do vault (estilo Dataview):** novo `BasesView` (store `basesOpen`, menu do vault "Bases (tabelas)…" + comando `bases`). Monta por **UI** uma consulta sobre TODAS as notas: fonte (pasta/tag), **colunas** (chips das propriedades descobertas no índice), **filtro** (campo + operador + valor), **ordenação** (campo + ↑/↓), **visão** (tabela/cartões/quadro/lista) e limite — renderizando ao vivo pelo mesmo motor das views ` ```query ` (`buildQueryView`). **Bases salvas** com nome em `.quartzo/bases.json` (Rust `load_bases`/`save_bases`), reaplicáveis num clique.

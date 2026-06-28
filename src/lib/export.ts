@@ -1,7 +1,11 @@
 // Exportar a nota renderizada: PDF (via impressão do sistema) e HTML standalone.
 import { save } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
+import { get } from "svelte/store";
 import { showToast } from "$lib/stores/toast";
+import { currentVaultPath } from "$lib/stores/vault";
+import { activeTabPath } from "$lib/stores/tabs";
+import { tr } from "$lib/i18n";
 
 function activeProse(): HTMLElement | null {
   return document.querySelector<HTMLElement>(".q-prose");
@@ -79,5 +83,52 @@ export async function exportNoteHtml(name: string) {
     showToast("HTML exportado", "success");
   } catch (e) {
     showToast(`Erro ao exportar: ${e}`, "error");
+  }
+}
+
+/** Pandoc está instalado no sistema? */
+export async function pandocAvailable(): Promise<boolean> {
+  try {
+    return await invoke<boolean>("pandoc_available");
+  } catch {
+    return false;
+  }
+}
+
+/** Exporta a nota ativa via Pandoc — o formato vem da extensão escolhida no diálogo. */
+export async function exportPandoc() {
+  const vault = get(currentVaultPath);
+  const note = get(activeTabPath);
+  if (!vault || !note) {
+    showToast(tr("toast.openVaultFirst"), "info");
+    return;
+  }
+  if (!(await pandocAvailable())) {
+    showToast(tr("export.pandocMissing"), "error");
+    return;
+  }
+  const base = (note.split(/[\\/]/).pop() ?? "nota").replace(/\.md$/i, "");
+  let dest: string | null;
+  try {
+    dest = await save({
+      defaultPath: `${base}.docx`,
+      filters: [
+        { name: "Word (DOCX)", extensions: ["docx"] },
+        { name: "OpenDocument (ODT)", extensions: ["odt"] },
+        { name: "PDF", extensions: ["pdf"] },
+        { name: "Rich Text (RTF)", extensions: ["rtf"] },
+        { name: "EPUB", extensions: ["epub"] },
+      ],
+    });
+  } catch {
+    dest = null;
+  }
+  if (!dest) return;
+  showToast(tr("export.pandocRunning"), "info");
+  try {
+    await invoke("export_pandoc", { vault, notePath: note, dest });
+    showToast(tr("export.pandocDone"), "success");
+  } catch (e) {
+    showToast(tr("export.pandocError", { error: String(e) }), "error");
   }
 }
