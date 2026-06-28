@@ -114,8 +114,11 @@
     </button>
   </div>
 
-  <!-- conteúdo -->
-  <div class="me-body" style="padding-bottom:{mode === 'edit' ? 46 : 0}px">
+  <!-- conteúdo (espaço pra barra de formatação + safe-area no modo escrever) -->
+  <div
+    class="me-body"
+    style="padding-bottom:{mode === 'edit' ? 'calc(46px + env(safe-area-inset-bottom))' : '0'}"
+  >
     {#if activeTab}
       {#if mode === "edit"}
         <CodeMirror
@@ -139,7 +142,10 @@
 
   <!-- barra de formatação acima do teclado -->
   {#if mode === "edit"}
-    <div class="me-fmt" style="bottom:{kb}px">
+    <div
+      class="me-fmt"
+      style="bottom:{kb}px; padding-bottom:{kb === 0 ? 'env(safe-area-inset-bottom)' : '0'}"
+    >
       {#each fmt as f (f.label)}
         {@const Icon = f.icon}
         <button
@@ -252,14 +258,12 @@
     display: flex;
     align-items: center;
     gap: 2px;
-    height: 46px;
+    min-height: 46px;
     padding: 0 6px;
     overflow-x: auto;
     background: var(--color-surface);
     border-top: 1px solid var(--color-border);
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.28);
-    /* quando o teclado está fechado (kb=0), respeita a safe-area */
-    padding-bottom: 0;
   }
   .me-fmt-btn {
     display: grid;

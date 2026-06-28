@@ -55,15 +55,26 @@
   let sheetNode = $state<FileNode | null>(null);
   let pressTimer: ReturnType<typeof setTimeout> | null = null;
   let longFired = false;
+  let pressX = 0;
+  let pressY = 0;
 
-  function pressStart(n: FileNode) {
+  function pressStart(e: PointerEvent, n: FileNode) {
     longFired = false;
+    pressX = e.clientX;
+    pressY = e.clientY;
     pressTimer = setTimeout(() => {
       longFired = true;
       sheetNode = n;
       sheetOpen = true;
       if (navigator.vibrate) navigator.vibrate(12);
     }, 430);
+  }
+  function pressMove(e: PointerEvent) {
+    // se o dedo se move (rolagem), cancela o long-press pra não abrir o sheet à toa
+    if (pressTimer && (Math.abs(e.clientX - pressX) > 10 || Math.abs(e.clientY - pressY) > 10)) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
   }
   function pressEnd() {
     if (pressTimer) clearTimeout(pressTimer);
@@ -144,7 +155,8 @@
       {#each list as n (n.path)}
         <button
           class="ml-item"
-          onpointerdown={() => pressStart(n)}
+          onpointerdown={(e) => pressStart(e, n)}
+          onpointermove={pressMove}
           onpointerup={pressEnd}
           onpointercancel={pressEnd}
           onpointerleave={pressEnd}
