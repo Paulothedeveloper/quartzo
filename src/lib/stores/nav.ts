@@ -94,3 +94,36 @@ export function toggleBookmark(path: string) {
 export function removeBookmark(path: string) {
   if (get(bookmarks).includes(path)) toggleBookmark(path);
 }
+
+// ---------- Fixadas no topo (pinned, por vault) ----------
+export const pinned = writable<string[]>([]);
+
+function pinKey(v: string): string {
+  return `quartzo:pinned:${v}`;
+}
+
+export function loadPinned() {
+  const v = get(currentVaultPath);
+  if (!v || typeof localStorage === "undefined") {
+    pinned.set([]);
+    return;
+  }
+  try {
+    pinned.set(JSON.parse(localStorage.getItem(pinKey(v)) ?? "[]"));
+  } catch {
+    pinned.set([]);
+  }
+}
+
+export function togglePin(path: string) {
+  const v = get(currentVaultPath);
+  if (!v || !path) return;
+  const list = get(pinned);
+  const next = list.includes(path) ? list.filter((p) => p !== path) : [path, ...list];
+  pinned.set(next);
+  try {
+    localStorage.setItem(pinKey(v), JSON.stringify(next));
+  } catch {
+    /* ignora */
+  }
+}

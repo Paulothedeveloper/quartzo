@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.47.0",
+    date: "2026-06-27",
+    items: [
+      "Notas duplicadas: novo limpador (no menu do vault ou Ctrl+K → “Notas duplicadas”) acha notas com conteúdo idêntico — ex.: a mesma adicionada duas vezes — e manda as cópias pra Lixeira num clique (mantém a mais antiga).",
+      "Fixar nota no topo: no clique-direito, “Fixar no topo” cria uma seção Fixadas no alto da barra lateral (separada dos Favoritos). Também tem “Favoritar”.",
+      "Menu do clique-direito não fica mais cortado pela janela: ele se reposiciona sozinho pra caber sempre, em qualquer canto.",
+    ],
+  },
+  {
     version: "0.46.0",
     date: "2026-06-27",
     items: [

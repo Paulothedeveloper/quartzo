@@ -6,16 +6,43 @@
     ctxMenu.set(null);
   }
 
-  const pos = $derived.by(() => {
+  let menuEl = $state<HTMLDivElement | null>(null);
+  let pos = $state<{ x: number; y: number } | null>(null);
+  let ready = $state(false); // só mostra depois de medir/ajustar (sem flash cortado)
+
+  // Reposiciona SEMPRE dentro da janela: mede o tamanho real e, se passar da borda,
+  // puxa pra dentro / abre pra cima. Resolve o menu "comido" pela janela.
+  $effect(() => {
     const m = $ctxMenu;
-    if (!m || typeof window === "undefined") return null;
-    const mw = 220;
-    const mh = m.items.reduce((h, it) => h + (it.separator ? 9 : 32), 10);
-    let x = m.x;
-    let y = m.y;
-    if (x + mw > window.innerWidth) x = window.innerWidth - mw - 8;
-    if (y + mh > window.innerHeight) y = window.innerHeight - mh - 8;
-    return { x: Math.max(6, x), y: Math.max(6, y) };
+    if (!m || typeof window === "undefined") {
+      pos = null;
+      ready = false;
+      return;
+    }
+    pos = { x: m.x, y: m.y };
+    ready = false;
+    queueMicrotask(() => {
+      const el = menuEl;
+      if (!el) {
+        ready = true;
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      const pad = 8;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let x = m.x;
+      let y = m.y;
+      // horizontal: se estoura à direita, encosta na borda
+      if (x + r.width > vw - pad) x = vw - r.width - pad;
+      // vertical: se estoura embaixo, tenta abrir pra cima do cursor; senão encosta
+      if (y + r.height > vh - pad) {
+        const above = m.y - r.height;
+        y = above >= pad ? above : vh - r.height - pad;
+      }
+      pos = { x: Math.max(pad, x), y: Math.max(pad, y) };
+      ready = true;
+    });
   });
 </script>
 
@@ -27,8 +54,9 @@
 
 {#if $ctxMenu && pos}
   <div
+    bind:this={menuEl}
     class="ctxmenu"
-    style="left:{pos.x}px; top:{pos.y}px"
+    style="left:{pos.x}px; top:{pos.y}px; visibility:{ready ? 'visible' : 'hidden'}"
     transition:fly={{ y: -4, duration: 110 }}
     role="menu"
     tabindex="-1"
@@ -92,6 +120,8 @@
     position: fixed;
     z-index: 300;
     min-width: 210px;
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
     padding: 5px;
     border-radius: 12px;
     background: rgba(28, 37, 54, 0.97);

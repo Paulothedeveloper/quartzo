@@ -26,6 +26,16 @@ completa, use **Gerenciar vaults…**. A mesma pasta nunca é listada duas vezes
 > A seção **Atalhos** no rodapé da barra lateral (Nota do dia, Grafo, Canvas,
 > Rascunho, Versões…) **recolhe e expande** na setinha ▾/▸, como a seção TAGS.
 
+**Notas duplicadas:** se você adicionou a mesma nota duas vezes sem querer, abra o
+menu do vault → **Notas duplicadas…** (ou **Ctrl+K** → "Notas duplicadas"). Ele
+acha notas com **conteúdo idêntico**, deixa a **mais antiga** marcada pra manter e
+manda as cópias pra **Lixeira** num clique (recuperável).
+
+**Clique-direito numa nota** (na árvore de arquivos): **Abrir**, **Abrir ao lado**,
+**Fixar no topo**, **Favoritar**, **Renomear**, **Copiar caminho**, **Mostrar na
+pasta** e **Apagar**. **Fixar no topo** põe a nota numa seção **Fixadas** no alto da
+barra lateral; **Favoritar** põe numa seção **Favoritos** logo abaixo.
+
 ---
 
 ## 2. Conectar ideias (o coração do PKM)

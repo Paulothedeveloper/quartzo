@@ -3,6 +3,12 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.47.0 — 2026-06-27
+
+- **Limpar notas duplicadas:** novo `DuplicatesModal` (store `duplicatesOpen`, no menu do vault "Notas duplicadas…" + comando `find-duplicates` na paleta). Rust `find_duplicate_notes(vault)` varre os `.md` (reusa `collect_md`), normaliza CRLF→LF + `trim_end`, agrupa por hash (`fnv1a`) e devolve grupos com 2+ arquivos (mais antigo primeiro). A UI lista cada grupo com a **mais antiga preservada** (desmarcada) e as cópias **pré-marcadas** pra Lixeira; remove via `delete_to_trash`, tira das abas abertas e re-escaneia. i18n `dup.*` PT/EN/ES.
+- **Fixar nota no topo + Favoritar no clique-direito:** o menu de contexto da nota (FileTree) ganhou **Fixar no topo/Desafixar** (`togglePin`, ícone alfinete) e **Favoritar/Remover dos favoritos** (`toggleBookmark`, estrela). "Fixar no topo" cria uma seção **Fixadas** no alto da sidebar (store `pinned` por vault em `quartzo:pinned:<vault>`, `loadPinned` no boot/troca de vault), **separada** dos Favoritos. Ambos também via Ctrl+Shift+S (favoritar).
+- **Menu de contexto nunca mais cortado:** `ContextMenu` agora **mede o tamanho real** após render e reposiciona pra caber 100% na janela (encosta na borda / abre pra cima quando perto do fim), com `max-height` + scroll para menus altos. Some o flash via `visibility` até ajustar. Resolve o menu "comido" pela janela em qualquer canto.
+
 ## 0.46.0 — 2026-06-27
 
 - **Vaults duplicados corrigidos:** `addRecentVault`/`getRecentVaults`/`removeRecentVault` agora comparam por **caminho normalizado** (`normVault`: minúsculas, `\`→`/`, sem barra final) — a mesma pasta não entra 2× (ex.: `D:\X` vs `D:/X`) e `getRecentVaults` **deduplica na leitura**, então a duplicata que já estava salva (o "WINDOWS - DAVINCI RESOLVE" repetido) some sozinha.

@@ -1474,6 +1474,85 @@ pub fn delete_to_trash(path: String) -> Result<(), String> {
     trash::delete(&path).map_err(|e| e.to_string())
 }
 
+// ---- Notas duplicadas (mesmo conteúdo) ----
+
+#[derive(Serialize, Clone)]
+pub struct DupFile {
+    pub path: String,
+    pub name: String,
+    pub rel: String,
+    pub modified: u64,
+}
+#[derive(Serialize, Clone)]
+pub struct DupGroup {
+    pub key: String,
+    pub size: u64,
+    pub empty: bool,
+    pub files: Vec<DupFile>,
+}
+
+/// Acha grupos de notas .md com **conteúdo idêntico** (duplicatas reais — ex.: a
+/// mesma nota adicionada 2×). Normaliza CRLF→LF e tira espaços/linhas no fim antes
+/// de comparar. Retorna só grupos com 2+ arquivos, mais cópias primeiro.
+#[tauri::command]
+pub fn find_duplicate_notes(vault: String) -> Result<Vec<DupGroup>, String> {
+    use std::collections::HashMap;
+    let root = Path::new(&vault);
+    let mut files = Vec::new();
+    collect_md(root, &mut files);
+
+    let mut groups: HashMap<u64, Vec<PathBuf>> = HashMap::new();
+    let mut sizes: HashMap<u64, usize> = HashMap::new();
+    for p in &files {
+        let Ok(content) = fs::read_to_string(p) else { continue };
+        let normalized = content.replace("\r\n", "\n");
+        let normalized = normalized.trim_end();
+        let h = fnv1a(normalized);
+        sizes.insert(h, normalized.len());
+        groups.entry(h).or_default().push(p.clone());
+    }
+
+    let mut out: Vec<DupGroup> = Vec::new();
+    for (h, paths) in groups {
+        if paths.len() < 2 {
+            continue;
+        }
+        let size = *sizes.get(&h).unwrap_or(&0) as u64;
+        let mut dup_files: Vec<DupFile> = paths
+            .iter()
+            .map(|p| {
+                let modified = fs::metadata(p)
+                    .and_then(|m| m.modified())
+                    .ok()
+                    .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                    .map(|d| d.as_secs())
+                    .unwrap_or(0);
+                let rel = p
+                    .strip_prefix(root)
+                    .unwrap_or(p)
+                    .to_string_lossy()
+                    .replace('\\', "/");
+                DupFile {
+                    path: p.to_string_lossy().to_string(),
+                    name: p.file_name().and_then(|n| n.to_str()).unwrap_or("").to_string(),
+                    rel,
+                    modified,
+                }
+            })
+            .collect();
+        // mais antigo primeiro (sugere manter o original e remover as cópias novas)
+        dup_files.sort_by(|a, b| a.modified.cmp(&b.modified));
+        out.push(DupGroup {
+            key: format!("{h:x}"),
+            size,
+            empty: size == 0,
+            files: dup_files,
+        });
+    }
+    out.sort_by(|a, b| b.files.len().cmp(&a.files.len()));
+    Ok(out)
+}
+
 fn is_word_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
 }

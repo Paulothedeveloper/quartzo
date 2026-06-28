@@ -21,6 +21,7 @@
   import PrismaPicker from "$lib/components/ui/PrismaPicker.svelte";
   import VaultManager from "$lib/components/ui/VaultManager.svelte";
   import RelinkModal from "$lib/components/ui/RelinkModal.svelte";
+  import DuplicatesModal from "$lib/components/ui/DuplicatesModal.svelte";
   import SearchModal from "$lib/components/ui/SearchModal.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
@@ -47,12 +48,13 @@
     prismaPickerOpen,
     relinkOpen,
     quickSaveOpen,
+    duplicatesOpen,
     rightPane,
   } from "$lib/stores/ui";
   import { refreshGitSync } from "$lib/stores/gitsync";
   import { settings, applySettings, getLastVault, formatCombo } from "$lib/stores/settings";
   import { syncAutoSnapshot } from "$lib/git-auto";
-  import { recordNav, navBack, navForward, loadBookmarks, toggleBookmark } from "$lib/stores/nav";
+  import { recordNav, navBack, navForward, loadBookmarks, toggleBookmark, loadPinned } from "$lib/stores/nav";
   import { COMMAND_DEFS } from "$lib/commands";
   import { graphData } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
@@ -176,10 +178,11 @@
     if (p) untrack(() => recordNav(p));
   });
 
-  // Favoritos: (re)carrega ao abrir/trocar de vault.
+  // Favoritos + fixadas: (re)carrega ao abrir/trocar de vault.
   $effect(() => {
     $currentVaultPath;
     untrack(loadBookmarks);
+    untrack(loadPinned);
   });
 
   // Índice de aliases (front-matter) — (re)carrega ao abrir/trocar de vault.
@@ -396,6 +399,10 @@
       if (p) toggleBookmark(p);
     },
     "fix-broken-links": () => relinkOpen.set(true),
+    "find-duplicates": () => {
+      if (get(currentVaultPath)) duplicatesOpen.set(true);
+      else showToast(tr("toast.openVaultFirst"), "info");
+    },
   };
 
   const commands = $derived<Command[]>([
@@ -603,4 +610,5 @@
 <PrismaPicker />
 <VaultManager />
 <RelinkModal />
+<DuplicatesModal />
 <QuickSave />

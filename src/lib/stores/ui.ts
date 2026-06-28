@@ -69,6 +69,9 @@ export const vaultManagerOpen = writable(false);
 /** Abre o corretor de links quebrados (relink) da nota atual. */
 export const relinkOpen = writable(false);
 
+/** Abre o limpador de notas duplicadas (mesmo conteúdo). */
+export const duplicatesOpen = writable(false);
+
 /** Alvo do "espiar página" (hover preview do wikilink). null = escondido. */
 export interface HoverPreviewState {
   path: string;

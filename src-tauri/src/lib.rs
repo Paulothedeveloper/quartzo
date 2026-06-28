@@ -4,6 +4,7 @@ use commands::{
     build_graph_index, build_alias_index, create_folder, create_note, daily_note, delete_to_trash, get_backlinks,
     build_query_index, copy_vault_to_cloud, create_note_full, detect_cloud_folders,
     get_unlinked_mentions, git_commit, git_commit_files, git_diff, git_init, git_log, git_pull, git_push, git_remote, rename_note, link_mention,
+    find_duplicate_notes,
     scan_for_file, import_attachment,
     git_status, launch_prisma, prisma_installed, prisma_db_present, prisma_search_assets,
     ffmpeg_available, make_video_proxy,
@@ -138,7 +139,8 @@ pub fn run() {
             prisma_db_present,
             prisma_search_assets,
             ffmpeg_available,
-            make_video_proxy
+            make_video_proxy,
+            find_duplicate_notes
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

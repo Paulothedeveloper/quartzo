@@ -15,11 +15,14 @@
     ExternalLink,
     CornerUpRight,
     Columns2,
+    Star,
+    Pin,
   } from "@lucide/svelte";
   import { slide } from "svelte/transition";
   import { get } from "svelte/store";
   import { selectedFile } from "$lib/stores/vault";
   import { activeTabPath } from "$lib/stores/tabs";
+  import { bookmarks, toggleBookmark, pinned, togglePin } from "$lib/stores/nav";
   import { ctxMenu, renamingPath, rightPane, type CtxMenuItem } from "$lib/stores/ui";
   import {
     renameEntry,
@@ -75,6 +78,16 @@
       : [
           { label: tr("common.open"), icon: CornerUpRight, action: () => selectedFile.set(node.path) },
           { label: tr("tabs.openBeside"), icon: Columns2, action: () => rightPane.set(node.path) },
+          {
+            label: get(pinned).includes(node.path) ? tr("tree.unpin") : tr("tree.pin"),
+            icon: Pin,
+            action: () => togglePin(node.path),
+          },
+          {
+            label: get(bookmarks).includes(node.path) ? tr("tree.unfavorite") : tr("tree.favorite"),
+            icon: Star,
+            action: () => toggleBookmark(node.path),
+          },
           { separator: true },
           ...common,
         ];
