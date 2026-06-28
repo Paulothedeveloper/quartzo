@@ -1083,3 +1083,33 @@ html.mobile .app-body.nav-open .app-sidebar { transform: translateX(0); }
 @keyframes q-fade-in { from { opacity: 0; } to { opacity: 1; } }
 /* Respiro pra barra de gestos embaixo. */
 html.mobile .q-view-in { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ===== Modais em TELA CHEIA no mobile (não "desktop espremido") =====
+   Os modais (Configurações, Bases, Insights, Duplicadas, Memória) usam o mesmo
+   padrão de overlay+painel; no celular o painel ocupa a tela toda com safe-area. */
+html.mobile .qmodal-overlay { padding: 0 !important; }
+html.mobile .qmodal-panel {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* Configurações: o rail lateral (w-48) vira abas horizontais no topo,
+   liberando a largura toda pro conteúdo (toque-first). */
+html.mobile .qsettings { flex-direction: column !important; }
+html.mobile .qsettings-nav {
+  width: 100% !important;
+  flex-direction: row !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border-right: none !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  gap: 4px !important;
+  padding: 8px 10px !important;
+}
+html.mobile .qsettings-nav > div { display: none !important; } /* título "Configurações" */
+html.mobile .qsettings-nav button { white-space: nowrap; flex-shrink: 0; }

@@ -92,14 +92,14 @@
 
 {#if open}
   <div
-    class="fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+    class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
     transition:fade={{ duration: 150 }}
     onclick={(e) => e.target === e.currentTarget && (open = false)}
     onkeydown={(e) => e.key === "Escape" && (open = false)}
     role="presentation"
   >
     <div
-      class="flex max-h-[88vh] w-full max-w-[560px] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+      class="qmodal-panel flex max-h-[88vh] w-full max-w-[560px] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
       transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
       role="dialog"
       aria-modal="true"

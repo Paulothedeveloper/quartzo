@@ -406,14 +406,14 @@
 
 {#if open}
   <div
-    class="fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+    class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
     transition:fade={{ duration: 150 }}
     onclick={(e) => e.target === e.currentTarget && (open = false)}
     onkeydown={(e) => e.key === "Escape" && (open = false)}
     role="presentation"
   >
     <div
-      class="flex h-[600px] max-h-[88vh] w-full max-w-[680px] overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+      class="qmodal-panel qsettings flex h-[600px] max-h-[88vh] w-full max-w-[680px] overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
       transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
       role="dialog"
       aria-modal="true"
@@ -421,7 +421,7 @@
       tabindex="-1"
     >
       <!-- Rail de seções -->
-      <nav class="flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-bg/40 px-3 py-3">
+      <nav class="qsettings-nav flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-bg/40 px-3 py-3">
         <div class="px-2 pb-2 pt-1 text-sm font-semibold">{$t("common.settings")}</div>
         {#each tabs as tab (tab.id)}
           <button

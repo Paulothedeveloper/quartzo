@@ -114,14 +114,14 @@
 
 {#if $duplicatesOpen}
   <div
-    class="fixed inset-0 z-[170] flex items-start justify-center bg-black/55 pt-[10vh] backdrop-blur-sm"
+    class="qmodal-overlay fixed inset-0 z-[170] flex items-start justify-center bg-black/55 pt-[10vh] backdrop-blur-sm"
     transition:fade={{ duration: 150 }}
     onclick={close}
     role="presentation"
   >
     <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
     <div
-      class="flex max-h-[78vh] w-full max-w-[600px] flex-col overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-2xl backdrop-blur-xl"
+      class="qmodal-panel flex max-h-[78vh] w-full max-w-[600px] flex-col overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-2xl backdrop-blur-xl"
       transition:fly={{ y: -18, duration: 230 }}
       onclick={(e) => e.stopPropagation()}
       role="dialog"
