@@ -6,7 +6,6 @@
     Share2,
     Menu as MenuIcon,
     Plus,
-    ChevronLeft,
     Settings as SettingsIcon,
     FolderPlus,
     FolderOpen,
@@ -22,7 +21,7 @@
     BookOpen,
   } from "@lucide/svelte";
   import { currentVaultPath } from "$lib/stores/vault";
-  import { openTabs, activeTabPath } from "$lib/stores/tabs";
+  import { activeTabPath } from "$lib/stores/tabs";
   import {
     showGraph,
     showCanvas,
@@ -37,17 +36,13 @@
     tutorialOpen,
   } from "$lib/stores/ui";
   import { createNoteIn, newNoteDir, openDailyNote, openNote } from "$lib/vault-actions";
-  import FileTree from "./FileTree.svelte";
   import WelcomeScreen from "./WelcomeScreen.svelte";
-  import MarkdownEditor from "$lib/components/editor/MarkdownEditor.svelte";
+  import MobileEditor from "$lib/mobile/MobileEditor.svelte";
+  import MobileNoteList from "$lib/mobile/MobileNoteList.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
   import Sketch from "$lib/components/sketch/Sketch.svelte";
-  import { fileTree } from "$lib/stores/vault";
-  import { selectedFile } from "$lib/stores/vault";
-  import type { FileNode } from "$lib/types";
   import { t, tr } from "$lib/i18n";
-  import { vaultLabel } from "$lib/stores/settings";
 
   let { onOpenVault, onCreateVault }: { onOpenVault?: () => void; onCreateVault?: () => void } = $props();
 
@@ -62,24 +57,6 @@
     }
   });
 
-  // Busca de arquivos (nome) dentro da aba Notas.
-  let search = $state("");
-  function flatten(nodes: FileNode[], acc: FileNode[] = []): FileNode[] {
-    for (const n of nodes) {
-      if (!n.is_dir) acc.push(n);
-      if (n.children) flatten(n.children, acc);
-    }
-    return acc;
-  }
-  const searchResults = $derived(
-    search.trim()
-      ? flatten($fileTree).filter((n) => n.name.toLowerCase().includes(search.trim().toLowerCase()))
-      : []
-  );
-
-  const noteName = $derived(
-    $activeTabPath ? ($activeTabPath.split(/[\\/]/).pop()?.replace(/\.md$/i, "") ?? "") : ""
-  );
 
   function newNote() {
     if (!$currentVaultPath) return;
@@ -139,30 +116,11 @@
       <WelcomeScreen {onOpenVault} {onCreateVault} />
     {:else if tab === "notes"}
       {#if viewingNote && $activeTabPath}
-        <!-- Editor em tela cheia -->
-        <div class="msh-topbar">
-          <button class="msh-back" onclick={backToList} aria-label={$t("titlebar.navBack")}>
-            <ChevronLeft size={22} />
-          </button>
-          <span class="msh-title">{noteName}</span>
-        </div>
-        <div class="msh-editor"><MarkdownEditor /></div>
+        <!-- Editor nativo (casca própria + barra de formatação acima do teclado) -->
+        <MobileEditor onBack={backToList} />
       {:else}
-        <!-- Lista de notas -->
-        <div class="msh-topbar">
-          <span class="msh-vault">{vaultLabel($currentVaultPath)}</span>
-        </div>
-        <div class="msh-searchbar">
-          <Search size={15} />
-          <input bind:value={search} placeholder={$t("sidebar.searchFiles")} />
-        </div>
-        <div class="msh-list">
-          {#if search.trim()}
-            <FileTree nodes={searchResults} />
-          {:else}
-            <FileTree nodes={$fileTree} />
-          {/if}
-        </div>
+        <!-- Lista de notas nativa (drill-down + long-press) -->
+        <MobileNoteList onOpen={(p) => openNote(p)} />
       {/if}
     {:else if tab === "graph"}
       <div class="msh-fill">
