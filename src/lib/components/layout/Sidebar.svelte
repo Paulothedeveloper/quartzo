@@ -34,7 +34,7 @@
   import { currentVaultPath, fileTree } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
   import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, duplicatesOpen, insightsOpen, basesOpen, askPrompt, askConfirm, type CtxMenuItem } from "$lib/stores/ui";
-  import { getRecentVaults, vaultLabel, setVaultLabel, removeRecentVault, getVaultLabels, settings } from "$lib/stores/settings";
+  import { getRecentVaults, vaultLabel, setVaultLabel, removeRecentVault, getVaultLabels, recentVaults, settings } from "$lib/stores/settings";
   import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote, createVault } from "$lib/vault-actions";
   import { bookmarks, toggleBookmark, pinned, togglePin } from "$lib/stores/nav";
   import type { FileNode } from "$lib/types";
@@ -47,10 +47,16 @@
 
   let search = $state("");
   let vaultRev = $state(0); // bump p/ reavaliar rótulos após renomear/remover
+  let lastVaultMenu: { x: number; y: number } | null = null; // posição p/ reabrir o menu
   const vaultName = $derived.by(() => {
     void vaultRev; // dependência: reavalia o rótulo após renomear/remover
     return $currentVaultPath ? vaultLabel($currentVaultPath) : "VAULT";
   });
+
+  // Reabre o menu de vaults na mesma posição com a lista FRESCA (após remover/renomear).
+  function reopenVaultMenu() {
+    if (lastVaultMenu) buildVaultMenu(lastVaultMenu.x, lastVaultMenu.y);
+  }
 
   function folderName(p: string): string {
     return p.split(/[\\/]/).filter(Boolean).pop() ?? p;
@@ -68,6 +74,7 @@
     setVaultLabel(path, val);
     vaultRev++;
     showToast(tr("vault.renamed"), "success");
+    reopenVaultMenu(); // mostra a lista já atualizada
   }
   // Remove um vault da lista (NÃO apaga a pasta do disco).
   async function removeVault(path: string) {
@@ -81,6 +88,7 @@
     removeRecentVault(path);
     vaultRev++;
     showToast(tr("vault.removed"), "info");
+    reopenVaultMenu(); // a lista atualiza na hora (não fica o homônimo "fantasma")
   }
 
   async function openVault() {
@@ -98,6 +106,11 @@
   function openVaultMenu(e: MouseEvent) {
     e.stopPropagation();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    buildVaultMenu(rect.left, rect.bottom + 4);
+  }
+  function buildVaultMenu(x: number, y: number) {
+    lastVaultMenu = { x, y };
+    void $recentVaults; // reativo: re-lê quando a lista muda
     const current = $currentVaultPath;
     const items: CtxMenuItem[] = [];
     // Ações do vault atual (igual ao Obsidian: clique-direito no nome do vault)
@@ -128,6 +141,7 @@
     for (const v of recents) {
       items.push({
         label: vaultLabel(v),
+        sub: v, // caminho completo — distingue homônimos (ex.: D:\ vs G:\Meu Drive)
         icon: v === current ? Check : QuartzIcon,
         action: () => {
           if (v !== current) setVault(v).then(() => showToast(tr("sidebar.vaultOpened"), "success"));
@@ -151,7 +165,7 @@
       { label: tr("vault.create"), icon: FolderPlus, action: createVault },
       { label: tr("vault.openOther"), icon: FolderOpen, action: openVault },
     );
-    ctxMenu.set({ x: rect.left, y: rect.bottom + 4, items });
+    ctxMenu.set({ x, y, items });
   }
 
   function newNote() {

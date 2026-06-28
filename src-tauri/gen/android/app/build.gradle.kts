@@ -13,9 +13,10 @@ val tauriProperties = Properties().apply {
     }
 }
 
-// Assinatura de release: lê key.properties (git-ignored; keystore fora do repo).
+// Assinatura de release: lê key.properties da raiz do projeto Android
+// (gen/android/key.properties; git-ignored; keystore fora do repo).
 val keystoreProperties = Properties().apply {
-    val f = file("key.properties")
+    val f = rootProject.file("key.properties")
     if (f.exists()) {
         f.inputStream().use { load(it) }
     }

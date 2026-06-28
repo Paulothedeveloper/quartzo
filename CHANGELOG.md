@@ -3,6 +3,13 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.56.0 — 2026-06-28
+
+- **Grafo — performance em vaults grandes:** o pré-cálculo do layout (d3-force) deixou de ser síncrono (`for…tick()` travava a thread ao abrir) e agora roda **em lotes via `requestAnimationFrame`** com guarda de geração (`layoutGen`) pra não duplicar ao recarregar; **culling** (`onlyRenderVisibleElements`) liga mais cedo (>350 nós, era 800) e `liteMode` em >120 nós / >250 arestas. Pan/zoom muito mais fluidos; sem freeze no load. Visual idêntico.
+- **Menu de vaults:** cada vault mostra o **caminho** (segunda linha via `CtxMenuItem.sub`) — distingue homônimos (ex.: `D:\VAULTS` vs `G:\Meu Drive\VAULTS`); store **`recentVaults`** reativa + **reabre o menu** após remover/renomear (a lista atualiza na hora); `normVault` com `trim`.
+- **Salvar todos os vaults na nuvem:** `saveAllVaultsToCloud()` (git-auto) percorre os vaults, faz commit + push em cada repo com remoto; botão em Configurações › Nuvem (desktop). i18n `set.saveAll*`.
+- **Ícone Android:** `tauri icon` regenerou os mipmaps com a logo de cristal.
+
 ## 0.55.0 — 2026-06-27
 
 - **Criar vault (faltava!):** `createVault()` em vault-actions — `askPrompt` do nome + (desktop) diálogo de pasta-pai / (mobile) `appLocalDataDir` → `ensure_dir` (Rust, novo) → `setVault`. Botões na **WelcomeScreen** (Criar + Abrir), no **menu de vaults** (Sidebar) e comando `new-vault` na paleta. i18n PT/EN/ES.

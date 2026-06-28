@@ -245,9 +245,9 @@ export function getLastVault(): string | null {
 
 // --- Lista de vaults conhecidos (igual ao seletor do Obsidian) ---
 const VAULTS = "quartzo:vaults";
-/** Chave de comparação de caminhos (Windows: case-insensitive, \ ou /, sem barra final). */
+/** Chave de comparação de caminhos (Windows: case-insensitive, \ ou /, sem barra/espaço final). */
 function normVault(p: string): string {
-  return p.replace(/[\\/]+$/, "").replace(/\\/g, "/").toLowerCase();
+  return p.trim().replace(/[\\/]+$/, "").replace(/\\/g, "/").toLowerCase();
 }
 export function getRecentVaults(): string[] {
   if (typeof localStorage === "undefined") return [];
@@ -267,22 +267,27 @@ export function getRecentVaults(): string[] {
     return [];
   }
 }
+/** Store REATIVA dos vaults recentes — a UI (menu/Gerenciar) atualiza na hora ao add/remover. */
+export const recentVaults = writable<string[]>(getRecentVaults());
 export function addRecentVault(path: string) {
   if (typeof localStorage === "undefined") return;
   const k = normVault(path);
   const list = [path, ...getRecentVaults().filter((p) => normVault(p) !== k)].slice(0, 12);
   localStorage.setItem(VAULTS, JSON.stringify(list));
+  recentVaults.set(list);
 }
 export function removeRecentVault(path: string) {
   if (typeof localStorage === "undefined") return;
   const k = normVault(path);
-  localStorage.setItem(VAULTS, JSON.stringify(getRecentVaults().filter((p) => normVault(p) !== k)));
+  const list = getRecentVaults().filter((p) => normVault(p) !== k);
+  localStorage.setItem(VAULTS, JSON.stringify(list));
   // remove também o rótulo customizado, se houver
   const labels = getVaultLabels();
   if (labels[path]) {
     delete labels[path];
     localStorage.setItem(VAULT_LABELS, JSON.stringify(labels));
   }
+  recentVaults.set(list);
 }
 
 // --- Rótulos (apelidos) customizados por vault ---
@@ -308,4 +313,5 @@ export function setVaultLabel(path: string, label: string) {
   if (label.trim()) labels[path] = label.trim();
   else delete labels[path];
   localStorage.setItem(VAULT_LABELS, JSON.stringify(labels));
+  recentVaults.set(getRecentVaults()); // re-renderiza os rótulos na UI
 }

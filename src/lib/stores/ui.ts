@@ -51,6 +51,8 @@ export interface CtxMenuItem {
   action?: () => void;
   danger?: boolean;
   separator?: boolean;
+  /** Segunda linha discreta (ex.: caminho do vault, pra distinguir homônimos). */
+  sub?: string;
   /** Botões pequenos no fim da linha (ex.: renomear / remover um vault). */
   actions?: CtxMenuAction[];
 }

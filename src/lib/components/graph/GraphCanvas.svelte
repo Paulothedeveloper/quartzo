@@ -70,7 +70,11 @@
   let noteDataCache = new Map<string, any>();
   let cachedRegions: Node[] = [];
   let tickCount = 0;
-  onDestroy(() => sim?.stop());
+  let layoutGen = 0; // invalida o pré-cálculo em lotes se os dados recarregarem
+  onDestroy(() => {
+    layoutGen++;
+    sim?.stop();
+  });
 
   function posFromSim(): Map<string, { x: number; y: number }> {
     const m = new Map<string, { x: number; y: number }>();
@@ -252,6 +256,7 @@
   function rebuild(rNodes: RawGraphNode[], rEdges: RawGraphEdge[]) {
     sim?.stop();
     sim = null;
+    layoutGen++; // invalida qualquer pré-cálculo em lotes ainda rodando
     firstDraw = true; // redesenha as arestas a cada (re)carga de dados
     // cores por pasta (índice estável, ordenado)
     groupColors = new Map();
@@ -273,8 +278,10 @@
     }
 
     // Grafo grande -> modo leve (sem efeitos pesados) + layout congelado.
-    liteMode = rNodes.length > 150 || valid.length > 300;
-    veryLarge = rNodes.length > 800; // só aí vale cular (senão atrapalha o zoom)
+    liteMode = rNodes.length > 120 || valid.length > 250;
+    // Culling (onlyRenderVisibleElements): liga mais cedo (>350) — em vaults
+    // grandes, pintar só o que está na viewport é MUITO mais fluido no pan/zoom.
+    veryLarge = rNodes.length > 350;
 
     // Centros de cluster por pasta, distribuídos num círculo (folders se agrupam).
     const groupList = [...new Set(rNodes.map((n) => n.group))].sort();
@@ -352,10 +359,32 @@
     } else {
       // Pré-computa e congela (grafos grandes ou física contínua desligada).
       s.stop();
-      const ticks = rNodes.length > 1000 ? 200 : rNodes.length > 300 ? 340 : 460;
-      for (let i = 0; i < ticks; i++) s.tick();
-      nodes = buildNodes(posFromSim(), true);
-      applyEdgeStyles();
+      if (rNodes.length > 300) {
+        // GRANDE: roda os ticks em LOTES via requestAnimationFrame pra NÃO
+        // congelar a thread principal (era o "travar" ao abrir vault grande).
+        const total = rNodes.length > 1500 ? 160 : rNodes.length > 800 ? 230 : 320;
+        const myGen = layoutGen;
+        let done = 0;
+        const run = () => {
+          if (myGen !== layoutGen) return; // dados recarregaram -> aborta
+          const batch = Math.min(25, total - done);
+          for (let k = 0; k < batch; k++) s.tick();
+          done += batch;
+          if (done >= total) {
+            nodes = buildNodes(posFromSim(), true);
+            applyEdgeStyles();
+            focusTarget = { ids: null, nonce: focusTarget.nonce + 1 }; // enquadra ao fim
+          } else {
+            requestAnimationFrame(run);
+          }
+        };
+        run();
+      } else {
+        const ticks = 460;
+        for (let i = 0; i < ticks; i++) s.tick();
+        nodes = buildNodes(posFromSim(), true);
+        applyEdgeStyles();
+      }
     }
   }
 

@@ -44,6 +44,8 @@
   const ACCENTS = ["#67e8f9", "#38bdf8", "#a78bfa", "#34d399", "#fbbf24", "#f472b6", "#f87171"];
   import { currentVaultPath } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
+  import { saveAllVaultsToCloud } from "$lib/git-auto";
+  import { isMobile } from "$lib/platform";
   import { prismaPickerOpen } from "$lib/stores/ui";
   import { setVault, refreshTree } from "$lib/vault-actions";
   import { loadGraph } from "$lib/stores/graph";
@@ -93,7 +95,7 @@
     if (open && section === "aparencia" && v) untrack(() => loadSnippets(v));
   });
 
-  let appVersion = $state("0.55.0");
+  let appVersion = $state("0.56.0");
   $effect(() => {
     try {
       getVersion()
@@ -236,6 +238,24 @@
   }
   let cloudFolders = $state<CloudFolder[]>([]);
   let movingCloud = $state(false);
+  // Salvar TODOS os vaults conhecidos de uma vez (commit + push em cada repo com remoto).
+  let savingAll = $state(false);
+  async function saveAll() {
+    savingAll = true;
+    try {
+      const r = await saveAllVaultsToCloud();
+      const msg = tr("set.saveAllResult", { pushed: r.pushed, committed: r.committed, skipped: r.skipped });
+      if (r.failed.length) {
+        showToast(tr("set.saveAllSomeFail", { fail: r.failed.join(", ") }), "error");
+      } else {
+        showToast(msg, "success");
+      }
+    } catch (e) {
+      showToast(`${e}`, "error");
+    } finally {
+      savingAll = false;
+    }
+  }
   async function loadClouds() {
     try {
       cloudFolders = await invoke<CloudFolder[]>("detect_cloud_folders");
@@ -1034,6 +1054,23 @@
                   {$t("set.cloudSyncDescBefore")} <strong>Google Drive</strong> {$t("set.cloudSyncDescAfter")}
                 </div>
               </div>
+
+              {#if !isMobile}
+                <div class="card flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium">{$t("set.saveAllTitle")}</div>
+                    <div class="mt-1 text-xs leading-relaxed text-text-secondary">{$t("set.saveAllDesc")}</div>
+                  </div>
+                  <button
+                    onclick={saveAll}
+                    disabled={savingAll}
+                    class="flex shrink-0 items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-50"
+                  >
+                    {#if savingAll}<Loader2 size={14} class="animate-spin" />{:else}<CloudUpload size={15} />{/if}
+                    {$t("set.saveAllBtn")}
+                  </button>
+                </div>
+              {/if}
 
               {#if vaultInCloud}
                 <div class="card flex items-center gap-2.5">

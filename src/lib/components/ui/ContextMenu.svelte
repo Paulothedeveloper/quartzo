@@ -77,7 +77,11 @@
             }}
           >
             {#if Icon}<Icon size={15} />{/if}
-            <span>{it.label}</span>
+            {#if it.sub}
+              <span class="ctx-text"><span class="ctx-label">{it.label}</span><span class="ctx-sub">{it.sub}</span></span>
+            {:else}
+              <span>{it.label}</span>
+            {/if}
           </button>
           {#each it.actions as a (a.title)}
             {@const AIcon = a.icon}
@@ -108,7 +112,11 @@
           }}
         >
           {#if Icon}<Icon size={15} />{/if}
-          <span>{it.label}</span>
+          {#if it.sub}
+            <span class="ctx-text"><span class="ctx-label">{it.label}</span><span class="ctx-sub">{it.sub}</span></span>
+          {:else}
+            <span>{it.label}</span>
+          {/if}
         </button>
       {/if}
     {/each}
@@ -157,10 +165,36 @@
     min-width: 0;
     width: auto;
   }
-  .ctx-item--grow span {
+  .ctx-item--grow > span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  /* Linha dupla: rótulo + caminho discreto (distinguir vaults homônimos). */
+  .ctx-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+  }
+  .ctx-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ctx-sub {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    direction: rtl; /* trunca pela ESQUERDA — mostra o fim do caminho (a pasta) */
+    text-align: left;
+  }
+  .ctx-item:hover .ctx-sub,
+  .ctx-act:hover ~ * .ctx-sub {
+    color: inherit;
+    opacity: 0.8;
   }
   .ctx-act {
     display: grid;

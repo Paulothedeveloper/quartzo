@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.56.0",
+    date: "2026-06-28",
+    items: [
+      "Grafo otimizado pra vaults grandes: o layout agora é calculado em lotes (não trava mais ao abrir um vault com muitas notas) e só desenha o que está visível mais cedo — pan e zoom bem mais fluidos.",
+      "Menu de vaults mostra o caminho embaixo do nome (distingue vaults com o mesmo nome em pastas diferentes) e a lista atualiza na hora ao remover/renomear.",
+      "Salvar todos os vaults de uma vez na nuvem: novo botão em Configurações › Nuvem (commit + push em cada vault com repositório/remoto), além do salvar individual.",
+      "Ícone do app (logo de cristal) aplicado no Android.",
+    ],
+  },
+  {
     version: "0.55.0",
     date: "2026-06-27",
     items: [
