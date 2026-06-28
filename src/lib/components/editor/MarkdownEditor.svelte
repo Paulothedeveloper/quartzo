@@ -160,7 +160,7 @@
 
 {#if activeTab}
   <!-- Barra superior -->
-  <div class="flex h-10 shrink-0 items-center justify-between border-b border-border px-4">
+  <div class="q-editor-toolbar flex h-10 shrink-0 items-center justify-between border-b border-border px-4">
     <span class="truncate text-sm text-text-secondary">{activeTab.name}</span>
 
     <div class="flex items-center gap-4">

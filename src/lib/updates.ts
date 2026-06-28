@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.49.0",
+    date: "2026-06-27",
+    items: [
+      "Modo foco (zen): esconde barra de título, barra lateral, abas e painéis e centraliza só o editor numa coluna confortável. Ative pela paleta (Ctrl+K → “Modo foco”) e saia com Esc ou no botão flutuante.",
+    ],
+  },
+  {
     version: "0.48.0",
     date: "2026-06-27",
     items: [

@@ -51,6 +51,7 @@
     quickSaveOpen,
     duplicatesOpen,
     insightsOpen,
+    zenMode,
     rightPane,
   } from "$lib/stores/ui";
   import { refreshGitSync } from "$lib/stores/gitsync";
@@ -74,6 +75,7 @@
   import { get } from "svelte/store";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { Minimize2 } from "@lucide/svelte";
 
   // ---- Redimensionar barra lateral (arrastar a borda) ----
   let dragWidth = $state<number | null>(null);
@@ -409,6 +411,21 @@
       if (get(currentVaultPath)) insightsOpen.set(true);
       else showToast(tr("toast.openVaultFirst"), "info");
     },
+    "toggle-zen": () => {
+      const on = !get(zenMode);
+      if (on) {
+        // entra no foco: fecha tudo que distrai
+        outlineOpen.set(false);
+        backlinksOpen.set(false);
+        gitOpen.set(false);
+        rightPane.set(null);
+        sidebarCollapsed.set(false); // a sidebar é escondida via CSS, não recolhida
+        sfx.open();
+      } else {
+        sfx.close();
+      }
+      zenMode.set(on);
+    },
   };
 
   const commands = $derived<Command[]>([
@@ -465,6 +482,13 @@
     return parts.join("+");
   }
   function onGlobalKeydown(e: KeyboardEvent) {
+    // Sair do Modo Foco com Esc (sem exigir Ctrl).
+    if (e.key === "Escape" && get(zenMode)) {
+      e.preventDefault();
+      zenMode.set(false);
+      sfx.close();
+      return;
+    }
     // Navegação voltar/avançar (Alt+←/→) — fora do sistema de atalhos (não exige Ctrl).
     if (e.altKey && !e.ctrlKey && !e.metaKey && !get(settingsOpen)) {
       if (e.key === "ArrowLeft") {
@@ -499,7 +523,7 @@
   onpointerover={onGlobalPointerOver}
 />
 
-<div class="flex h-screen w-screen flex-col overflow-hidden">
+<div class="flex h-screen w-screen flex-col overflow-hidden" class:app-zen={$zenMode}>
   <TitleBar />
   <div class="flex min-h-0 flex-1">
   <aside
@@ -540,7 +564,7 @@
     {:else if $openTabs.length || $rightPane || ($gitOpen && $currentVaultPath)}
       <div class="q-view-in flex min-h-0 flex-1">
         {#if $openTabs.length}
-          <div class="flex min-w-0 flex-1 flex-col">
+          <div class="q-main flex min-w-0 flex-1 flex-col">
             <EditorTabs />
             <MarkdownEditor />
           </div>
@@ -619,3 +643,15 @@
 <DuplicatesModal />
 <InsightsModal />
 <QuickSave />
+
+{#if $zenMode}
+  <button
+    class="zen-exit"
+    onclick={() => { zenMode.set(false); sfx.close(); }}
+    title={$t("zen.exit")}
+    transition:fly={{ y: -8, duration: 200 }}
+  >
+    <Minimize2 size={15} />
+    <span>{$t("zen.exit")}</span>
+  </button>
+{/if}

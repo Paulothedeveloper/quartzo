@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.49.0 — 2026-06-27
+
+- **Modo foco / zen:** store `zenMode` + comando `toggle-zen` (paleta, hint "foco"; configurável em Atalhos). Classe `.app-zen` no container raiz esconde `.qtitlebar`, `.app-sidebar`, `.q-resizer`, `.q-editor-tabs` e `.q-editor-toolbar` e centraliza `.q-main` (`max-width:900px;margin:auto`). Ao entrar, fecha painéis (outline/backlinks/git/rightPane). Sai com **Esc** (handler global) ou **botão flutuante** discreto (`.zen-exit`, canto sup. dir.). SFX de abrir/fechar. i18n PT/EN/ES.
+
 ## 0.48.0 — 2026-06-27
 
 - **Visão do vault — órfãs e recentes:** novo `InsightsModal` (store `insightsOpen`, no menu do vault "Órfãs e recentes…" + comando `vault-insights` na paleta), com **abas Recentes/Órfãs**. Rust `vault_insights(vault, recent_limit)` varre os `.md` (reusa `collect_md`+`parse_links`+resolução por nome/caminho do grafo), calcula **grau total** (entrada+saída) de cada nota → **órfã = grau 0**, e devolve as **recentes por mtime** (top 30) com `path/name/rel/modified` (structs `NoteInfo`/`VaultInsights`). A UI lista cada nota (pasta + data nas recentes; "sem links" nas órfãs), abre num clique e tem botões de **fixar/favoritar** no hover. i18n `insights.*` PT/EN/ES.

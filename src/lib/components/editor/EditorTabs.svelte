@@ -53,7 +53,7 @@
   }
 </script>
 
-<div class="flex overflow-x-auto border-b border-border bg-surface">
+<div class="q-editor-tabs flex overflow-x-auto border-b border-border bg-surface">
   {#each $openTabs as tab (tab.path)}
     <button
       class="group flex min-w-[140px] max-w-[220px] items-center gap-2 border-r border-t-2 border-border px-4 py-2 text-sm transition-all duration-150 ease-out {$activeTabPath ===

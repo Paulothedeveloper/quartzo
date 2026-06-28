@@ -35,6 +35,11 @@ manda as cópias pra **Lixeira** num clique (recuperável).
 abas: **Recentes** (modificadas por último) e **Órfãs** (notas sem nenhum link de
 entrada ou saída — ilhas pra revisar). Clique abre a nota; dá pra fixar/favoritar ali.
 
+**Modo foco (zen):** **Ctrl+K → "Modo foco"** esconde tudo (barra de título, lateral,
+abas e painéis) e deixa só o editor centralizado, pra escrever sem distração. Saia
+com **Esc** ou no botão flutuante no canto. (Pode atribuir um atalho em Configurações
+› Atalhos.)
+
 **Clique-direito numa nota** (na árvore de arquivos): **Abrir**, **Abrir ao lado**,
 **Fixar no topo**, **Favoritar**, **Renomear**, **Copiar caminho**, **Mostrar na
 pasta** e **Apagar**. **Fixar no topo** põe a nota numa seção **Fixadas** no alto da

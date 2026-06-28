@@ -996,3 +996,44 @@ textarea,
 .callout-danger .callout-title { color: #fca5a5; }
 .callout-quote { border-color: #64748b; }
 .callout-quote .callout-title { color: #cbd5e1; }
+
+/* ==================== MODO FOCO / ZEN ==================== */
+/* Esconde toda a interface e centraliza só o editor numa coluna confortável. */
+.app-zen .qtitlebar,
+.app-zen .app-sidebar,
+.app-zen .q-resizer,
+.app-zen .q-editor-tabs,
+.app-zen .q-editor-toolbar {
+  display: none !important;
+}
+.app-zen .q-main {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+/* Botão flutuante pra sair do foco (canto superior direito). */
+.zen-exit {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  opacity: 0.35;
+  transition: opacity 0.18s var(--ease-out, ease), color 0.18s ease, background 0.18s ease;
+}
+.zen-exit:hover {
+  opacity: 1;
+  color: var(--color-text-primary);
+  background: var(--color-elevated);
+}
