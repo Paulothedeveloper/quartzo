@@ -8,7 +8,7 @@
 **Gratuito · Funciona offline · Seus arquivos são seus (.md no seu PC).**
 **Free · Works offline · Your files stay yours (.md on your PC).**
 
-<sub>Windows · Tauri 2 (Rust) + SvelteKit/Svelte 5 + TypeScript + Tailwind v4</sub>
+<sub>Windows · Android · Tauri 2 (Rust) + SvelteKit/Svelte 5 + TypeScript + Tailwind v4</sub>
 
 [**⬇ Baixar / Download**](https://github.com/Paulothedeveloper/quartzo/releases/latest) · [**📖 Guia do usuário**](docs/GUIA.md) · [Releases](https://github.com/Paulothedeveloper/quartzo/releases) · [Issues](https://github.com/Paulothedeveloper/quartzo/issues)
 
@@ -43,6 +43,7 @@ Mais que um editor de notas: tem **grafo** de conexões (estilo cérebro), **Can
 - 🎬 **Vídeo:** revisão time-coded + export de marcadores. 🎨 **Design:** conta-gotas + extração de paleta.
 - 🌿 **Git nativo** (versões/histórico), ✏️ **rascunho** (desenho), 🖨️ **export** PDF/HTML.
 - ☁️ **Nuvem** via Google Drive/OneDrive (pasta sincronizada). 🌓 Tema claro/escuro, **SFX** e animações.
+- 📱 **App Android nativo** — não é o desktop espremido: abas embaixo (Notas/Buscar/Grafo/Mais), lista de notas, editor em tela cheia e botão flutuante pra criar. Mesmo vault, mesmas notas.
 - 🔗 **Ecossistema integrado:** conversa com o **PRISMA** (nossa biblioteca de mídia) e o **VELVET** (cor no DaVinci). Ver [Ecossistema](#-ecossistema--ecosystem).
 
 ### Privacidade e segurança — pode usar sem medo
@@ -54,9 +55,17 @@ Mais que um editor de notas: tem **grafo** de conexões (estilo cérebro), **Can
 
 ### Como instalar
 
+**Windows**
+
 1. Vá em **[Releases](https://github.com/Paulothedeveloper/quartzo/releases/latest)**.
 2. Baixe **`Quartzo_x.y.z_x64-setup.exe`**.
 3. Rode e abra o Quartzo. App não assinado → o SmartScreen pode avisar ("Mais informações" → "Executar assim mesmo").
+
+**Android**
+
+1. Na [última release](https://github.com/Paulothedeveloper/quartzo/releases/latest), baixe **`Quartzo_x.y.z.apk`**.
+2. Abra o APK no celular e permita "instalar de fontes desconhecidas".
+3. Abra o Quartzo, crie ou abra um vault e escreva. (O `.aab` é só pra Play Store.)
 
 ---
 
@@ -85,6 +94,7 @@ More than a note editor: it has a **connections graph** (brain-style), **Canvas/
 - 🎬 **Video:** time-coded review + marker export. 🎨 **Design:** eyedropper + palette extraction.
 - 🌿 **Native Git** (versions/history), ✏️ **sketch**, 🖨️ **export** to PDF/HTML.
 - ☁️ **Cloud** via Google Drive/OneDrive (synced folder). 🌓 Light/dark theme, **SFX** and animations.
+- 📱 **Native Android app** — not the squished desktop: bottom tabs (Notes/Search/Graph/More), note list, full-screen editor and a floating button to create. Same vault, same notes.
 - 🔗 **Integrated ecosystem:** talks to **PRISMA** (our media library) and **VELVET** (color in DaVinci). See [Ecosystem](#-ecossistema--ecosystem).
 
 ### Privacy & security — use it with confidence
@@ -96,9 +106,17 @@ More than a note editor: it has a **connections graph** (brain-style), **Canvas/
 
 ### Install
 
+**Windows**
+
 1. Go to **[Releases](https://github.com/Paulothedeveloper/quartzo/releases/latest)**.
 2. Download **`Quartzo_x.y.z_x64-setup.exe`**.
 3. Run it and open Quartzo. Unsigned app → SmartScreen may warn ("More info" → "Run anyway").
+
+**Android**
+
+1. On the [latest release](https://github.com/Paulothedeveloper/quartzo/releases/latest), download **`Quartzo_x.y.z.apk`**.
+2. Open the APK on your phone and allow "install from unknown sources".
+3. Open Quartzo, create or open a vault and start writing. (The `.aab` is for the Play Store only.)
 
 ---
 
@@ -118,7 +136,7 @@ Contrato técnico da integração · Integration contract: **[docs/INTEGRATION.m
 
 ## Stack
 
-- **Desktop:** [Tauri 2](https://tauri.app) (Rust) · **UI:** SvelteKit + Svelte 5 + TypeScript (Vite) + Tailwind v4
+- **Desktop & Mobile:** [Tauri 2](https://tauri.app) (Rust) — Windows e **Android** (mesmo core) · **UI:** SvelteKit + Svelte 5 + TypeScript (Vite) + Tailwind v4
 - **Editor:** CodeMirror 6 · **Render:** marked + Mermaid + KaTeX · **Grafo:** @xyflow/svelte + d3-force
 
 ## Licença · License
