@@ -1282,7 +1282,8 @@ pub struct PrismaAsset {
 }
 
 /// Busca assets no banco do PRISMA (read-only, seguro mesmo com o PRISMA aberto).
-/// `query` vazio = mais recentes. Filtra a lixeira (trashed=0).
+/// `query` vazio = mais recentes. Filtra a lixeira (trashed=0). Só desktop (rusqlite + PRISMA).
+#[cfg(desktop)]
 #[tauri::command]
 pub fn prisma_search_assets(query: String, limit: i64) -> Result<Vec<PrismaAsset>, String> {
     let db = prisma_db_file().ok_or("Banco do PRISMA não encontrado")?;
@@ -1323,6 +1324,11 @@ pub fn prisma_search_assets(query: String, limit: i64) -> Result<Vec<PrismaAsset
         }
     }
     Ok(out)
+}
+#[cfg(not(desktop))]
+#[tauri::command]
+pub fn prisma_search_assets(_query: String, _limit: i64) -> Result<Vec<PrismaAsset>, String> {
+    Ok(Vec::new()) // PRISMA é só desktop
 }
 
 // ==================== GIT (versionamento local) ====================
@@ -1688,10 +1694,16 @@ pub fn rename_path(path: String, new_name: String) -> Result<String, String> {
     Ok(dest.to_string_lossy().to_string())
 }
 
-/// Move um arquivo/pasta para a Lixeira (recuperável).
+/// Move um arquivo/pasta para a Lixeira (recuperável). Só desktop (crate `trash`).
+#[cfg(desktop)]
 #[tauri::command]
 pub fn delete_to_trash(path: String) -> Result<(), String> {
     trash::delete(&path).map_err(|e| e.to_string())
+}
+#[cfg(not(desktop))]
+#[tauri::command]
+pub fn delete_to_trash(_path: String) -> Result<(), String> {
+    Err("Lixeira indisponível no mobile".into())
 }
 
 // ---- Notas duplicadas (mesmo conteúdo) ----

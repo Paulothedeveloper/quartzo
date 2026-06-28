@@ -14,9 +14,12 @@ use commands::{
     WatchState,
 };
 use std::sync::Mutex;
+#[cfg(desktop)]
 use tauri::{Emitter, Manager};
 
 /// Trata um quartzo://note/<caminho-relativo> — foca a janela e manda o front abrir a nota.
+/// Só desktop: usa métodos de janela (unminimize/set_focus) que não existem no mobile.
+#[cfg(desktop)]
 fn handle_deeplink(app: &tauri::AppHandle, url: &str) {
     if let Some(rest) = url.strip_prefix("quartzo://note/") {
         // tira query/fragmento e decodifica %20 etc.
@@ -33,6 +36,7 @@ fn handle_deeplink(app: &tauri::AppHandle, url: &str) {
 }
 
 /// Decodificação simples de percent-encoding (sem dependências extras).
+#[cfg(desktop)]
 fn percent_decode(s: &str) -> String {
     let bytes = s.as_bytes();
     let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
@@ -55,20 +59,24 @@ fn percent_decode(s: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        // single-instance PRIMEIRO: se já há um Quartzo aberto e clicam um
-        // quartzo://, o SO chama isto na instância existente (em vez de abrir outra).
-        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
-            if let Some(w) = app.get_webview_window("main") {
-                let _ = w.unminimize();
-                let _ = w.set_focus();
+    let builder = tauri::Builder::default();
+
+    // single-instance é SÓ desktop: se já há um Quartzo aberto e clicam um
+    // quartzo://, o SO chama isto na instância existente (em vez de abrir outra).
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+        if let Some(w) = app.get_webview_window("main") {
+            let _ = w.unminimize();
+            let _ = w.set_focus();
+        }
+        for arg in &argv {
+            if arg.starts_with("quartzo://") {
+                handle_deeplink(app, arg);
             }
-            for arg in &argv {
-                if arg.starts_with("quartzo://") {
-                    handle_deeplink(app, arg);
-                }
-            }
-        }))
+        }
+    }));
+
+    builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_deep_link::init())
