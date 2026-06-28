@@ -58,7 +58,7 @@
     position: relative;
     height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow: auto; /* nunca corta o conteúdo: rola se a janela for baixa */
     display: grid;
     place-items: center;
     background: radial-gradient(ellipse 75% 60% at 50% 36%, #101a36 0%, #0a0f1c 55%, #05070e 100%);
@@ -121,7 +121,8 @@
     position: relative;
     z-index: 2;
     text-align: center;
-    padding: 2rem;
+    padding: 2rem max(2rem, env(safe-area-inset-left)) calc(2rem + env(safe-area-inset-bottom));
+    max-width: 560px;
     animation: rise 0.6s var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
   }
   .crystal {
@@ -169,12 +170,13 @@
     animation: none;
   }
   h1 {
-    margin-top: 1.6rem;
-    font-size: 2.6rem;
+    margin-top: 1.4rem;
+    font-size: clamp(1.9rem, 6vw, 2.6rem);
     font-weight: 700;
     letter-spacing: -0.025em;
     color: #f0f9ff;
-    line-height: 1.1;
+    line-height: 1.18; /* >1.1 senão o texto em degradê corta os descendentes */
+    padding-bottom: 0.08em;
   }
   .grad {
     background: linear-gradient(115deg, #a5f3fc 0%, #67e8f9 45%, #818cf8 100%);
@@ -232,6 +234,19 @@
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: #cbd5e1;
+  }
+
+  /* Janelas baixas: encolhe o cristal e as margens pra nada cortar. */
+  @media (max-height: 760px) {
+    .crystal { transform: scale(0.72); margin-bottom: -2rem; }
+    h1 { margin-top: 0.5rem; }
+    .sub { font-size: 0.95rem; margin-top: 0.6rem; }
+    .cta { margin-top: 1.2rem; }
+    .hint { margin-top: 0.9rem; }
+  }
+  @media (max-height: 560px) {
+    .crystal { transform: scale(0.55); margin-bottom: -3.4rem; }
+    .hint { display: none; }
   }
 
   @keyframes drift {
