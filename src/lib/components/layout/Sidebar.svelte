@@ -22,14 +22,15 @@
     Settings2,
     Star,
     X,
+    Trash2,
   } from "@lucide/svelte";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
   import { invoke } from "@tauri-apps/api/core";
   import { currentVaultPath, fileTree } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
-  import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, type CtxMenuItem } from "$lib/stores/ui";
-  import { getRecentVaults, vaultLabel, settings } from "$lib/stores/settings";
+  import { showGraph, showCanvas, showSketch, sidebarCollapsed, settingsOpen, memoryOpen, searchRequest, gitOpen, ctxMenu, vaultManagerOpen, askPrompt, askConfirm, type CtxMenuItem } from "$lib/stores/ui";
+  import { getRecentVaults, vaultLabel, setVaultLabel, removeRecentVault, getVaultLabels, settings } from "$lib/stores/settings";
   import { setVault, refreshTree, createNoteIn, createFolderIn, openDailyNote, newNoteDir, openNote } from "$lib/vault-actions";
   import { bookmarks, toggleBookmark } from "$lib/stores/nav";
   import type { FileNode } from "$lib/types";
@@ -41,9 +42,42 @@
   import { t, tr } from "$lib/i18n";
 
   let search = $state("");
-  const vaultName = $derived(
-    $currentVaultPath ? vaultLabel($currentVaultPath) : "VAULT"
-  );
+  let vaultRev = $state(0); // bump p/ reavaliar rótulos após renomear/remover
+  const vaultName = $derived.by(() => {
+    void vaultRev; // dependência: reavalia o rótulo após renomear/remover
+    return $currentVaultPath ? vaultLabel($currentVaultPath) : "VAULT";
+  });
+
+  function folderName(p: string): string {
+    return p.split(/[\\/]/).filter(Boolean).pop() ?? p;
+  }
+  // Renomeia (apelido) um vault via diálogo de texto.
+  async function renameVault(path: string) {
+    const val = await askPrompt({
+      title: tr("vault.renameTitle"),
+      message: path,
+      initial: getVaultLabels()[path] ?? "",
+      placeholder: folderName(path),
+      confirmLabel: tr("vault.rename"),
+    });
+    if (val === null) return; // cancelou
+    setVaultLabel(path, val);
+    vaultRev++;
+    showToast(tr("vault.renamed"), "success");
+  }
+  // Remove um vault da lista (NÃO apaga a pasta do disco).
+  async function removeVault(path: string) {
+    const ok = await askConfirm({
+      title: tr("vault.removeTitle"),
+      message: tr("vault.removeMsg", { name: vaultLabel(path) }),
+      confirmLabel: tr("vault.removeFromList"),
+      danger: true,
+    });
+    if (!ok) return;
+    removeRecentVault(path);
+    vaultRev++;
+    showToast(tr("vault.removed"), "info");
+  }
 
   async function openVault() {
     const selected = await openDialog({
@@ -94,6 +128,10 @@
         action: () => {
           if (v !== current) setVault(v).then(() => showToast(tr("sidebar.vaultOpened"), "success"));
         },
+        actions: [
+          { icon: Pencil, title: tr("vault.rename"), action: () => renameVault(v) },
+          { icon: Trash2, title: tr("vault.removeFromList"), danger: true, action: () => removeVault(v) },
+        ],
       });
     }
     if (recents.length) items.push({ separator: true });
@@ -143,6 +181,16 @@
     search.trim()
       ? flatten($fileTree).filter((n) => n.name.toLowerCase().includes(search.trim().toLowerCase()))
       : []
+  );
+
+  // Há algum atalho do rodapé habilitado? (se não, esconde o cabeçalho recolhível)
+  const hasShortcuts = $derived(
+    $settings.features.dailyNotes ||
+      $settings.features.memory ||
+      $settings.features.graph ||
+      $settings.features.canvas ||
+      $settings.features.sketch ||
+      $settings.features.git
   );
 </script>
 
@@ -346,70 +394,86 @@
       </div>
     {/if}
 
-    <!-- Seção inferior fixa -->
-    <div class="mt-auto flex flex-col gap-1 border-t border-border p-2">
-      {#if $settings.features.dailyNotes}
+    <!-- Seção inferior: atalhos recolhíveis + Configurações sempre visível -->
+    <div class="mt-auto flex flex-col border-t border-border">
+      {#if hasShortcuts}
         <button
-          onclick={openDailyNote}
-          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
+          onclick={() => settings.update((s) => ({ ...s, sidebarShortcutsOpen: !s.sidebarShortcutsOpen }))}
+          title={$settings.sidebarShortcutsOpen ? $t("sidebar.shortcutsHide") : $t("sidebar.shortcutsShow")}
+          class="flex w-full items-center gap-1.5 px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:text-text-primary"
         >
-          <CalendarDays size={16} /> {$t("titlebar.dailyNote")}
+          {$t("sidebar.shortcuts")}
+          <span class="ml-auto text-text-muted">{$settings.sidebarShortcutsOpen ? "▾" : "▸"}</span>
         </button>
+        {#if $settings.sidebarShortcutsOpen}
+          <div class="flex flex-col gap-1 px-2 pb-1" transition:slide={{ duration: 180 }}>
+            {#if $settings.features.dailyNotes}
+              <button
+                onclick={openDailyNote}
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
+              >
+                <CalendarDays size={16} /> {$t("titlebar.dailyNote")}
+              </button>
+            {/if}
+            {#if $settings.features.memory}
+              <button
+                onclick={() => memoryOpen.set(true)}
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
+              >
+                <Sparkles size={16} class="text-accent" /> {$t("sidebar.newMemory")}
+              </button>
+            {/if}
+            {#if $settings.features.graph}
+              <button
+                onclick={() => showGraph.update((v) => !v)}
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showGraph
+                  ? 'bg-accent/15 text-accent-light'
+                  : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+              >
+                <Share2 size={16} /> {$t("graph.title")}
+              </button>
+            {/if}
+            {#if $settings.features.canvas}
+              <button
+                onclick={() => showCanvas.update((v) => !v)}
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showCanvas
+                  ? 'bg-accent/15 text-accent-light'
+                  : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+              >
+                <Frame size={16} /> Canvas
+              </button>
+            {/if}
+            {#if $settings.features.sketch}
+              <button
+                onclick={() => showSketch.update((v) => !v)}
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showSketch
+                  ? 'bg-accent/15 text-accent-light'
+                  : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+              >
+                <Pencil size={16} /> {$t("sidebar.sketch")}
+              </button>
+            {/if}
+            {#if $settings.features.git}
+              <button
+                onclick={() => gitOpen.update((v) => !v)}
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$gitOpen
+                  ? 'bg-accent/15 text-accent-light'
+                  : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+              >
+                <GitBranch size={16} /> {$t("git.title")}
+              </button>
+            {/if}
+          </div>
+        {/if}
       {/if}
-      {#if $settings.features.memory}
+      <div class="px-2 pb-2 pt-1">
         <button
-          onclick={() => memoryOpen.set(true)}
-          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-all hover:bg-elevated hover:text-text-primary active:scale-[0.99]"
+          onclick={() => settingsOpen.set(true)}
+          class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
         >
-          <Sparkles size={16} class="text-accent" /> {$t("sidebar.newMemory")}
+          <SettingsIcon size={16} /> {$t("common.settings")}
         </button>
-      {/if}
-      {#if $settings.features.graph}
-        <button
-          onclick={() => showGraph.update((v) => !v)}
-          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showGraph
-            ? 'bg-accent/15 text-accent-light'
-            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-        >
-          <Share2 size={16} /> {$t("graph.title")}
-        </button>
-      {/if}
-      {#if $settings.features.canvas}
-        <button
-          onclick={() => showCanvas.update((v) => !v)}
-          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showCanvas
-            ? 'bg-accent/15 text-accent-light'
-            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-        >
-          <Frame size={16} /> Canvas
-        </button>
-      {/if}
-      {#if $settings.features.sketch}
-        <button
-          onclick={() => showSketch.update((v) => !v)}
-          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$showSketch
-            ? 'bg-accent/15 text-accent-light'
-            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-        >
-          <Pencil size={16} /> {$t("sidebar.sketch")}
-        </button>
-      {/if}
-      {#if $settings.features.git}
-        <button
-          onclick={() => gitOpen.update((v) => !v)}
-          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all active:scale-[0.99] {$gitOpen
-            ? 'bg-accent/15 text-accent-light'
-            : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-        >
-          <GitBranch size={16} /> {$t("git.title")}
-        </button>
-      {/if}
-      <button
-        onclick={() => settingsOpen.set(true)}
-        class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
-      >
-        <SettingsIcon size={16} /> {$t("common.settings")}
-      </button>
+      </div>
     </div>
   </div>
 {/if}

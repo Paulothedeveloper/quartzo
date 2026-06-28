@@ -54,6 +54,7 @@ export interface Settings {
   // Geral / Arquivos & Links
   autoOpenVault: boolean;
   sidebarWidth: number; // largura da barra lateral (px), arrastável
+  sidebarShortcutsOpen: boolean; // grupo de atalhos do rodapé da sidebar expandido
   newNoteLocation: "root" | "current"; // onde criar novas notas (raiz do vault ou pasta da nota atual)
   confirmBeforeDelete: boolean; // confirmar antes de mandar arquivos pra lixeira
   // Git
@@ -141,6 +142,7 @@ export const DEFAULT_SETTINGS: Settings = {
   enabledSnippets: [],
   autoOpenVault: true,
   sidebarWidth: 280,
+  sidebarShortcutsOpen: true,
   newNoteLocation: "root",
   confirmBeforeDelete: true,
   gitAutoSnapshot: false,
@@ -243,22 +245,38 @@ export function getLastVault(): string | null {
 
 // --- Lista de vaults conhecidos (igual ao seletor do Obsidian) ---
 const VAULTS = "quartzo:vaults";
+/** Chave de comparação de caminhos (Windows: case-insensitive, \ ou /, sem barra final). */
+function normVault(p: string): string {
+  return p.replace(/[\\/]+$/, "").replace(/\\/g, "/").toLowerCase();
+}
 export function getRecentVaults(): string[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(VAULTS) ?? "[]");
+    const raw: string[] = JSON.parse(localStorage.getItem(VAULTS) ?? "[]");
+    // Remove duplicatas por caminho normalizado (limpa entradas antigas com \ vs / etc.).
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const p of raw) {
+      const k = normVault(p);
+      if (!p || seen.has(k)) continue;
+      seen.add(k);
+      out.push(p);
+    }
+    return out;
   } catch {
     return [];
   }
 }
 export function addRecentVault(path: string) {
   if (typeof localStorage === "undefined") return;
-  const list = [path, ...getRecentVaults().filter((p) => p !== path)].slice(0, 12);
+  const k = normVault(path);
+  const list = [path, ...getRecentVaults().filter((p) => normVault(p) !== k)].slice(0, 12);
   localStorage.setItem(VAULTS, JSON.stringify(list));
 }
 export function removeRecentVault(path: string) {
   if (typeof localStorage === "undefined") return;
-  localStorage.setItem(VAULTS, JSON.stringify(getRecentVaults().filter((p) => p !== path)));
+  const k = normVault(path);
+  localStorage.setItem(VAULTS, JSON.stringify(getRecentVaults().filter((p) => normVault(p) !== k)));
   // remove também o rótulo customizado, se houver
   const labels = getVaultLabels();
   if (labels[path]) {

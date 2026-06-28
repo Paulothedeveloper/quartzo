@@ -3,6 +3,12 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.46.0 — 2026-06-27
+
+- **Vaults duplicados corrigidos:** `addRecentVault`/`getRecentVaults`/`removeRecentVault` agora comparam por **caminho normalizado** (`normVault`: minúsculas, `\`→`/`, sem barra final) — a mesma pasta não entra 2× (ex.: `D:\X` vs `D:/X`) e `getRecentVaults` **deduplica na leitura**, então a duplicata que já estava salva (o "WINDOWS - DAVINCI RESOLVE" repetido) some sozinha.
+- **Renomear/remover vault direto no menu:** o dropdown de vaults ganhou **botões inline** por item (lápis = renomear apelido, lixeira = remover da lista) que aparecem no hover — sem precisar abrir "Gerenciar vaults". Para isso, `CtxMenuItem` ganhou `actions?: CtxMenuAction[]` (o `ContextMenu` renderiza os botões à direita) e foi criado um **diálogo de texto reutilizável** `askPrompt`/`PromptDialog.svelte` (usado no renomear; Enter confirma, Esc cancela). Remover **não apaga a pasta do disco** (confirma antes via `askConfirm`).
+- **Grupo de atalhos recolhível:** a seção inferior da sidebar (Nota do dia, Memória, Grafo, Canvas, Rascunho, Versões) virou um grupo **"Atalhos" com setinha ▾/▸** (igual à seção TAGS), persistido em `sidebarShortcutsOpen`. **Configurações** fica sempre visível abaixo. i18n PT/EN/ES.
+
 ## 0.45.0 — 2026-06-27
 
 - **Salvar na nuvem acessível (QuickSave):** botão de **nuvem na barra de título** (com **badge** do nº de alterações pendentes) + **Ctrl+S** + comando na paleta (`cloud-save`) abrem um **popover** ancorado no topo-direito — sem precisar abrir nota nem ir nas Configurações. O painel lista os arquivos alterados com **checkbox por arquivo** (etiqueta +/−/→/• por estado), **“Selecionar tudo”**, mensagem opcional e um botão que troca de rótulo: **“Salvar tudo na nuvem”** (tudo marcado) ou **“Salvar N na nuvem”** (subconjunto). Ao salvar, faz commit e, se houver remoto, **push automático** (toast “Salvo na nuvem”); sem remoto, salva local e avisa. Mostra estado do remoto (sincronizado / N pra enviar / botão **Receber N**) e oferece **Configurar versões** quando o vault ainda não é repo.

@@ -18,8 +18,13 @@ preso no app. Este guia cobre os comandos e recursos principais.
 3. **Escrever**: digite em Markdown. Salva sozinho.
 4. **Modos** (canto superior direito): **Editor** · **Dividido** · **Leitura**.
 
-Vários vaults? Clique no nome do vault → **Gerenciar vaults…** para **renomear**
-(apelido) ou **remover** da lista (não apaga do disco).
+Vários vaults? Clique no **nome do vault** para abrir o menu. Cada vault da lista
+tem, ao passar o mouse, um botão de **renomear** (apelido) e um de **remover da
+lista** (não apaga a pasta do disco) — rápido, sem abrir nada. Se quiser a tela
+completa, use **Gerenciar vaults…**. A mesma pasta nunca é listada duas vezes.
+
+> A seção **Atalhos** no rodapé da barra lateral (Nota do dia, Grafo, Canvas,
+> Rascunho, Versões…) **recolhe e expande** na setinha ▾/▸, como a seção TAGS.
 
 ---
 

@@ -36,6 +36,38 @@
     {#each $ctxMenu.items as it, i (i)}
       {#if it.separator}
         <div class="ctx-sep"></div>
+      {:else if it.actions && it.actions.length}
+        {@const Icon = it.icon}
+        <div class="ctx-row">
+          <button
+            class="ctx-item ctx-item--grow"
+            class:danger={it.danger}
+            role="menuitem"
+            onclick={() => {
+              it.action?.();
+              close();
+            }}
+          >
+            {#if Icon}<Icon size={15} />{/if}
+            <span>{it.label}</span>
+          </button>
+          {#each it.actions as a (a.title)}
+            {@const AIcon = a.icon}
+            <button
+              class="ctx-act"
+              class:danger={a.danger}
+              title={a.title}
+              aria-label={a.title}
+              onclick={(e) => {
+                e.stopPropagation();
+                a.action();
+                close();
+              }}
+            >
+              <AIcon size={14} />
+            </button>
+          {/each}
+        </div>
       {:else}
         {@const Icon = it.icon}
         <button
@@ -82,6 +114,48 @@
     transition:
       background 0.12s var(--ease-out, ease),
       color 0.12s var(--ease-out, ease);
+  }
+  /* Linha com botões de ação no fim (renomear / remover) */
+  .ctx-row {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border-radius: 8px;
+  }
+  .ctx-item--grow {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+  .ctx-item--grow span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ctx-act {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition:
+      background 0.12s var(--ease-out, ease),
+      color 0.12s var(--ease-out, ease),
+      opacity 0.12s var(--ease-out, ease);
+  }
+  .ctx-row:hover .ctx-act {
+    opacity: 1;
+  }
+  .ctx-act:hover {
+    background: var(--color-accent);
+    color: #06121a;
+  }
+  .ctx-act.danger:hover {
+    background: var(--color-danger);
+    color: #fff;
   }
   .ctx-item :global(svg) {
     color: var(--color-text-secondary);

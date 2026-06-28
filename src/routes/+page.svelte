@@ -16,6 +16,7 @@
   import CommandPalette, { type Command } from "$lib/components/ui/CommandPalette.svelte";
   import ContextMenu from "$lib/components/ui/ContextMenu.svelte";
   import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
+  import PromptDialog from "$lib/components/ui/PromptDialog.svelte";
   import HoverPreview from "$lib/components/ui/HoverPreview.svelte";
   import PrismaPicker from "$lib/components/ui/PrismaPicker.svelte";
   import VaultManager from "$lib/components/ui/VaultManager.svelte";
@@ -597,6 +598,7 @@
 <SnippetInjector />
 <MemoryModal bind:open={$memoryOpen} />
 <ConfirmDialog />
+<PromptDialog />
 <HoverPreview />
 <PrismaPicker />
 <VaultManager />

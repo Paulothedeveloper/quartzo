@@ -36,12 +36,20 @@ export const showSketch = writable(false);
 /** Caminho do item sendo renomeado no FileTree (inline). */
 export const renamingPath = writable<string | null>(null);
 
+export interface CtxMenuAction {
+  icon: any;
+  title: string;
+  action: () => void;
+  danger?: boolean;
+}
 export interface CtxMenuItem {
   label?: string;
   icon?: any;
   action?: () => void;
   danger?: boolean;
   separator?: boolean;
+  /** Botões pequenos no fim da linha (ex.: renomear / remover um vault). */
+  actions?: CtxMenuAction[];
 }
 /** Menu de contexto global (clique-direito). null = fechado. */
 export const ctxMenu = writable<{ x: number; y: number; items: CtxMenuItem[] } | null>(null);
@@ -87,4 +95,26 @@ export function askConfirm(opts: {
   danger?: boolean;
 }): Promise<boolean> {
   return new Promise((resolve) => confirmRequest.set({ ...opts, resolve }));
+}
+
+/** Diálogo de entrada de texto (promessa). null = fechado. */
+export interface PromptRequest {
+  title: string;
+  message?: string;
+  initial?: string;
+  placeholder?: string;
+  confirmLabel?: string;
+  resolve: (value: string | null) => void;
+}
+export const promptRequest = writable<PromptRequest | null>(null);
+
+/** Abre um diálogo de texto; resolve o valor digitado ou null se cancelar. */
+export function askPrompt(opts: {
+  title: string;
+  message?: string;
+  initial?: string;
+  placeholder?: string;
+  confirmLabel?: string;
+}): Promise<string | null> {
+  return new Promise((resolve) => promptRequest.set({ ...opts, resolve }));
 }

@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.46.0",
+    date: "2026-06-27",
+    items: [
+      "Vaults repetidos: a mesma pasta não entra mais duas vezes na lista (corrige a duplicata que aparecia ao reabrir) e duplicatas antigas somem sozinhas.",
+      "No menu de vaults, cada item agora tem botão de renomear (apelido) e de remover da lista — direto ali, sem abrir 'Gerenciar vaults'.",
+      "A seção de atalhos do rodapé da barra lateral (Nota do dia, Grafo, Canvas, Rascunho, Versões…) agora recolhe e expande com uma setinha, igual às outras seções.",
+    ],
+  },
+  {
     version: "0.45.0",
     date: "2026-06-27",
     items: [
