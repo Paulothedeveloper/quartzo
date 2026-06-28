@@ -28,7 +28,6 @@
     showSketch,
     settingsOpen,
     memoryOpen,
-    searchRequest,
     vaultManagerOpen,
     basesOpen,
     insightsOpen,
@@ -39,6 +38,7 @@
   import WelcomeScreen from "./WelcomeScreen.svelte";
   import MobileEditor from "$lib/mobile/MobileEditor.svelte";
   import MobileNoteList from "$lib/mobile/MobileNoteList.svelte";
+  import MobileSearch from "$lib/mobile/MobileSearch.svelte";
   import GraphView from "$lib/components/graph/GraphView.svelte";
   import CanvasView from "$lib/components/canvas/CanvasView.svelte";
   import Sketch from "$lib/components/sketch/Sketch.svelte";
@@ -73,7 +73,7 @@
       showCanvas.set(false);
       showSketch.set(false);
     }
-    if (t === "search") searchRequest.set("");
+    // a aba "Buscar" tem tela nativa própria (MobileSearch) — não abre o modal.
   }
 
   function backToList() {
@@ -122,6 +122,9 @@
         <!-- Lista de notas nativa (drill-down + long-press) -->
         <MobileNoteList onOpen={(p) => openNote(p)} />
       {/if}
+    {:else if tab === "search"}
+      <!-- Busca nativa em tela cheia -->
+      <MobileSearch onOpen={(p) => { openNote(p); tab = "notes"; }} />
     {:else if tab === "graph"}
       <div class="msh-fill">
         {#if $showCanvas}
