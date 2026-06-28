@@ -3,6 +3,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
   import TitleBar from "$lib/components/layout/TitleBar.svelte";
+  import MobileShell from "$lib/components/layout/MobileShell.svelte";
   import Sidebar from "$lib/components/layout/Sidebar.svelte";
   import EditorTabs from "$lib/components/editor/EditorTabs.svelte";
   import MarkdownEditor from "$lib/components/editor/MarkdownEditor.svelte";
@@ -560,6 +561,9 @@
   onpointerover={onGlobalPointerOver}
 />
 
+{#if isMobile}
+  <MobileShell onOpenVault={openVault} onCreateVault={createVault} />
+{:else}
 <div class="flex h-screen w-screen flex-col overflow-hidden" class:app-zen={$zenMode}>
   <TitleBar />
   <div class="app-body flex min-h-0 flex-1" class:nav-open={$mobileNavOpen}>
@@ -655,6 +659,7 @@
   </main>
   </div>
 </div>
+{/if}
 
 <Toast />
 <CommandPalette bind:open={paletteOpen} {commands} />
