@@ -227,7 +227,7 @@
       if (pulsingIds.size) { pulsingIds = new Set(); applyEdgeStyles(); }
       return;
     }
-    const count = Math.min(14, Math.max(3, Math.round(allEdgeIds.length * 0.12)));
+    const count = Math.min(16, Math.max(4, Math.round(allEdgeIds.length * 0.12)));
     const next = new Set<string>();
     let guard = 0;
     while (next.size < count && guard < count * 12) {
@@ -245,7 +245,7 @@
     pulsingIds = new Set();
     if (!pulsesAllowed()) return;
     tickPulses();
-    pulseTimer = setInterval(tickPulses, 1900);
+    pulseTimer = setInterval(tickPulses, 1600);
   }
 
   function focusGroup(group: string) {
@@ -302,11 +302,21 @@
       } else {
         opacity = 0.5;
       }
-      // Glow (filtro SVG) é o que mais trava no pan/zoom quando aplicado em
-      // TODAS as arestas — re-rasteriza cada path a cada frame. Agora só as
-      // arestas DESTACADAS recebem glow (poucas); as demais ficam só com o
-      // traço ciano (composita na GPU, sem repaint). Visual idêntico de longe.
-      const glow = strong && !liteMode ? "filter:drop-shadow(0 0 2px rgba(103,232,249,0.8));" : "";
+      // Sinapse "disparando": a aresta que está pulsando ACENDE (traço mais
+      // forte + glow), como um neurônio real conduzindo o impulso. Só ~14 por
+      // vez -> barato. As destacadas (hover/filtro) também acendem.
+      const firing = !strong && !liteMode && pulsingIds.has(e.id);
+      if (firing) {
+        stroke = "#7df0fb";
+        width = Math.max(width, 1.7);
+        opacity = Math.max(opacity, 0.95);
+      }
+      // Glow (filtro SVG) só nas POUCAS arestas acesas (destacadas ou disparando)
+      // — composita barato; as demais ficam só com o traço (sem repaint).
+      const glow =
+        (strong || firing) && !liteMode
+          ? "filter:drop-shadow(0 0 3px rgba(103,232,249,0.9));"
+          : "";
       const draw =
         drawOnce && !liteMode
           ? "stroke-dasharray:8000;stroke-dashoffset:8000;animation:edge-draw 0.9s var(--ease-out,ease) forwards;"
@@ -537,6 +547,24 @@
 <style>
   .graph-wrap {
     position: relative;
+    /* animação de ENTRADA da tela do grafo: o "cérebro" desperta (fade + leve
+       zoom). Roda ao abrir/montar a view. Respeita "reduzir animações". */
+    animation: graph-wake 0.62s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+  @keyframes graph-wake {
+    from {
+      opacity: 0;
+      transform: scale(0.965);
+      filter: brightness(1.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+      filter: brightness(1);
+    }
+  }
+  :global(html.no-anim) .graph-wrap {
+    animation: none;
   }
   /* ===== MODO LEVE (grafos grandes): tira efeitos GPU-pesados que travam o
      pan/zoom — sombras, glow, blur e a animação de entrada. Cores e formas
@@ -624,10 +652,12 @@
   .graph-wrap :global(.svelte-flow__viewport) {
     will-change: transform;
   }
-  /* arestas: SEM filtro SVG no estado base (filtro em massa re-rasteriza a cada
-     frame de pan/zoom = o maior travamento). O brilho fica só nas destacadas,
-     aplicado inline via JS (poucas por vez). Aqui só a transição do traço. */
+  /* arestas: brilho-base SUTIL (sinapse) — restaura a beleza "neurônio". Como o
+     layout é congelado, o pan é translate na GPU (sem repaint); só re-rasteriza
+     no zoom ativo, o que é aceitável. No modo leve (grafos grandes) fica sem
+     filtro (regra acima). As arestas DISPARANDO/destacadas acendem mais (inline). */
   .graph-wrap :global(.svelte-flow__edge-path) {
+    filter: drop-shadow(0 0 1.5px rgba(103, 232, 249, 0.4));
     transition: stroke 0.22s var(--ease-out, ease), stroke-width 0.22s var(--ease-out, ease);
   }
   .graph-wrap :global(.svelte-flow__minimap) {

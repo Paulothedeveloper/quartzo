@@ -38,13 +38,33 @@
 <BaseEdge {id} {path} {markerEnd} {style} />
 
 {#if data?.pulse}
-  <!-- impulso: energia viajando do neurônio de origem pro de destino -->
-  <circle class="synapse-pulse" r="2.6" fill="#a5f3fc">
+  <!-- impulso: energia viajando do neurônio de origem pro de destino.
+       "cometa": um rastro maior e suave + a cabeça brilhante. -->
+  <circle class="synapse-trail" r="5" fill="#67e8f9">
+    <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" path={path} rotate="auto" />
+    <animate
+      attributeName="opacity"
+      values="0;0.5;0.5;0"
+      keyTimes="0;0.18;0.7;1"
+      dur="{dur}s"
+      begin="{begin}s"
+      repeatCount="indefinite"
+    />
+  </circle>
+  <circle class="synapse-head" r="3" fill="#ecfeff">
     <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" path={path} rotate="auto" />
     <animate
       attributeName="opacity"
       values="0;1;1;0"
-      keyTimes="0;0.15;0.7;1"
+      keyTimes="0;0.12;0.72;1"
+      dur="{dur}s"
+      begin="{begin}s"
+      repeatCount="indefinite"
+    />
+    <animate
+      attributeName="r"
+      values="1.6;3;3;1.6"
+      keyTimes="0;0.12;0.72;1"
       dur="{dur}s"
       begin="{begin}s"
       repeatCount="indefinite"
@@ -53,12 +73,19 @@
 {/if}
 
 <style>
-  .synapse-pulse {
-    filter: drop-shadow(0 0 3.5px rgba(165, 243, 252, 0.95));
+  .synapse-head {
+    filter: drop-shadow(0 0 5px rgba(165, 243, 252, 0.95));
+    pointer-events: none;
+  }
+  /* rastro: círculo maior e translúcido (sem blur — blur por frame é caro);
+     o glow da cabeça já dá a sensação de cometa. */
+  .synapse-trail {
+    opacity: 0.4;
     pointer-events: none;
   }
   /* respeita "reduzir animações" */
-  :global(html.no-anim) .synapse-pulse {
+  :global(html.no-anim) .synapse-head,
+  :global(html.no-anim) .synapse-trail {
     display: none;
   }
 </style>
