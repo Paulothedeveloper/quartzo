@@ -3,12 +3,13 @@ import { dict } from "./i18n-dict";
 
 export type Locale = "pt" | "en" | "es" | "fr" | "de";
 
-export const LOCALES: { id: Locale; label: string; flag: string }[] = [
-  { id: "pt", label: "Português", flag: "🇧🇷" },
-  { id: "en", label: "English", flag: "🇺🇸" },
-  { id: "es", label: "Español", flag: "🇪🇸" },
-  { id: "fr", label: "Français", flag: "🇫🇷" },
-  { id: "de", label: "Deutsch", flag: "🇩🇪" },
+// Sem bandeiras/emoji (regra: ZERO emoji na UI — ver Manual). Só texto.
+export const LOCALES: { id: Locale; label: string }[] = [
+  { id: "pt", label: "Português" },
+  { id: "en", label: "English" },
+  { id: "es", label: "Español" },
+  { id: "fr", label: "Français" },
+  { id: "de", label: "Deutsch" },
 ];
 
 const KEY = "quartzo:locale";

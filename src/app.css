@@ -1154,3 +1154,11 @@ html.mobile .q-tooltop {
   min-height: 3rem;
   padding-top: calc(env(safe-area-inset-top) + 8px);
 }
+/* os botões da toolbar (Cor/Imagem/Card de texto…) não quebram em várias linhas:
+   ficam numa linha só e a barra rola na horizontal. */
+html.mobile .q-tooltop > * {
+  flex-shrink: 0;
+}
+html.mobile .q-tooltop button {
+  white-space: nowrap;
+}

@@ -483,15 +483,14 @@
                 <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
                   {$t("settings.language")} · Language · Idioma
                 </div>
-                <div class="mt-2 flex gap-2">
+                <div class="mt-2 grid grid-cols-3 gap-2">
                   {#each LOCALES as l (l.id)}
                     <button
                       onclick={() => setLocale(l.id)}
-                      class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all active:scale-[0.97] {$locale === l.id
+                      class="flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition-all active:scale-[0.97] {$locale === l.id
                         ? 'border-accent bg-accent/15 text-text-primary'
                         : 'border-border bg-elevated text-text-secondary hover:text-text-primary'}"
                     >
-                      <span class="text-base leading-none">{l.flag}</span>
                       {l.label}
                     </button>
                   {/each}

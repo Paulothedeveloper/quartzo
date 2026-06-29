@@ -16,6 +16,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-06-29",
     items: [
       "Grafo mais FLUIDO (motion design): os impulsos agora fluem contínuos e com easing (aceleram/desaceleram suave, aparecem e somem sem 'pop'), mais lentos e elegantes, cada um numa fase diferente. Sumiu o 'engasgo' que dava aspecto robótico — ele vinha de um timer que reiniciava TODOS os impulsos juntos a cada 1,6s; agora cada aresta tem seu impulso fixo, animado pelo navegador.",
+      "Grafo: o nome da pasta (rótulo da região) não fica mais ATRÁS dos nós — foi pro topo da região, sem colisão de texto com elementos.",
+      "Idioma: removidas as bandeiras (emoji) do seletor — agora só texto, e os botões cabem certinho (sem estourar). Segue a regra de ZERO emoji na interface.",
       "Android: o botão VOLTAR agora fecha as camadas em ordem (folha → modal → gaveta → editor → volta pra Início) em vez de sair do app direto. Só sai do app quando já está na tela inicial.",
     ],
   },

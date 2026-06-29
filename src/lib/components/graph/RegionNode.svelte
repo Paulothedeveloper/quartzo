@@ -27,7 +27,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* rótulo ANCORADO NO TOPO (não no centro) — senão o nome da pasta fica ATRÁS
+       do aglomerado de nós (que a física centraliza na região) = colisão de texto
+       com elementos. No topo, fica acima dos nós, legível e sem sobrepor. */
+    justify-content: flex-start;
+    padding-top: 13%;
     border-radius: 9999px;
     cursor: pointer;
     /* lobo: névoa colorida suave, como uma área cerebral / faceta do cristal */
