@@ -38,3 +38,10 @@ pulldown-cmark = { version = "0.12", default-features = false }
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 trash = "5.2.6"
 rusqlite = { version = "0.32", features = ["bundled"] }
+# Sincronia Google Drive (DESKTOP por enquanto): loopback OAuth (PKCE) + Picker.
+# Android (deep link) fica pra fase 2 — por isso gated em desktop.
+tiny_http = "0.12"
+ureq = { version = "2", features = ["json", "tls"] }
+sha2 = "0.10"
+base64 = "0.22"
+urlencoding = "2"

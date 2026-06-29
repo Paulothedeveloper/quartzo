@@ -53,6 +53,8 @@
   import { getVersion } from "@tauri-apps/api/app";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import MobileScreen from "$lib/mobile/MobileScreen.svelte";
+  import { connectAndPick, downloadFolder } from "$lib/google-drive";
+  import { googleConfigured } from "$lib/google-config";
   import { t, tr, locale, setLocale, LOCALES } from "$lib/i18n";
 
   interface CssSnippet {
@@ -298,6 +300,35 @@
     if (open && section === "nuvem") untrack(loadClouds);
   });
 
+  // ---- Baixar vault do Google Drive (login loopback + Picker no navegador) ----
+  let driveBusy = $state(false);
+  async function downloadFromDrive() {
+    if (!googleConfigured()) {
+      showToast("Sincronia do Drive ainda não configurada (faltam as credenciais).", "info");
+      return;
+    }
+    driveBusy = true;
+    try {
+      const pick = await connectAndPick(); // abre o navegador: login + escolher pasta
+      const parent = await openDialog({ directory: true, title: tr("set.switchVault") });
+      if (!parent || Array.isArray(parent)) return;
+      const sep = (parent as string).includes("\\") ? "\\" : "/";
+      const dest = `${parent}${sep}${pick.folderName}`;
+      showToast(`Baixando "${pick.folderName}"…`, "info");
+      const p = await downloadFolder(pick.accessToken, pick.folderId, dest);
+      await setVault(dest);
+      open = false;
+      showToast(
+        `Vault baixado: ${p.done} arquivo(s)${p.skippedBinary ? ` · ${p.skippedBinary} ignorado(s)` : ""}.`,
+        "success"
+      );
+    } catch (e) {
+      showToast(`Drive: ${e}`, "error");
+    } finally {
+      driveBusy = false;
+    }
+  }
+
   // ---- Buscar atualização (GitHub Releases) ----
   let checking = $state(false);
   let update = $state<UpdateResult | null>(null);
@@ -495,6 +526,24 @@
                     </button>
                   {/each}
                 </div>
+              </div>
+
+              <div class="card">
+                <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
+                  Nuvem · Google Drive
+                </div>
+                <div class="mt-1.5 text-sm text-text-secondary">
+                  Baixe um vault salvo no seu Google Drive — você entra com o Google e
+                  escolhe a pasta no seletor.
+                </div>
+                <button
+                  onclick={downloadFromDrive}
+                  disabled={driveBusy}
+                  class="mt-3 flex items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-60"
+                >
+                  {#if driveBusy}<Loader2 size={15} class="animate-spin" />{:else}<Cloud size={15} />{/if}
+                  Baixar vault do Drive
+                </button>
               </div>
             </div>
           {:else if section === "arquivos"}

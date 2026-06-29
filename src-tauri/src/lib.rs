@@ -1,5 +1,23 @@
 mod commands;
 mod docx;
+#[cfg(desktop)]
+mod google_drive;
+
+#[cfg(desktop)]
+use google_drive::google_drive_pick;
+
+// Stub no mobile: o fluxo de loopback OAuth é desktop por enquanto (Android = deep
+// link, fase 2). Mantém o nome do comando pro invoke_handler resolver nas 2 builds.
+#[cfg(not(desktop))]
+#[tauri::command]
+async fn google_drive_pick(
+    _client_id: String,
+    _client_secret: String,
+    _api_key: String,
+    _project_number: String,
+) -> Result<(), String> {
+    Err("Sincronia com o Drive: disponível no desktop por enquanto.".into())
+}
 
 use commands::{
     build_graph_index, build_alias_index, create_folder, create_note, daily_note, delete_to_trash, get_backlinks,
@@ -154,7 +172,8 @@ pub fn run() {
             vault_insights,
             load_bases,
             save_bases,
-            export_docx
+            export_docx,
+            google_drive_pick
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
