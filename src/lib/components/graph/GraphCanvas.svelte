@@ -72,14 +72,9 @@
   let cachedRegions: Node[] = [];
   let tickCount = 0;
   let layoutGen = 0; // invalida o pré-cálculo em lotes se os dados recarregarem
-  // impulsos sinápticos (decl. cedo pra uso no onDestroy)
-  let pulsingIds = new Set<string>();
-  let allEdgeIds: string[] = [];
-  let pulseTimer: ReturnType<typeof setInterval> | null = null;
   onDestroy(() => {
     layoutGen++;
     sim?.stop();
-    if (pulseTimer) clearInterval(pulseTimer);
   });
 
   function posFromSim(): Map<string, { x: number; y: number }> {
@@ -213,44 +208,15 @@
   let focusTarget = $state<{ ids: string[] | null; nonce: number }>({ ids: null, nonce: 0 });
 
   // ---- Impulsos sinápticos (energia viajando pelas arestas) ----
-  // Só ALGUMAS arestas pulsam por vez (~12), revezando a cada ~2s. As demais
-  // ficam estáticas (zero repaint). SMIL (animateMotion) anima no browser, fora
-  // da thread principal. Desligado no modo leve e com "reduzir animações".
-  function pulsesAllowed(): boolean {
-    // Os impulsos ("neurônios piscando") rodam SEMPRE — independem do tamanho do
-    // grafo. São só ~16 por vez (revezando) e animados por SMIL fora da thread
-    // principal, então não pesam mesmo em vaults grandes. A otimização de verdade
-    // foi congelar a física (sim.stop), não tirar o visual. Só desligamos com
-    // "reduzir animações".
-    if (allEdgeIds.length === 0) return false;
-    if (typeof document !== "undefined" && document.documentElement.classList.contains("no-anim"))
-      return false;
-    return true;
-  }
-  function tickPulses() {
-    if (!pulsesAllowed()) {
-      if (pulsingIds.size) { pulsingIds = new Set(); applyEdgeStyles(); }
-      return;
-    }
-    const count = Math.min(16, Math.max(4, Math.round(allEdgeIds.length * 0.12)));
-    const next = new Set<string>();
-    let guard = 0;
-    while (next.size < count && guard < count * 12) {
-      // índice pseudo-aleatório estável o suficiente (sem Math.random global)
-      const k = (tickCount * 2654435761 + next.size * 40503 + guard * 97 + allEdgeIds.length) >>> 0;
-      next.add(allEdgeIds[k % allEdgeIds.length]);
-      guard++;
-    }
-    tickCount++;
-    pulsingIds = next;
-    applyEdgeStyles();
-  }
-  function startPulses() {
-    if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; }
-    pulsingIds = new Set();
-    if (!pulsesAllowed()) return;
-    tickPulses();
-    pulseTimer = setInterval(tickPulses, 1600);
+  // ESTÁTICOS: cada aresta pulsa (ou não) de forma fixa, definida no build. SEM
+  // timer/rebuild periódico — era ele que reiniciava TODOS os pulsos a cada 1,6s
+  // e dava o aspecto "engasgado/animalesco". Agora o cometa flui contínuo (SMIL,
+  // com easing), cada um numa fase/velocidade diferente -> energia fluida.
+  // Em vaults grandes, limitamos a ~120 cometas (escolha estável, não rotativa)
+  // pra não exagerar; o resto fica só com o traço. Desliga com "reduzir animações".
+  const PULSE_CAP = 120;
+  function noAnim(): boolean {
+    return typeof document !== "undefined" && document.documentElement.classList.contains("no-anim");
   }
 
   function focusGroup(group: string) {
@@ -307,29 +273,20 @@
       } else {
         opacity = 0.5;
       }
-      // Sinapse "disparando": a aresta que está pulsando ACENDE (traço mais
-      // forte + glow), como um neurônio real conduzindo o impulso. Só ~14 por
-      // vez -> barato. As destacadas (hover/filtro) também acendem.
-      const firing = !strong && pulsingIds.has(e.id);
-      if (firing) {
-        stroke = "#7df0fb";
-        width = Math.max(width, 1.7);
-        opacity = Math.max(opacity, 0.95);
-      }
-      // Glow (filtro SVG) só nas POUCAS arestas acesas (destacadas ou disparando)
-      // — são ~16 por vez, composita barato; as demais ficam só com o traço.
-      // Vale mesmo em grafos grandes (o custo é por-aresta-acesa, não por-aresta).
-      const glow =
-        strong || firing
-          ? "filter:drop-shadow(0 0 3px rgba(103,232,249,0.9));"
-          : "";
+      // Glow (filtro SVG) só nas arestas DESTACADAS (hover/filtro) — são poucas,
+      // composita barato. O "neurônio piscando" vem do COMETA (data.pulse), que é
+      // estável (definido no build) e animado por SMIL com easing — sem rebuild
+      // periódico, então flui sem engasgar.
+      const glow = strong
+        ? "filter:drop-shadow(0 0 3px rgba(103,232,249,0.9));"
+        : "";
       const draw =
         drawOnce && !liteMode
           ? "stroke-dasharray:8000;stroke-dashoffset:8000;animation:edge-draw 0.9s var(--ease-out,ease) forwards;"
           : "";
       return {
         ...e,
-        data: { ...(e.data as any), pulse: pulsingIds.has(e.id) },
+        data: e.data, // pulse já definido no build (estável)
         style: `stroke:${stroke};stroke-width:${width};opacity:${opacity};${glow}${draw}`,
       };
     });
@@ -338,8 +295,6 @@
   function rebuild(rNodes: RawGraphNode[], rEdges: RawGraphEdge[]) {
     sim?.stop();
     sim = null;
-    if (pulseTimer) { clearInterval(pulseTimer); pulseTimer = null; }
-    pulsingIds = new Set();
     layoutGen++; // invalida qualquer pré-cálculo em lotes ainda rodando
     firstDraw = true; // redesenha as arestas a cada (re)carga de dados
     // cores por pasta (índice estável, ordenado)
@@ -411,14 +366,17 @@
     // Custom edge "synapse" (desenha a aresta + impulso opcional). SEMPRE bezier
     // (curva) — neurônios não se ligam por linha reta. Curvar vs. reto não muda
     // o custo (é só o "d" do path); a otimização real é o layout congelado.
-    baseEdges = valid.map((e) => ({
+    // Pulso ESTÁVEL por aresta (sem rotação/timer). Em vaults grandes, ~1 a cada
+    // N arestas pulsa (cap ~120 cometas) — escolha fixa, então nada reinicia.
+    const off = noAnim();
+    const step = !off && valid.length > PULSE_CAP ? Math.ceil(valid.length / PULSE_CAP) : 1;
+    baseEdges = valid.map((e, i) => ({
       id: e.id,
       source: e.source,
       target: e.target,
       type: "synapse",
-      data: {},
+      data: { pulse: !off && i % step === 0 },
     }));
-    allEdgeIds = valid.map((e) => e.id);
 
     // ===== LAYOUT SEMPRE CONGELADO (pan/zoom liso) =====
     // A física ao VIVO era a causa do travamento: ela reconciliava os ~100 nós
@@ -445,7 +403,6 @@
       s.stop(); // garante que não há timer rodando -> nada anima parado
       nodes = buildNodes(posFromSim(), true);
       applyEdgeStyles();
-      startPulses(); // começa os impulsos sinápticos (poucos por vez, revezando)
       focusTarget = { ids: null, nonce: focusTarget.nonce + 1 }; // enquadra 1x
     };
 

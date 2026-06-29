@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getBezierPath, getStraightPath, BaseEdge } from "@xyflow/svelte";
+  import { getBezierPath, BaseEdge } from "@xyflow/svelte";
 
   let {
     id,
@@ -14,15 +14,14 @@
     data,
   }: any = $props();
 
-  // Bezier por padrão; reto no modo leve (mais barato).
+  // SEMPRE bezier (curva orgânica) — neurônio não liga por linha reta.
   const geom = $derived(
-    data?.straight
-      ? getStraightPath({ sourceX, sourceY, targetX, targetY })
-      : getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
+    getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
   );
   const path = $derived(geom[0]);
 
-  // Duração/atraso variam por aresta (hash do id) pra os impulsos não sincronizarem.
+  // Duração/fase variam por aresta (hash do id) pro fluxo NÃO sincronizar —
+  // dá a sensação de energia contínua e orgânica. Mais lento = mais elegante.
   function hash(s: string): number {
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) {
@@ -31,40 +30,70 @@
     }
     return h >>> 0;
   }
-  const dur = $derived(1.1 + (hash(id) % 90) / 100); // 1.10–1.99s
-  const begin = $derived(-((hash(id + "b") % 140) / 100)); // começa em fase diferente
+  const dur = $derived(2.0 + (hash(id) % 170) / 100); // 2.0–3.7s (glide lento)
+  const begin = $derived(-((hash(id + "b") % 400) / 100)); // fase espalhada 0–4s
+  // easing do FADE (aparece/some suave, sem "pop"). 3 intervalos (4 keyTimes).
+  const fade = "0.4 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1";
+  // easing da POSIÇÃO ao longo da curva: acelera e desacelera (ease-in-out).
+  const glide = "0.45 0 0.55 1";
 </script>
 
 <BaseEdge {id} {path} {markerEnd} {style} />
 
 {#if data?.pulse}
-  <!-- impulso: energia viajando do neurônio de origem pro de destino.
-       "cometa": um rastro maior e suave + a cabeça brilhante. -->
-  <circle class="synapse-trail" r="5" fill="#67e8f9">
-    <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" path={path} rotate="auto" />
+  <!-- impulso: energia fluindo do neurônio de origem pro de destino.
+       rastro translúcido (cometa) + cabeça brilhante, ambos com glide suave. -->
+  <circle class="synapse-trail" r="6" fill="#67e8f9">
+    <animateMotion
+      dur="{dur}s"
+      begin="{begin}s"
+      repeatCount="indefinite"
+      path={path}
+      rotate="auto"
+      calcMode="spline"
+      keyPoints="0;1"
+      keyTimes="0;1"
+      keySplines={glide}
+    />
     <animate
       attributeName="opacity"
-      values="0;0.5;0.5;0"
-      keyTimes="0;0.18;0.7;1"
+      values="0;0.42;0.42;0"
+      keyTimes="0;0.22;0.7;1"
+      calcMode="spline"
+      keySplines={fade}
       dur="{dur}s"
       begin="{begin}s"
       repeatCount="indefinite"
     />
   </circle>
-  <circle class="synapse-head" r="3" fill="#ecfeff">
-    <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" path={path} rotate="auto" />
+  <circle class="synapse-head" r="2.6" fill="#ecfeff">
+    <animateMotion
+      dur="{dur}s"
+      begin="{begin}s"
+      repeatCount="indefinite"
+      path={path}
+      rotate="auto"
+      calcMode="spline"
+      keyPoints="0;1"
+      keyTimes="0;1"
+      keySplines={glide}
+    />
     <animate
       attributeName="opacity"
       values="0;1;1;0"
-      keyTimes="0;0.12;0.72;1"
+      keyTimes="0;0.2;0.72;1"
+      calcMode="spline"
+      keySplines={fade}
       dur="{dur}s"
       begin="{begin}s"
       repeatCount="indefinite"
     />
     <animate
       attributeName="r"
-      values="1.6;3;3;1.6"
-      keyTimes="0;0.12;0.72;1"
+      values="1.4;2.8;2.8;1.4"
+      keyTimes="0;0.2;0.72;1"
+      calcMode="spline"
+      keySplines={fade}
       dur="{dur}s"
       begin="{begin}s"
       repeatCount="indefinite"
@@ -77,13 +106,12 @@
     filter: drop-shadow(0 0 5px rgba(165, 243, 252, 0.95));
     pointer-events: none;
   }
-  /* rastro: círculo maior e translúcido (sem blur — blur por frame é caro);
-     o glow da cabeça já dá a sensação de cometa. */
+  /* rastro: círculo maior e translúcido (sem blur por-frame — caro); o glow da
+     cabeça já dá o efeito de cometa suave. */
   .synapse-trail {
     opacity: 0.4;
     pointer-events: none;
   }
-  /* respeita "reduzir animações" */
   :global(html.no-anim) .synapse-head,
   :global(html.no-anim) .synapse-trail {
     display: none;

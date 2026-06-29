@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { fly } from "svelte/transition";
+  import { isMobile } from "$lib/platform";
   import {
     PanelLeft,
     Search,
@@ -129,6 +131,48 @@
   function edgeUp() {
     edgeActive = false;
   }
+
+  // ----- Botão "voltar" do Android: fecha camadas em ordem antes de sair do app.
+  // Sem isso, o back saía direto do app de qualquer tela. Usa o truque de history:
+  // mantém 1 entrada-sentinela; cada back vira um popstate que fechamos e re-armamos.
+  function handleBack(): boolean {
+    if (newSheetOpen) { newSheetOpen = false; return true; }
+    if ($settingsOpen) { settingsOpen.set(false); return true; }
+    if ($basesOpen) { basesOpen.set(false); return true; }
+    if ($insightsOpen) { insightsOpen.set(false); return true; }
+    if ($duplicatesOpen) { duplicatesOpen.set(false); return true; }
+    if ($memoryOpen) { memoryOpen.set(false); return true; }
+    if ($vaultManagerOpen) { vaultManagerOpen.set(false); return true; }
+    if ($tutorialOpen) { tutorialOpen.set(false); return true; }
+    if (drawerOpen) { drawerOpen = false; return true; }
+    if ($showCanvas) { showCanvas.set(false); go("home"); return true; }
+    if ($showSketch) { showSketch.set(false); go("home"); return true; }
+    if (viewingNote) { backToHome(); return true; }
+    if (tab !== "home") { go("home"); return true; }
+    return false; // nada pra fechar -> deixa sair do app
+  }
+
+  onMount(() => {
+    if (!isMobile) return;
+    history.pushState({ qz: 1 }, "");
+    const onPop = () => {
+      if (handleBack()) {
+        history.pushState({ qz: 1 }, ""); // re-arma pro próximo back
+      } else {
+        // nada pra fechar (tela inicial) -> sai do app num toque só.
+        // window.history.back() vira no-op na entrada inicial do WebView, então
+        // fechamos a janela/activity via Tauri.
+        import("@tauri-apps/api/window")
+          .then(({ getCurrentWindow }) => getCurrentWindow().close())
+          .catch(() => {
+            window.removeEventListener("popstate", onPop);
+            history.back();
+          });
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  });
 </script>
 
 <div class="msh">

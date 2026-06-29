@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.59.1 — 2026-06-29
+
+- **Grafo mais fluido (motion design):** removido o timer que rotacionava os impulsos e **reconstruía TODO o array de arestas a cada 1,6s** — isso recriava os elementos SMIL e reiniciava todos os cometas juntos (o "engasgo/animalesco"). Agora o pulso é **estável por aresta** (definido no build, cap ~120 cometas em vaults grandes), o cometa tem **easing** (`calcMode="spline"`: glide ease-in-out na posição + fade suave na opacidade/raio), **mais lento** (2.0–3.7s) e **fases espalhadas** (0–4s) → fluxo contínuo e orgânico, sem rebuild periódico. `SynapseEdge` sempre bezier.
+- **Android — botão Voltar:** `MobileShell` agora intercepta o back (truque de `history.pushState` + `popstate`) e fecha as camadas em ordem (sheet → modais → gaveta → canvas/sketch → editor → aba≠Início) antes de sair; só sai do app na tela inicial.
+
 ## 0.59.0 — 2026-06-29
 
 **Redesign mobile (Obsidian UX + acabamento BW Hair/Ludex + identidade Quartzo)** + **grafo orgânico de volta**.
