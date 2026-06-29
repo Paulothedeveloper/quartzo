@@ -150,7 +150,7 @@
   <!-- lista -->
   <div class="ml-items">
     {#if list.length === 0}
-      <div class="ml-empty">{search.trim() ? $t("search.noResults") : $t("graph.emptyTitle")}</div>
+      <div class="ml-empty">{search.trim() ? $t("search.noResults", { query: search.trim() }) : $t("mobile.emptyNotes")}</div>
     {:else}
       {#each list as n (n.path)}
         <button
