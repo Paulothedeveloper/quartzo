@@ -31,33 +31,33 @@
 
 <div class="flex h-full flex-col">
   <!-- Toolbar -->
-  <div class="flex h-12 shrink-0 items-center gap-3 border-b border-border px-4">
-    <div class="flex items-center gap-2 text-sm font-medium">
+  <div class="gv-toolbar flex h-12 shrink-0 items-center gap-3 border-b border-border px-4">
+    <div class="gv-title flex items-center gap-2 text-sm font-medium">
       <Share2 size={16} class="text-accent" />
       {$t("graph.title")}
     </div>
 
     {#if $graphData}
-      <span class="text-xs text-text-muted">
+      <span class="gv-count text-xs text-text-muted">
         {$t("graph.notesLinks", { notes: $graphData.nodes.length, links: $graphData.edges.length })}
       </span>
     {/if}
 
-    <div class="ml-auto flex items-center gap-2">
+    <div class="gv-controls ml-auto flex items-center gap-2">
       <!-- Busca -->
-      <div class="flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5">
-        <Search size={14} class="text-text-secondary" />
+      <div class="gv-search flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5">
+        <Search size={14} class="shrink-0 text-text-secondary" />
         <input
           bind:value={search}
           placeholder={$t("graph.highlight")}
-          class="w-40 bg-transparent text-sm outline-none placeholder:text-text-secondary"
+          class="w-40 min-w-0 bg-transparent text-sm outline-none placeholder:text-text-secondary"
         />
       </div>
 
       <!-- Filtro de pasta -->
       <select
         bind:value={folder}
-        class="rounded-lg bg-elevated px-2 py-1.5 text-sm text-text-primary outline-none"
+        class="gv-folder min-w-0 rounded-lg bg-elevated px-2 py-1.5 text-sm text-text-primary outline-none"
       >
         <option value={null}>{$t("graph.allFolders")}</option>
         {#each folders as f (f)}
@@ -68,14 +68,14 @@
       <button
         onclick={reload}
         title={$t("graph.reindex")}
-        class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+        class="shrink-0 rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
       >
         <RefreshCw size={15} />
       </button>
       <button
         onclick={() => onClose?.()}
         title={$t("graph.closeGraph")}
-        class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+        class="gv-close shrink-0 rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
       >
         <X size={16} />
       </button>

@@ -1113,3 +1113,16 @@ html.mobile .qsettings-nav {
 }
 html.mobile .qsettings-nav > div { display: none !important; } /* título "Configurações" */
 html.mobile .qsettings-nav button { white-space: nowrap; flex-shrink: 0; }
+
+/* ===== Toolbar do GRAFO no mobile: cabe na largura (era a "aba grafo bugada",
+   a toolbar de desktop estourava pra fora da tela). Esconde título/contagem/
+   fechar (a navegação é pelas abas de baixo); busca ocupa o espaço; filtro
+   limitado. ===== */
+html.mobile .gv-toolbar { padding-left: 8px; padding-right: 8px; gap: 8px; }
+html.mobile .gv-title,
+html.mobile .gv-count,
+html.mobile .gv-close { display: none !important; }
+html.mobile .gv-controls { margin-left: 0 !important; width: 100%; gap: 6px; }
+html.mobile .gv-search { flex: 1; min-width: 0; }
+html.mobile .gv-search input { width: 100% !important; }
+html.mobile .gv-folder { max-width: 34vw; }
