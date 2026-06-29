@@ -217,7 +217,12 @@
   // ficam estáticas (zero repaint). SMIL (animateMotion) anima no browser, fora
   // da thread principal. Desligado no modo leve e com "reduzir animações".
   function pulsesAllowed(): boolean {
-    if (liteMode || allEdgeIds.length === 0) return false;
+    // Os impulsos ("neurônios piscando") rodam SEMPRE — independem do tamanho do
+    // grafo. São só ~16 por vez (revezando) e animados por SMIL fora da thread
+    // principal, então não pesam mesmo em vaults grandes. A otimização de verdade
+    // foi congelar a física (sim.stop), não tirar o visual. Só desligamos com
+    // "reduzir animações".
+    if (allEdgeIds.length === 0) return false;
     if (typeof document !== "undefined" && document.documentElement.classList.contains("no-anim"))
       return false;
     return true;
@@ -305,16 +310,17 @@
       // Sinapse "disparando": a aresta que está pulsando ACENDE (traço mais
       // forte + glow), como um neurônio real conduzindo o impulso. Só ~14 por
       // vez -> barato. As destacadas (hover/filtro) também acendem.
-      const firing = !strong && !liteMode && pulsingIds.has(e.id);
+      const firing = !strong && pulsingIds.has(e.id);
       if (firing) {
         stroke = "#7df0fb";
         width = Math.max(width, 1.7);
         opacity = Math.max(opacity, 0.95);
       }
       // Glow (filtro SVG) só nas POUCAS arestas acesas (destacadas ou disparando)
-      // — composita barato; as demais ficam só com o traço (sem repaint).
+      // — são ~16 por vez, composita barato; as demais ficam só com o traço.
+      // Vale mesmo em grafos grandes (o custo é por-aresta-acesa, não por-aresta).
       const glow =
-        (strong || firing) && !liteMode
+        strong || firing
           ? "filter:drop-shadow(0 0 3px rgba(103,232,249,0.9));"
           : "";
       const draw =
@@ -402,14 +408,15 @@
       .force("x", forceX((d: any) => gx(d.id)).strength(0.16))
       .force("y", forceY((d: any) => gy(d.id)).strength(0.16));
 
-    // Custom edge "synapse" (desenha a aresta + impulso opcional). Reta no modo
-    // leve (geometria mais barata) via data.straight.
+    // Custom edge "synapse" (desenha a aresta + impulso opcional). SEMPRE bezier
+    // (curva) — neurônios não se ligam por linha reta. Curvar vs. reto não muda
+    // o custo (é só o "d" do path); a otimização real é o layout congelado.
     baseEdges = valid.map((e) => ({
       id: e.id,
       source: e.source,
       target: e.target,
       type: "synapse",
-      data: { straight: liteMode },
+      data: {},
     }));
     allEdgeIds = valid.map((e) => e.id);
 

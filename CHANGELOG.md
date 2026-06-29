@@ -3,6 +3,24 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.59.0 — 2026-06-29
+
+**Redesign mobile (Obsidian UX + acabamento BW Hair/Ludex + identidade Quartzo)** + **grafo orgânico de volta**.
+
+Mobile (tudo sob `isMobile`, desktop intacto):
+- **Gaveta lateral** (`MobileDrawer`) = árvore de pastas como navegação principal (reusa `MobileNoteList`); abre por toque ou **swipe da borda esquerda**; rodapé com nova nota + abrir/gerenciar vault + configurações.
+- **Barra inferior flutuante em pílula** (`.m-glass`: blur+saturate + borda interna 1px + inner shadow) com **bolha cyan + glow** na aba ativa (Início/Buscar/Grafo/Mais).
+- **Tela inicial** (`MobileHome`): cristal + tagline + ações-pílula (Nova nota / Buscar / Nota do dia) + **recentes** (via `vault_insights`).
+- **Configurações = lista agrupada drill-down** (toca seção → subtela via `MobileScreen`), no lugar das abas horizontais.
+- **Folha de ações no +** (`BottomSheet`): nova nota, nota do dia, memória, canvas, rascunho.
+- **Acabamento** (tokens em `app.css`): `--m-ease` cubic-bezier(0.22,1,0.36,1), `.m-press` (scale 0.96), `.m-row-in` (stagger), `.m-glass`, `--m-glow`. Aplicado em home, gaveta, pílula, Mais, Settings, árvore.
+
+Grafo (desktop + app, `GraphCanvas`/`SynapseEdge`):
+- **Conexões SEMPRE bezier (curvas)** — removido o `straight` do modo leve (neurônio não liga por reta).
+- **Impulsos sinápticos SEMPRE ligados** (~16 por vez, revezando; SMIL fora da thread) — não dependem mais do tamanho do vault.
+- **Glow nas arestas que disparam** mesmo em vaults grandes (custo é por-aresta-acesa, ~16, não por-aresta-total).
+- A otimização que resolveu o travamento (layout **congelado**, `sim.stop()`) foi mantida — era a física ao vivo que pesava, não o visual.
+
 ## 0.58.0 — 2026-06-29
 
 **Mobile 100% nativo** — o Paulo apontou que ainda existiam abas que eram só o desktop embrulhado com CSS (`html.mobile .qmodal-panel{inset:0}`, `qsettings-*`, `gv-*` escondendo coisas com `display:none`). Refeitas como telas nativas de verdade, com o **mesmo conteúdo** e **casca de navegação própria** (padrão: corpo em `{#snippet}` reusado nas duas cascas via `{#if isMobile}{:else}` — desktop intacto).

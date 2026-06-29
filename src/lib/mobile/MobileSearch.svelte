@@ -148,7 +148,7 @@
     flex: 1;
     min-height: 0;
     overflow: auto;
-    padding: 6px 8px 16px;
+    padding: 6px 8px calc(env(safe-area-inset-bottom) + 110px);
   }
   .ms-hint {
     padding: 40px 18px;

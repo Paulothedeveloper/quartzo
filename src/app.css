@@ -1084,6 +1084,61 @@ html.mobile .app-body.nav-open .app-sidebar { transform: translateX(0); }
 /* Respiro pra barra de gestos embaixo. */
 html.mobile .q-view-in { padding-bottom: env(safe-area-inset-bottom); }
 
+/* ===== Acabamento mobile (tokens + utilidades) =====================
+   Fusão das técnicas dos apps consolidados do Paulo:
+   - BW Hair: scale-press 0.92 + Material3 motion
+   - Ludex: glass-morphism (blur+saturate), gradient ativo, stagger,
+            curva cubic-bezier(0.22,1,0.36,1), glow
+   Identidade Quartzo: accent cyan #67e8f9 (var --color-accent). */
+:root {
+  --m-ease: cubic-bezier(0.22, 1, 0.36, 1); /* entrada premium (Ludex) */
+  --m-ease-press: cubic-bezier(0.4, 0, 0.2, 1);
+  --m-radius: 14px;
+  --m-radius-lg: 22px;
+  --m-radius-pill: 999px;
+  --m-glow: 0 6px 22px rgba(103, 232, 249, 0.28); /* glow cyan no ativo */
+}
+
+/* Vidro: blur + saturação + borda interna 1px + luz interior (true glass). */
+.m-glass {
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid color-mix(in srgb, #ffffff 10%, transparent);
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Micro-press físico (BW Hair). Aplicar em botões/itens tocáveis. */
+.m-press {
+  transition: transform 0.12s var(--m-ease-press), background-color 0.16s ease,
+    color 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.m-press:active {
+  transform: scale(0.96);
+}
+
+/* Entrada em stagger (Ludex): translateY + fade. O delay vem inline por item.
+   Respeita "reduzir animações". */
+@keyframes m-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.m-row-in {
+  animation: m-row-in 0.42s var(--m-ease) both;
+}
+html.no-anim .m-row-in {
+  animation: none;
+}
+
 /* Telas grandes no mobile (Configurações, Bases, Insights, Duplicadas, Memória,
    Gerenciar vaults, Grafo) agora têm casca NATIVA própria (MobileScreen / toolbar
    mobile dedicada) — não mais "desktop espremido" via !important. Os diálogos

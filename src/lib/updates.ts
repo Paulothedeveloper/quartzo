@@ -12,6 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.59.0",
+    date: "2026-06-29",
+    items: [
+      "Mobile redesenhado de verdade (inspirado no Obsidian Mobile + acabamento dos apps BW Hair/Ludex): GAVETA lateral com a árvore de pastas como navegação principal (abre por toque ou arrastando da borda), BARRA INFERIOR flutuante em pílula (vidro + bolha cyan que acende na aba ativa), e TELA INICIAL com o cristal + ações rápidas (Nova nota / Buscar / Nota do dia) + recentes.",
+      "Configurações agora é lista agrupada com drill-down (toca a seção → abre a subtela), no lugar das abas horizontais — igual ao padrão nativo.",
+      "Botão + abre uma folha de ações (nova nota, nota do dia, memória, canvas, rascunho). Acabamento: micro-toque (scale), entrada em cascata (stagger) e vidro nas superfícies. Identidade Quartzo mantida (cristal + cyan).",
+      "Grafo: trouxe de volta o visual ORGÂNICO que tava bom — conexões SEMPRE curvas (neurônio não liga por linha reta) + neurônios PISCANDO (impulsos viajando pelas conexões), agora ligados mesmo em vaults grandes. O que travava era a física ao vivo (já congelada); curvar e piscar não pesam (só ~16 impulsos por vez, animados pelo browser). Vale no desktop e no app.",
+    ],
+  },
+  {
     version: "0.58.0",
     date: "2026-06-29",
     items: [

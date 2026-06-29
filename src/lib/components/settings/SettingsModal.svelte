@@ -33,7 +33,7 @@
   import { checkForUpdate, CHANGELOG, GITHUB_REPO, type UpdateResult } from "$lib/updates";
   import { settings, SHORTCUT_ACTIONS, DEFAULT_SHORTCUTS, formatCombo, type Settings, type EditorFont, type Density, type ViewMode } from "$lib/stores/settings";
   import { loadNoteTypes, saveNoteTypes, DEFAULT_TYPES, type NoteType } from "$lib/types-notes";
-  import { Layers, Trash2, Pipette, Puzzle, Search } from "@lucide/svelte";
+  import { Layers, Trash2, Pipette, Puzzle, Search, ChevronRight } from "@lucide/svelte";
   import { FEATURE_PLUGINS } from "$lib/stores/settings";
 
   function setFeature(id: string, val: boolean) {
@@ -124,6 +124,16 @@
     | "tutorial"
     | "sobre";
   let section = $state<Section>("geral");
+  // Mobile: navegação drill-down (lista agrupada -> subtela), estilo Obsidian.
+  let mobileInSection = $state(false);
+  function openSection(id: Section) {
+    section = id;
+    mobileInSection = true;
+  }
+  // Ao fechar Configurações, volta pra lista (mobile) na próxima abertura.
+  $effect(() => {
+    if (!open) mobileInSection = false;
+  });
 
   const tabs: { id: Section; icon: typeof Info }[] = [
     { id: "geral", icon: Settings2 },
@@ -421,8 +431,22 @@
   {/each}
 {/snippet}
 
-{#snippet settingsSub()}
-  <div class="flex gap-1 overflow-x-auto px-2 py-2">{@render navTabs(true)}</div>
+{#snippet settingsList()}
+  <div class="overflow-hidden rounded-2xl border border-border bg-elevated/30">
+    {#each tabs as tab, i (tab.id)}
+      <button
+        class="m-press m-row-in flex w-full items-center gap-3 border-b border-border px-4 py-3.5 text-left last:border-b-0"
+        style="animation-delay: {Math.min(i * 30, 200)}ms"
+        onclick={() => openSection(tab.id)}
+      >
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-elevated text-accent-light">
+          <tab.icon size={18} />
+        </span>
+        <span class="flex-1 text-[0.97rem] text-text-primary">{$t(`settings.tab.${tab.id}`)}</span>
+        <ChevronRight size={17} class="shrink-0 text-text-muted" />
+      </button>
+    {/each}
+  </div>
 {/snippet}
 
 {#snippet sectionBody()}
@@ -1368,15 +1392,18 @@
 
 {#if open}
   {#if isMobile}
-    <MobileScreen
-      title={$t("common.settings")}
-      icon={Settings2}
-      onClose={() => (open = false)}
-      subbar={settingsSub}
-      pad={false}
-    >
-      <div class="p-4">{@render sectionBody()}</div>
-    </MobileScreen>
+    {#if mobileInSection}
+      <MobileScreen
+        title={$t(`settings.tab.${section}`)}
+        onClose={() => (mobileInSection = false)}
+      >
+        {@render sectionBody()}
+      </MobileScreen>
+    {:else}
+      <MobileScreen title={$t("common.settings")} icon={Settings2} onClose={() => (open = false)}>
+        {@render settingsList()}
+      </MobileScreen>
+    {/if}
   {:else}
     <div
       class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"

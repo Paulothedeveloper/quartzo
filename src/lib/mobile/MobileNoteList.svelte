@@ -152,9 +152,10 @@
     {#if list.length === 0}
       <div class="ml-empty">{search.trim() ? $t("search.noResults", { query: search.trim() }) : $t("mobile.emptyNotes")}</div>
     {:else}
-      {#each list as n (n.path)}
+      {#each list as n, i (n.path)}
         <button
-          class="ml-item"
+          class="ml-item m-press m-row-in"
+          style="animation-delay: {Math.min(i * 22, 200)}ms"
           onpointerdown={(e) => pressStart(e, n)}
           onpointermove={pressMove}
           onpointerup={pressEnd}
