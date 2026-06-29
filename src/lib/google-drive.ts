@@ -64,6 +64,8 @@ async function downloadText(token: string, fileId: string): Promise<string> {
 export interface DownloadProgress {
   done: number;
   skippedBinary: number;
+  listed: number; // total de itens que a API retornou (diagnóstico)
+  folders: number;
 }
 
 /**
@@ -77,15 +79,18 @@ export async function downloadFolder(
   destDir: string,
   onProgress?: (p: DownloadProgress) => void
 ): Promise<DownloadProgress> {
-  const prog: DownloadProgress = { done: 0, skippedBinary: 0 };
+  const prog: DownloadProgress = { done: 0, skippedBinary: 0, listed: 0, folders: 0 };
   const sep = destDir.includes("\\") ? "\\" : "/";
 
   async function walk(driveFolder: string, localDir: string) {
     await invoke("ensure_dir", { path: localDir });
     const children = await listChildren(token, driveFolder);
     for (const f of children) {
+      prog.listed++;
       const childPath = `${localDir}${sep}${f.name}`;
       if (f.mimeType === FOLDER_MIME) {
+        prog.folders++;
+        onProgress?.(prog);
         await walk(f.id, childPath);
       } else if (GOOGLE_NATIVE.test(f.mimeType)) {
         // Google Docs/Sheets nativos não são arquivos crus — pula.

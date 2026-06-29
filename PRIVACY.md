@@ -10,10 +10,10 @@ O Quartzo é um aplicativo de notas Markdown **local-first**: seus dados ficam n
 **Nada.** O Quartzo não coleta, não armazena em nuvem própria e não compartilha dados pessoais. Suas notas, vaults e configurações ficam **localmente** no seu dispositivo (ou em pastas que você mesmo escolher).
 
 ## Acesso ao Google Drive (opcional)
-Se — e somente se — você usar o recurso **"Baixar vaults da nuvem"**, o Quartzo pede acesso ao Google via OAuth com o escopo **`drive.file`**. Esse escopo é o mais restrito possível:
+Se — e somente se — você usar o recurso **"Baixar vault do Drive"**, o Quartzo pede acesso ao Google via OAuth com o escopo **`drive.readonly`** (somente leitura):
 
-- O Quartzo só enxerga os **arquivos/pastas que VOCÊ escolher** no seletor do Google (Google Picker). Ele **não** lê o resto do seu Drive.
-- O acesso é usado **apenas para baixar** os arquivos do vault que você selecionou, gravando-os **localmente** no app. O Quartzo **não** modifica, apaga nem envia arquivos para o seu Drive.
+- O acesso é **só de leitura** e usado **exclusivamente** para localizar e **baixar** a pasta do vault que VOCÊ escolher, gravando os arquivos **localmente** no app. O Quartzo **não** modifica, apaga nem envia nada para o seu Drive.
+- O Quartzo **não** lê nem indexa o resto do seu Drive em segundo plano — só busca/baixa a pasta selecionada quando você aciona o recurso.
 - O **token** de acesso fica armazenado **apenas no seu dispositivo** (armazenamento seguro), nunca em servidor nosso. Você pode revogar o acesso a qualquer momento em [myaccount.google.com/permissions](https://myaccount.google.com/permissions).
 - Nenhum dado do Drive é compartilhado com terceiros.
 
@@ -40,10 +40,10 @@ Quartzo is a **local-first** Markdown notes app: your data stays on **your devic
 **Nothing.** Quartzo does not collect, store on our own cloud, or share personal data. Your notes, vaults and settings live **locally** on your device (or in folders you choose).
 
 ## Google Drive access (optional)
-If — and only if — you use the **"Download vaults from cloud"** feature, Quartzo requests Google access via OAuth with the **`drive.file`** scope, the most restricted scope available:
+If — and only if — you use the **"Download vault from Drive"** feature, Quartzo requests Google access via OAuth with the **`drive.readonly`** scope (read-only):
 
-- Quartzo can only see the **files/folders YOU pick** in the Google Picker. It does **not** read the rest of your Drive.
-- Access is used **only to download** the vault files you selected, writing them **locally** in the app. Quartzo does **not** modify, delete or upload files to your Drive.
+- Access is **read-only** and used **solely** to locate and **download** the vault folder YOU choose, writing the files **locally** in the app. Quartzo does **not** modify, delete or upload anything to your Drive.
+- Quartzo does **not** read or index the rest of your Drive in the background — it only searches/downloads the selected folder when you trigger the feature.
 - The access **token** is stored **only on your device** (secure storage), never on our servers. You can revoke access anytime at [myaccount.google.com/permissions](https://myaccount.google.com/permissions).
 - No Drive data is shared with third parties.
 

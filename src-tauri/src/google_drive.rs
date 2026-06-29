@@ -24,7 +24,9 @@ use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
 
 #[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct DrivePick {
+    // serializa como accessToken/folderId/folderName (o front lê em camelCase).
     pub access_token: String,
     pub folder_id: String,
     pub folder_name: String,
@@ -136,7 +138,10 @@ pub async fn google_drive_pick(
         let redirect = format!("http://127.0.0.1:{port}");
 
         let (verifier, challenge) = pkce();
-        let scope = "https://www.googleapis.com/auth/drive.file";
+        // drive.readonly: drive.file NÃO lista conteúdo de pasta (provado: 0 itens).
+        // Pra baixar um vault inteiro precisa de leitura. Em modo TESTE funciona sem
+        // a avaliação CASA (só exigida pra publicar pra qualquer usuário).
+        let scope = "https://www.googleapis.com/auth/drive.readonly";
         let auth_url = format!(
             "https://accounts.google.com/o/oauth2/v2/auth?client_id={cid}&redirect_uri={ru}\
              &response_type=code&scope={sc}&code_challenge={ch}&code_challenge_method=S256\
