@@ -12,6 +12,14 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.62.0",
+    date: "2026-06-29",
+    items: [
+      "Grafo AGORA com a cara do cristal de verdade: os nós viraram NEURÔNIOS cyan branco-quentes (com brilho), no lugar das bolinhas coloridas, e as FACETAS do cristal por trás da rede ficaram bem mais visíveis. (Antes a mudança não aparecia em vault grande por causa do modo leve — corrigido.)",
+      "Nova opção 'Qualidade total no grafo' (Configurações > Aparência): por padrão, vaults grandes (+120 notas) usam um modo leve pra rolar liso; ligue esta opção pra FORÇAR a qualidade total (neurônios com brilho + animações + facetas vivas) mesmo em vault grande.",
+    ],
+  },
+  {
     version: "0.61.0",
     date: "2026-06-29",
     items: [

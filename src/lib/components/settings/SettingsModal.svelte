@@ -870,6 +870,13 @@
                   $settings.graphContinuous,
                   () => set("graphContinuous", !$settings.graphContinuous)
                 )}
+                <div class="divider"></div>
+                {@render toggleRow(
+                  $t("set.graphFullQuality"),
+                  $t("set.graphFullQualityDesc"),
+                  $settings.graphFullQuality,
+                  () => set("graphFullQuality", !$settings.graphFullQuality)
+                )}
               </div>
 
               <div class="card">

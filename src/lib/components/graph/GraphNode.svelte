@@ -98,17 +98,20 @@
     display: grid;
     place-items: center;
     border-radius: 9999px;
+    /* NÓ = célula-neurônio CYAN branco-quente (como os nós do ícone), independente
+       da pasta. A cor da pasta vira só uma aura sutil (::after) + os lobos. */
     background: radial-gradient(
-      circle at 50% 40%,
+      circle at 50% 38%,
       #ffffff 0%,
-      color-mix(in srgb, var(--c) 88%, #ffffff) 24%,
-      color-mix(in srgb, var(--c) 72%, #0a1120) 62%,
-      color-mix(in srgb, var(--c) 30%, #0a1120) 100%
+      #c9f6fd 18%,
+      #67e8f9 44%,
+      #1a6f93 74%,
+      #0a1120 100%
     );
     box-shadow:
-      0 0 6px color-mix(in srgb, var(--c) 75%, transparent),
-      0 0 16px color-mix(in srgb, var(--c) 38%, transparent),
-      inset 0 0 4px rgba(255, 255, 255, 0.5);
+      0 0 7px rgba(103, 232, 249, 0.85),
+      0 0 18px rgba(103, 232, 249, 0.5),
+      inset 0 0 4px rgba(255, 255, 255, 0.6);
     transition:
       transform 0.24s var(--ease-out, ease),
       box-shadow 0.24s var(--ease-out, ease);
@@ -199,15 +202,15 @@
   .gnode.hovered .neuron {
     transform: scale(1.5);
     box-shadow:
-      0 0 12px color-mix(in srgb, var(--c) 95%, transparent),
-      0 0 26px color-mix(in srgb, var(--c) 55%, transparent),
-      inset 0 0 4px rgba(255, 255, 255, 0.35);
+      0 0 14px rgba(103, 232, 249, 0.95),
+      0 0 30px rgba(165, 243, 252, 0.55),
+      inset 0 0 4px rgba(255, 255, 255, 0.4);
   }
   .gnode.focused .neuron {
     box-shadow:
-      0 0 9px color-mix(in srgb, var(--c) 85%, transparent),
-      0 0 18px color-mix(in srgb, var(--c) 40%, transparent),
-      inset 0 0 3px rgba(255, 255, 255, 0.3);
+      0 0 10px rgba(103, 232, 249, 0.85),
+      0 0 20px rgba(103, 232, 249, 0.4),
+      inset 0 0 3px rgba(255, 255, 255, 0.32);
   }
   .gnode.hovered .glabel {
     color: #f0f9ff;

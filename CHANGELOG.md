@@ -3,6 +3,15 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.62.0 — 2026-06-29
+
+- **Grafo — redesign que REALMENTE aparece (a 0.61 era sutil demais):** a causa de "continua igual" era o **modo leve** (liga acima de 120 nós / 250 links), que sobrescrevia os nós com cor-de-pasta chapada e desligava o glow — então em vault grande (caso do Paulo, 179 notas) nada do redesign aparecia. Corrigido:
+  - **Nós = células cyan branco-quentes** (núcleo branco → cyan → escuro) com glow, INCLUSIVE no modo leve (glow estático, barato). A cor da pasta saiu dos nós e ficou só nos **lobos**.
+  - **Facetas do cristal mais fortes** (fill-opacity ~2,3× + stroke 0.30) — agora claramente visíveis cruzando o canvas.
+  - Hover/focus em cyan.
+- **Nova opção "Qualidade total no grafo" (exceção pedida pelo Paulo):** `graphFullQuality` (Configurações > Aparência, card do Grafo). Quando ligada, FORÇA `liteMode=false` mesmo em vault grande → neurônios animados (respiração + halo) + facetas vivas. `GraphCanvas` rebuilda ao alternar (o `data.lite` é definido no build). i18n 5 idiomas. Default off (pan/zoom liso em vault grande).
+- Validado no `tauri dev` com o vault do Manual (179 notas, modo leve): aglomerado cyan + facetas fortes (preview no vault do projeto).
+
 ## 0.61.0 — 2026-06-29
 
 - **Grafo redesenhado pra identidade cristal+neurônios (pedido do Paulo: "tudo novo na aba de garfo"):** mantive o MOTOR (SvelteFlow + d3-force com **layout congelado** — a otimização que matou o lag, regra `simulacao-ao-vivo-congele-o-layout`) e reescrevi o VISUAL pra virar a "rede neural dentro do cristal" do ícone novo:

@@ -332,7 +332,9 @@
     }
 
     // Grafo grande -> modo leve (sem efeitos pesados) + layout congelado.
-    liteMode = rNodes.length > 120 || valid.length > 250;
+    // EXCEÇÃO do Paulo: se "qualidade total" estiver ligada nas configs, força o
+    // visual completo (nós cyan com glow + animações) mesmo em vault grande.
+    liteMode = (rNodes.length > 120 || valid.length > 250) && !get(settings).graphFullQuality;
     // Culling (onlyRenderVisibleElements): liga mais cedo (>350) — em vaults
     // grandes, pintar só o que está na viewport é MUITO mais fluido no pan/zoom.
     veryLarge = rNodes.length > 350;
@@ -444,10 +446,12 @@
     }
   }
 
-  // Reconstrói quando os dados mudam.
+  // Reconstrói quando os dados mudam — ou quando o Paulo alterna a "qualidade total"
+  // (precisa rebuildar pq o data.lite dos nós é definido no build).
   $effect(() => {
     const rn = rawNodes;
     const re = rawEdges;
+    $settings.graphFullQuality;
     untrack(() => rebuild(rn, re));
   });
 
@@ -493,23 +497,23 @@
        da pedra). Estático e na GPU (pointer-events:none) — não afeta pan/zoom. -->
   <div class="graph-facets" aria-hidden="true">
     <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-      <polygon points="430,420 859,1296 302,1591" fill="#67e8f9" fill-opacity="0.030" stroke="#67e8f9" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 302,1591 -246,1025" fill="#22d3ee" fill-opacity="0.039" stroke="#22d3ee" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 -246,1025 -664,234" fill="#818cf8" fill-opacity="0.049" stroke="#818cf8" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 -664,234 -145,-192" fill="#a78bfa" fill-opacity="0.058" stroke="#a78bfa" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 -145,-192 494,-621" fill="#38bdf8" fill-opacity="0.030" stroke="#38bdf8" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 494,-621 1159,-589" fill="#5eead4" fill-opacity="0.039" stroke="#5eead4" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 1159,-589 1383,213" fill="#7dd3fc" fill-opacity="0.049" stroke="#7dd3fc" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 1383,213 1342,1165" fill="#c4b5fd" fill-opacity="0.058" stroke="#c4b5fd" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="430,420 1342,1165 859,1296" fill="#67e8f9" fill-opacity="0.030" stroke="#67e8f9" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 146,1423 -478,1034" fill="#a78bfa" fill-opacity="0.039" stroke="#a78bfa" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 -478,1034 -219,168" fill="#38bdf8" fill-opacity="0.049" stroke="#38bdf8" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 -219,168 23,-389" fill="#5eead4" fill-opacity="0.058" stroke="#5eead4" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 23,-389 784,-260" fill="#7dd3fc" fill-opacity="0.030" stroke="#7dd3fc" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 784,-260 1562,158" fill="#c4b5fd" fill-opacity="0.039" stroke="#c4b5fd" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 1562,158 1798,900" fill="#67e8f9" fill-opacity="0.049" stroke="#67e8f9" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 1798,900 1009,1445" fill="#22d3ee" fill-opacity="0.058" stroke="#22d3ee" stroke-opacity="0.10" stroke-width="1.1"/>
-      <polygon points="600,560 1009,1445 146,1423" fill="#818cf8" fill-opacity="0.030" stroke="#818cf8" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 859,1296 302,1591" fill="#67e8f9" fill-opacity="0.070" stroke="#67e8f9" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 302,1591 -246,1025" fill="#22d3ee" fill-opacity="0.090" stroke="#22d3ee" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 -246,1025 -664,234" fill="#818cf8" fill-opacity="0.110" stroke="#818cf8" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 -664,234 -145,-192" fill="#a78bfa" fill-opacity="0.130" stroke="#a78bfa" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 -145,-192 494,-621" fill="#38bdf8" fill-opacity="0.070" stroke="#38bdf8" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 494,-621 1159,-589" fill="#5eead4" fill-opacity="0.090" stroke="#5eead4" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 1159,-589 1383,213" fill="#7dd3fc" fill-opacity="0.110" stroke="#7dd3fc" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 1383,213 1342,1165" fill="#c4b5fd" fill-opacity="0.130" stroke="#c4b5fd" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="430,420 1342,1165 859,1296" fill="#67e8f9" fill-opacity="0.070" stroke="#67e8f9" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 146,1423 -478,1034" fill="#a78bfa" fill-opacity="0.090" stroke="#a78bfa" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 -478,1034 -219,168" fill="#38bdf8" fill-opacity="0.110" stroke="#38bdf8" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 -219,168 23,-389" fill="#5eead4" fill-opacity="0.130" stroke="#5eead4" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 23,-389 784,-260" fill="#7dd3fc" fill-opacity="0.070" stroke="#7dd3fc" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 784,-260 1562,158" fill="#c4b5fd" fill-opacity="0.090" stroke="#c4b5fd" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 1562,158 1798,900" fill="#67e8f9" fill-opacity="0.110" stroke="#67e8f9" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 1798,900 1009,1445" fill="#22d3ee" fill-opacity="0.130" stroke="#22d3ee" stroke-opacity="0.30" stroke-width="1.6"/>
+      <polygon points="600,560 1009,1445 146,1423" fill="#818cf8" fill-opacity="0.070" stroke="#818cf8" stroke-opacity="0.30" stroke-width="1.6"/>
     </svg>
   </div>
   <SvelteFlow
@@ -599,14 +603,16 @@
   /* ===== MODO LEVE (grafos grandes): tira efeitos GPU-pesados que travam o
      pan/zoom — sombras, glow, blur e a animação de entrada. Cores e formas
      ficam (de longe é quase imperceptível), mas a fluidez melhora muito. ===== */
+  /* modo leve: nó CYAN branco-quente com glow ESTÁTICO (sem animação/halo pesado),
+     pra ficar igual ao ícone mesmo em vault grande, sem custar no pan/zoom. */
   .graph-wrap--lite :global(.neuron) {
-    background: color-mix(in srgb, var(--c) 58%, #0a1120) !important;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16) !important;
+    background: radial-gradient(circle at 50% 40%, #ffffff 0%, #c9f6fd 20%, #67e8f9 52%, #0a1120 100%) !important;
+    box-shadow: 0 0 5px rgba(103, 232, 249, 0.6), inset 0 0 2px rgba(255, 255, 255, 0.55) !important;
   }
   .graph-wrap--lite :global(.gnode.hovered .neuron),
   .graph-wrap--lite :global(.gnode.focused .neuron) {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-      0 0 6px color-mix(in srgb, var(--c) 70%, transparent) !important;
+    box-shadow: 0 0 11px rgba(103, 232, 249, 0.95), 0 0 22px rgba(165, 243, 252, 0.5),
+      inset 0 0 3px rgba(255, 255, 255, 0.5) !important;
   }
   .graph-wrap--lite :global(.gnode) {
     animation: none !important;

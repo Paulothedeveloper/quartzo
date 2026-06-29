@@ -29,6 +29,7 @@ export interface Settings {
   propertiesPanel: boolean; // editor visual de propriedades (front-matter) no topo do editor
   wikilinkAutocomplete: boolean; // sugerir notas ao digitar [[ no editor
   graphContinuous: boolean; // grafo com física contínua (nós acomodam + reagem ao arrastar)
+  graphFullQuality: boolean; // FORÇA a qualidade total do grafo (nós cyan com glow + animações + facetas vivas) mesmo em vault grande, ignorando o modo leve. Pode pesar no pan/zoom.
   // Preview / renderização
   renderMermaid: boolean; // diagramas ```mermaid
   renderQueries: boolean; // views dinâmicas ```query (tabela/kanban/tarefas)
@@ -122,6 +123,7 @@ export const DEFAULT_SETTINGS: Settings = {
   propertiesPanel: true,
   wikilinkAutocomplete: true,
   graphContinuous: true,
+  graphFullQuality: false,
   renderMermaid: true,
   renderQueries: true,
   renderVideo: true,
