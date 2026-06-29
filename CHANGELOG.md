@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.59.2 — 2026-06-29
+
+- **Grafo — mais "motion effect" (pesquisa de refs de rede neural):** `SynapseEdge` agora é um **cometa com cauda** (cabeça `#eafdff` brilhante + 2 dots de rastro com opacidade decrescente e fase atrasada, todos com easing spline) fluindo pela curva bezier. `GraphNode` ganhou um **halo de glow pulsando** (`::after` anel radial, `opacity`+`scale` em loop, fase/ritmo por índice = GPU, barato) — a "pulsação de luz" das sinapses. Refs: animações de neural network (Envato/motion) + técnica de fluxo SVG (Visual Cinnamon).
+
 ## 0.59.1 — 2026-06-29
 
 - **Grafo VIVO (a cara das primeiras versões, sem lag):** os neurônios voltaram a se mover — agora **RESPIRAM** (propriedade CSS `scale` pulsando em `GraphNode`, fase/ritmo por índice; compõe com o `transform` do hover, mantém o nó centrado na aresta = sem desconectar, GPU = sem lag). Substitui a física ao vivo que dava o movimento original mas travava. Arestas com impulso ficaram mais VIVAS (traço cyan mais claro/grosso, estável). **Lição registrada no Manual** ([[visual-que-o-usuario-amava-pegue-a-referencia-antes]]): eu vinha iterando no escuro; o certo é pegar a referência da versão amada antes de mexer.

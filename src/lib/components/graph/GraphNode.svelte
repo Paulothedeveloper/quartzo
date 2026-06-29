@@ -118,7 +118,29 @@
     0%, 100% { scale: 1; }
     50% { scale: 1.07; }
   }
-  :global(html.no-anim) .neuron.alive {
+  /* halo de glow PULSANDO (a "pulsação de luz" do neurônio, das refs de motion
+     design). opacity+scale = GPU, barato. radial bright em fundo escuro = bloom. */
+  .neuron.alive::after {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      transparent 26%,
+      color-mix(in srgb, var(--c) 52%, transparent) 46%,
+      transparent 72%
+    );
+    pointer-events: none;
+    z-index: -1;
+    animation: neuron-glow var(--bdur, 4s) ease-in-out var(--bdelay, 0s) infinite;
+  }
+  @keyframes neuron-glow {
+    0%, 100% { opacity: 0.22; transform: scale(0.82); }
+    50% { opacity: 0.55; transform: scale(1.2); }
+  }
+  :global(html.no-anim) .neuron.alive,
+  :global(html.no-anim) .neuron.alive::after {
     animation: none;
   }
   .gicon {

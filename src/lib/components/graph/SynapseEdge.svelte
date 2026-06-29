@@ -20,8 +20,8 @@
   );
   const path = $derived(geom[0]);
 
-  // Duração/fase variam por aresta (hash do id) pro fluxo NÃO sincronizar —
-  // dá a sensação de energia contínua e orgânica. Mais lento = mais elegante.
+  // Duração/fase variam por aresta (hash do id) pro fluxo NÃO sincronizar.
+  // Mais lento = mais elegante (motion design).
   function hash(s: string): number {
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) {
@@ -32,88 +32,40 @@
   }
   const dur = $derived(2.0 + (hash(id) % 170) / 100); // 2.0–3.7s (glide lento)
   const begin = $derived(-((hash(id + "b") % 400) / 100)); // fase espalhada 0–4s
-  // easing do FADE (aparece/some suave, sem "pop"). 3 intervalos (4 keyTimes).
-  const fade = "0.4 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1";
-  // easing da POSIÇÃO ao longo da curva: acelera e desacelera (ease-in-out).
-  const glide = "0.45 0 0.55 1";
+  const fade = "0.4 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1"; // aparece/some suave
+  const glide = "0.45 0 0.55 1"; // ease-in-out na posição (glide)
 </script>
 
 <BaseEdge {id} {path} {markerEnd} {style} />
 
 {#if data?.pulse}
-  <!-- impulso: energia fluindo do neurônio de origem pro de destino.
-       rastro translúcido (cometa) + cabeça brilhante, ambos com glide suave. -->
-  <circle class="synapse-trail" r="6" fill="#67e8f9">
-    <animateMotion
-      dur="{dur}s"
-      begin="{begin}s"
-      repeatCount="indefinite"
-      path={path}
-      rotate="auto"
-      calcMode="spline"
-      keyPoints="0;1"
-      keyTimes="0;1"
-      keySplines={glide}
-    />
-    <animate
-      attributeName="opacity"
-      values="0;0.42;0.42;0"
-      keyTimes="0;0.22;0.7;1"
-      calcMode="spline"
-      keySplines={fade}
-      dur="{dur}s"
-      begin="{begin}s"
-      repeatCount="indefinite"
-    />
+  <!-- COMETA: cabeça brilhante + cauda (2 dots que ficam pra trás, opacidade
+       decrescente) = rastro de energia fluindo pela sinapse. Tudo com easing. -->
+  <circle class="syn-tail" r="2.2" fill="#67e8f9">
+    <animateMotion dur="{dur}s" begin="{begin + 0.11}s" repeatCount="indefinite" path={path} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines={glide} />
+    <animate attributeName="opacity" values="0;0.28;0.28;0" keyTimes="0;0.22;0.7;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin + 0.11}s" repeatCount="indefinite" />
   </circle>
-  <circle class="synapse-head" r="2.6" fill="#ecfeff">
-    <animateMotion
-      dur="{dur}s"
-      begin="{begin}s"
-      repeatCount="indefinite"
-      path={path}
-      rotate="auto"
-      calcMode="spline"
-      keyPoints="0;1"
-      keyTimes="0;1"
-      keySplines={glide}
-    />
-    <animate
-      attributeName="opacity"
-      values="0;1;1;0"
-      keyTimes="0;0.2;0.72;1"
-      calcMode="spline"
-      keySplines={fade}
-      dur="{dur}s"
-      begin="{begin}s"
-      repeatCount="indefinite"
-    />
-    <animate
-      attributeName="r"
-      values="1.4;2.8;2.8;1.4"
-      keyTimes="0;0.2;0.72;1"
-      calcMode="spline"
-      keySplines={fade}
-      dur="{dur}s"
-      begin="{begin}s"
-      repeatCount="indefinite"
-    />
+  <circle class="syn-tail" r="2.5" fill="#7df0fb">
+    <animateMotion dur="{dur}s" begin="{begin + 0.055}s" repeatCount="indefinite" path={path} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines={glide} />
+    <animate attributeName="opacity" values="0;0.45;0.45;0" keyTimes="0;0.2;0.72;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin + 0.055}s" repeatCount="indefinite" />
+  </circle>
+  <circle class="syn-head" r="2.8" fill="#eafdff">
+    <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" path={path} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines={glide} />
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.18;0.74;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin}s" repeatCount="indefinite" />
+    <animate attributeName="r" values="1.4;3;3;1.4" keyTimes="0;0.18;0.74;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin}s" repeatCount="indefinite" />
   </circle>
 {/if}
 
 <style>
-  .synapse-head {
-    filter: drop-shadow(0 0 5px rgba(165, 243, 252, 0.95));
+  .syn-head {
+    filter: drop-shadow(0 0 5px rgba(180, 248, 255, 0.95));
     pointer-events: none;
   }
-  /* rastro: círculo maior e translúcido (sem blur por-frame — caro); o glow da
-     cabeça já dá o efeito de cometa suave. */
-  .synapse-trail {
-    opacity: 0.4;
+  .syn-tail {
     pointer-events: none;
   }
-  :global(html.no-anim) .synapse-head,
-  :global(html.no-anim) .synapse-trail {
+  :global(html.no-anim) .syn-head,
+  :global(html.no-anim) .syn-tail {
     display: none;
   }
 </style>

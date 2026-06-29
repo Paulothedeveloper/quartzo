@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.59.2",
+    date: "2026-06-29",
+    items: [
+      "Grafo com mais cara de MOTION EFFECT (pesquisei referências de redes neurais): os impulsos agora têm RASTRO de cometa (cabeça brilhante + cauda que some) fluindo pelas conexões, e os neurônios ganharam um HALO de luz pulsando ao redor (a 'pulsação de luz' das sinapses). Tudo na GPU, sem travar.",
+    ],
+  },
+  {
     version: "0.59.1",
     date: "2026-06-29",
     items: [
