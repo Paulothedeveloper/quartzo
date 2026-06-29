@@ -224,16 +224,17 @@
     overflow: auto;
     background: var(--color-bg);
   }
-  /* barra de formatação: estática no topo do editor (sempre visível). Rola na
-     horizontal se não couber. Não depende do teclado. */
+  /* barra de formatação: estática no topo do editor (sempre visível). QUEBRA pra
+     2ª linha se não couber (flex-wrap) — nunca scroll horizontal (regra do Manual:
+     barra-de-controles-quebrar). Não depende do teclado. */
   .me-fmt {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 2px;
     flex-shrink: 0;
     min-height: 46px;
-    padding: 0 6px;
-    overflow-x: auto;
+    padding: 4px 6px;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
   }

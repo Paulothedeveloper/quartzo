@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.59.3 — 2026-06-29
+
+- **Toolbars com flex-wrap (regra do Manual `barra-de-controles-quebrar`):** as barras de Canvas/Rascunho (`.q-tooltop`) e a de formatação do editor mobile (`.me-fmt`) usavam `overflow-x:auto` (scroll horizontal — que o Paulo já reprovou). Trocado por `flex-wrap:wrap` + `min-height`/altura automática → quebram pra 2ª linha quando não cabem, sem scroll nem corte, em qualquer largura. Reli o Manual antes (regra: reler antes de mudar) e corrigi minha própria implementação da 0.59.1.
+
 ## 0.59.2 — 2026-06-29
 
 - **Grafo — mais "motion effect" (pesquisa de refs de rede neural):** `SynapseEdge` agora é um **cometa com cauda** (cabeça `#eafdff` brilhante + 2 dots de rastro com opacidade decrescente e fase atrasada, todos com easing spline) fluindo pela curva bezier. `GraphNode` ganhou um **halo de glow pulsando** (`::after` anel radial, `opacity`+`scale` em loop, fase/ritmo por índice = GPU, barato) — a "pulsação de luz" das sinapses. Refs: animações de neural network (Envato/motion) + técnica de fluxo SVG (Visual Cinnamon).

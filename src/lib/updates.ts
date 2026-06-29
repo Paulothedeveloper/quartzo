@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.59.3",
+    date: "2026-06-29",
+    items: [
+      "Barras de ferramentas (Canvas, Rascunho e a de formatação do editor) agora QUEBRAM pra uma segunda linha quando não cabem, em vez de rolar na horizontal — nada de barra de rolagem feia nem botão cortado. Vale em qualquer largura de tela.",
+    ],
+  },
+  {
     version: "0.59.2",
     date: "2026-06-29",
     items: [
