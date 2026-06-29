@@ -63,7 +63,8 @@
     position: relative;
     height: 100%;
     width: 100%;
-    overflow: auto; /* nunca corta o conteúdo: rola se a janela for baixa */
+    overflow-x: hidden; /* clipa orbs/glows decorativos que passam da borda (sem scroll horizontal no mobile) */
+    overflow-y: auto; /* nunca corta o conteúdo: rola na vertical se a janela for baixa */
     display: grid;
     place-items: center;
     background: radial-gradient(ellipse 75% 60% at 50% 36%, #101a36 0%, #0a0f1c 55%, #05070e 100%);
