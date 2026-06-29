@@ -3,6 +3,12 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.60.0 — 2026-06-29
+
+- **Ícone + logo novos (cristal + neurônios):** o ícone foi refeito (processo: reli as regras de marca/vault do Manual, busquei referências reais, gerei conceitos via Pollinations e o Paulo escolheu o cristal com a rede neural acesa por dentro — amarra com o grafo do app). **Variação app vs PC** (pedido do Paulo): desktop usa o render rico e detalhado (`tauri icon` a partir do master V1); o **adaptive do Android** usa uma versão mais bold (`mob_555`) com poucos nós grandes que continuam legíveis em tamanho pequeno (foreground + cor de fundo `#0a0e1a` casada com a borda). Cascata aplicada: `src-tauri/icons/*` (desktop/ios), `gen/android/.../res/mipmap-*` (legacy + adaptive), `static/favicon.png` e `static/quartzo-crystal.png` (hero in-app via `CrystalIllustration`). Validei cada peça renderizando (círculo/squircle/pequeno), não confiando no "salvou". Kit salvo no vault.
+- **Drive no CELULAR (sincronia de nuvem):** conectar conta Google (OAuth por **deep link** — Custom Tab volta pro app via scheme reverso do Client ID Android) e **baixar um vault** da pasta do Google Drive direto pro app. Em modo teste aparece "app não verificado → Avançado → Acessar" (escopo `drive.readonly`). Client Android criado (SHA-1 do release), intent-filter no `AndroidManifest`, fluxo no front + Rust emitindo o redirect.
+- **Aba Nuvem no celular limpa:** o conteúdo que era só de PC (salvar todos/git, "este vault já está na nuvem", "instale o Drive Desktop", e o card de intro de sincronia) agora é `{#if !isMobile}` — no celular a aba mostra só **"Baixar vault do Drive"**.
+
 ## 0.59.3 — 2026-06-29
 
 - **Toolbars com flex-wrap (regra do Manual `barra-de-controles-quebrar`):** as barras de Canvas/Rascunho (`.q-tooltop`) e a de formatação do editor mobile (`.me-fmt`) usavam `overflow-x:auto` (scroll horizontal — que o Paulo já reprovou). Trocado por `flex-wrap:wrap` + `min-height`/altura automática → quebram pra 2ª linha quando não cabem, sem scroll nem corte, em qualquer largura. Reli o Manual antes (regra: reler antes de mudar) e corrigi minha própria implementação da 0.59.1.

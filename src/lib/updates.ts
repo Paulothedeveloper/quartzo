@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.60.0",
+    date: "2026-06-29",
+    items: [
+      "ÍCONE NOVO do Quartzo: o cristal agora carrega uma rede de NEURÔNIOS acesa por dentro (cyan), amarrando com o grafo do app — 'segundo cérebro em cristal'. Com variação: no PC o ícone é o render rico e detalhado; no celular é uma versão mais bold que continua legível em tamanho pequeno.",
+      "Sincronia de nuvem no CELULAR: dá pra conectar a conta Google e BAIXAR um vault salvo na sua pasta do Google Drive direto pro app (Configurações > Nuvem > Conectar Google Drive).",
+      "Aba Nuvem no celular agora mostra só o que faz sentido no mobile (baixar do Drive) — saiu o conteúdo que era só de PC.",
+    ],
+  },
+  {
     version: "0.59.3",
     date: "2026-06-29",
     items: [

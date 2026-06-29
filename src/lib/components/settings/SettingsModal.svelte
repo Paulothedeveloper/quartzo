@@ -1093,12 +1093,14 @@
             </div>
           {:else if section === "nuvem"}
             <div class="space-y-3">
-              <div class="card">
-                <div class="text-sm font-medium">{$t("set.cloudSync")}</div>
-                <div class="mt-1 text-xs leading-relaxed text-text-secondary">
-                  {$t("set.cloudSyncDescBefore")} <strong>Google Drive</strong> {$t("set.cloudSyncDescAfter")}
+              {#if !isMobile}
+                <div class="card">
+                  <div class="text-sm font-medium">{$t("set.cloudSync")}</div>
+                  <div class="mt-1 text-xs leading-relaxed text-text-secondary">
+                    {$t("set.cloudSyncDescBefore")} <strong>Google Drive</strong> {$t("set.cloudSyncDescAfter")}
+                  </div>
                 </div>
-              </div>
+              {/if}
 
               {#if isMobile}
                 <div class="card space-y-3">
