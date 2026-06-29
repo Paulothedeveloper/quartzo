@@ -1171,6 +1171,7 @@
                 </div>
               {/if}
 
+              {#if !isMobile}
               {#if vaultInCloud}
                 <div class="card flex items-center gap-2.5">
                   <CheckCircle2 size={20} class="shrink-0 text-success" />
@@ -1231,6 +1232,7 @@
                   {$t("set.cloudFootnoteBefore")}
                   <code>Quartzo/{$currentVaultPath?.split(/[\\/]/).pop() ?? ""}</code>.
                 </div>
+              {/if}
               {/if}
             </div>
           {:else if section === "integracoes"}
