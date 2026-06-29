@@ -9,10 +9,15 @@
 // project_number = appId do Picker (do projeto quartzo-5eb76 = 407456134162).
 
 export const GOOGLE = {
+  // Desktop (loopback) — usado pelo fluxo desktop (dormente por ora).
   clientId: "",
   clientSecret: "",
   apiKey: "",
   projectNumber: "407456134162",
+  // Android (deep link) — Client ID do OAuth client tipo "Android" (sem secret).
+  // Preenchido quando o Paulo criar o client. O scheme de redirect é o reverso:
+  // com.googleusercontent.apps.<prefixo-do-clientId>
+  androidClientId: "",
 };
 
 export function googleConfigured(): boolean {

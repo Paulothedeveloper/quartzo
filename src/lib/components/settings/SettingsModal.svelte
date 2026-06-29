@@ -20,6 +20,7 @@
     Braces,
     Cloud,
     CloudUpload,
+    CloudDownload,
     Workflow,
     Boxes,
     Clapperboard,
@@ -45,6 +46,9 @@
   import { currentVaultPath } from "$lib/stores/vault";
   import { showToast } from "$lib/stores/toast";
   import { saveAllVaultsToCloud } from "$lib/git-auto";
+  import { connectAndListVaults, downloadVault, type DriveVault } from "$lib/google-drive-mobile";
+  import { GOOGLE } from "$lib/google-config";
+  import { appLocalDataDir, join } from "@tauri-apps/api/path";
   import { isMobile } from "$lib/platform";
   import { prismaPickerOpen } from "$lib/stores/ui";
   import { setVault, refreshTree } from "$lib/vault-actions";
@@ -292,6 +296,48 @@
       showToast(`${e}`, "error");
     } finally {
       movingCloud = false;
+    }
+  }
+
+  // ---- Baixar vault do Google Drive (só mobile) ----
+  const driveConfigured = !!GOOGLE.androidClientId;
+  let driveBusy = $state(false); // conectando/listando
+  let driveVaults = $state<DriveVault[]>([]);
+  let driveToken = $state("");
+  let driveDownloading = $state(""); // id do vault baixando
+  let driveProg = $state<{ done: number; folders: number; skippedBinary: number } | null>(null);
+  let driveErr = $state("");
+
+  async function driveConnect() {
+    driveBusy = true;
+    driveErr = "";
+    try {
+      const s = await connectAndListVaults();
+      driveToken = s.token;
+      driveVaults = s.vaults;
+      if (!s.vaults.length) driveErr = tr("set.driveDlEmpty");
+    } catch (e) {
+      driveErr = `${e}`;
+    } finally {
+      driveBusy = false;
+    }
+  }
+
+  async function drivePick(v: DriveVault) {
+    if (driveDownloading) return;
+    driveDownloading = v.id;
+    driveErr = "";
+    driveProg = null;
+    try {
+      const base = await appLocalDataDir();
+      const dest = await join(base, "vaults", v.name);
+      const p = await downloadVault(driveToken, v.id, dest, (pr) => (driveProg = { ...pr }));
+      showToast(tr("set.driveDlDone", { name: v.name, n: p.done }), "success");
+      await setVault(dest);
+    } catch (e) {
+      driveErr = `${e}`;
+    } finally {
+      driveDownloading = "";
     }
   }
   $effect(() => {
@@ -1053,6 +1099,60 @@
                   {$t("set.cloudSyncDescBefore")} <strong>Google Drive</strong> {$t("set.cloudSyncDescAfter")}
                 </div>
               </div>
+
+              {#if isMobile}
+                <div class="card space-y-3">
+                  <div>
+                    <div class="flex items-center gap-2 text-sm font-medium">
+                      <CloudDownload size={16} class="text-accent" /> {$t("set.driveDlTitle")}
+                    </div>
+                    <div class="mt-1 text-xs leading-relaxed text-text-secondary">{$t("set.driveDlDesc")}</div>
+                  </div>
+
+                  {#if !driveConfigured}
+                    <div class="flex items-start gap-2 text-xs text-text-secondary">
+                      <AlertCircle size={16} class="mt-0.5 shrink-0 text-warning" />
+                      <span>{$t("set.driveDlPending")}</span>
+                    </div>
+                  {:else if driveVaults.length === 0}
+                    <button
+                      onclick={driveConnect}
+                      disabled={driveBusy}
+                      class="flex items-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-50"
+                    >
+                      {#if driveBusy}<Loader2 size={15} class="animate-spin" />{:else}<Cloud size={15} />{/if}
+                      {$t("set.driveDlConnect")}
+                    </button>
+                  {:else}
+                    <div class="text-xs font-medium uppercase tracking-wider text-text-muted">
+                      {$t("set.driveDlPick")}
+                    </div>
+                    {#each driveVaults as v (v.id)}
+                      <button
+                        onclick={() => drivePick(v)}
+                        disabled={!!driveDownloading}
+                        class="flex w-full items-center justify-between gap-3 rounded-lg bg-elevated px-3 py-2.5 text-left transition-all hover:bg-elevated/70 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        <span class="truncate text-sm font-medium">{v.name}</span>
+                        {#if driveDownloading === v.id}
+                          <Loader2 size={15} class="shrink-0 animate-spin text-accent" />
+                        {:else}
+                          <CloudDownload size={15} class="shrink-0 text-accent" />
+                        {/if}
+                      </button>
+                    {/each}
+                  {/if}
+
+                  {#if driveProg}
+                    <div class="text-xs text-text-secondary">
+                      {$t("set.driveDlProgress", { done: driveProg.done, folders: driveProg.folders })}
+                    </div>
+                  {/if}
+                  {#if driveErr}
+                    <div class="text-xs leading-relaxed text-danger">{driveErr}</div>
+                  {/if}
+                </div>
+              {/if}
 
               {#if !isMobile}
                 <div class="card flex items-center justify-between gap-3">

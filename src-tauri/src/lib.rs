@@ -120,6 +120,23 @@ pub fn run() {
                     });
                 }
             }
+            // Mobile (Android): captura o redirect do OAuth do Google (scheme reverso do
+            // Client ID) e repassa pro front via evento `oauth-redirect`. O registro do
+            // scheme é feito pelo intent-filter no AndroidManifest (não por register_all).
+            #[cfg(mobile)]
+            {
+                use tauri::Emitter;
+                use tauri_plugin_deep_link::DeepLinkExt;
+                let handle = app.handle().clone();
+                app.deep_link().on_open_url(move |event| {
+                    for url in event.urls() {
+                        let s = url.as_str();
+                        if s.starts_with("com.googleusercontent.apps.") {
+                            let _ = handle.emit("oauth-redirect", s.to_string());
+                        }
+                    }
+                });
+            }
             Ok(())
         })
         .manage(WatchState(Mutex::new(None)))
