@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onDestroy } from "svelte";
   import {
     ChevronLeft, PenLine, BookOpen, Check, Loader2,
     Bold, Italic, Heading2, List, ListChecks, Quote, Code, Link as LinkIcon, Image as ImageIcon,
@@ -47,27 +47,7 @@
     saveTimer = setTimeout(() => save(path, value), $settings.autoSaveDelay);
   }
 
-  // ---- barra de formatação ACIMA do teclado (visualViewport) ----
-  let kb = $state(0); // altura do teclado virtual
-  function onVV() {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    kb = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
-  }
-  onMount(() => {
-    const vv = window.visualViewport;
-    if (vv) {
-      vv.addEventListener("resize", onVV);
-      vv.addEventListener("scroll", onVV);
-      onVV();
-    }
-  });
   onDestroy(() => {
-    const vv = window.visualViewport;
-    if (vv) {
-      vv.removeEventListener("resize", onVV);
-      vv.removeEventListener("scroll", onVV);
-    }
     if (saveTimer) clearTimeout(saveTimer);
   });
 
@@ -114,11 +94,25 @@
     </button>
   </div>
 
-  <!-- conteúdo (espaço pra barra de formatação + safe-area no modo escrever) -->
-  <div
-    class="me-body"
-    style="padding-bottom:{mode === 'edit' ? 'calc(46px + env(safe-area-inset-bottom))' : '0'}"
-  >
+  <!-- barra de formatação (topo do editor, sempre visível — não depende do
+       inset do teclado, que o edge-to-edge do Tauri não repassa ao WebView) -->
+  {#if mode === "edit"}
+    <div class="me-fmt">
+      {#each fmt as f (f.label)}
+        {@const Icon = f.icon}
+        <button
+          class="me-fmt-btn"
+          onpointerdown={(e) => apply(e, f.run)}
+          aria-label={f.label}
+        >
+          <Icon size={20} />
+        </button>
+      {/each}
+    </div>
+  {/if}
+
+  <!-- conteúdo -->
+  <div class="me-body">
     {#if activeTab}
       {#if mode === "edit"}
         <CodeMirror
@@ -139,25 +133,6 @@
       {/if}
     {/if}
   </div>
-
-  <!-- barra de formatação acima do teclado -->
-  {#if mode === "edit"}
-    <div
-      class="me-fmt"
-      style="bottom:{kb}px; padding-bottom:{kb === 0 ? 'env(safe-area-inset-bottom)' : '0'}"
-    >
-      {#each fmt as f (f.label)}
-        {@const Icon = f.icon}
-        <button
-          class="me-fmt-btn"
-          onpointerdown={(e) => apply(e, f.run)}
-          aria-label={f.label}
-        >
-          <Icon size={20} />
-        </button>
-      {/each}
-    </div>
-  {/if}
 </div>
 
 <style>
@@ -249,21 +224,18 @@
     overflow: auto;
     background: var(--color-bg);
   }
-  /* barra de formatação: fixa, sobe junto com o teclado (bottom = altura do teclado) */
+  /* barra de formatação: estática no topo do editor (sempre visível). Rola na
+     horizontal se não couber. Não depende do teclado. */
   .me-fmt {
-    position: fixed;
-    left: 0;
-    right: 0;
-    z-index: 40;
     display: flex;
     align-items: center;
     gap: 2px;
+    flex-shrink: 0;
     min-height: 46px;
     padding: 0 6px;
     overflow-x: auto;
     background: var(--color-surface);
-    border-top: 1px solid var(--color-border);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.28);
+    border-bottom: 1px solid var(--color-border);
   }
   .me-fmt-btn {
     display: grid;

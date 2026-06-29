@@ -7,7 +7,7 @@ Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 
 Correções pegas **testando no emulador Android real** + no app desktop:
 
-- **Android — barra de formatação acima do teclado:** `windowSoftInputMode="adjustResize"` no `AndroidManifest`. Sem isso a webview do Tauri não encolhe com o teclado e a barra (bottom:0) ficava **atrás** dele. Agora encolhe e a barra fica acima do teclado.
+- **Android — barra de formatação do editor:** ficava **escondida atrás do teclado** (o edge-to-edge do Tauri não repassa o inset do teclado pro WebView — nem `adjustResize`, `visualViewport` ou `interactive-widget` resolvem porque o WebView não "vê" o teclado). Solução robusta: a barra agora é **fixa no topo da nota** (sempre visível, rola na horizontal), independente do teclado. Validado no emulador.
 - **Lista de notas vazia** mostrava `"Grafo vazio"` (chave i18n errada) → nova chave `mobile.emptyNotes` ("Nenhuma nota ainda. Toque em + para criar.") nos 5 idiomas.
 - **Desktop — arrastar pra reordenar:** funcionava no navegador mas não no app porque o Tauri intercepta o DnD HTML5 (`dragDropEnabled:true`). Setado `dragDropEnabled:false` no `tauri.conf.json` (também faz o drop de imagem no Canvas usar o evento web padrão). Ver lição no Manual.
 

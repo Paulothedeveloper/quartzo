@@ -15,7 +15,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "0.57.1",
     date: "2026-06-29",
     items: [
-      "Android: a barra de formatação do editor agora sobe certinho ACIMA do teclado (estava ficando atrás dele). Corrigido após teste no aparelho.",
+      "Android: a barra de formatação do editor agora fica fixa no topo da nota (sempre visível e fácil de tocar). Antes ela ficava escondida atrás do teclado. Corrigido após testar no aparelho.",
       "Lista de notas vazia mostrava \"Grafo vazio\" por engano — agora mostra \"Nenhuma nota ainda. Toque em + para criar.\" (nos 5 idiomas).",
       "Desktop: arrastar pra reordenar tópicos agora funciona no app (o Tauri estava bloqueando o arraste interno).",
     ],
