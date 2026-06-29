@@ -25,6 +25,12 @@
   });
 
   const delay = $derived(Math.min(data.index * 6, 480));
+  // "Vida" sem física: cada neurônio RESPIRA (escala sutil pulsando), com fase e
+  // ritmo variando por índice — dá o movimento orgânico das primeiras versões
+  // (quando a física ao vivo travava) SEM lag: anima a propriedade `scale` na GPU,
+  // mantém o nó centrado no ponto da aresta (não desconecta) e não recalcula layout.
+  const breatheDur = $derived(3.6 + (data.index % 7) * 0.5); // 3.6–6.6s
+  const breatheDelay = $derived(-((data.index % 9) * 0.5)); // fases diferentes
   const icon = $derived(
     (data.label.match(/\p{Extended_Pictographic}/u)?.[0] as string | undefined) ?? null
   );
@@ -46,7 +52,11 @@
 >
   <Handle type="target" position={Position.Top} class="ghandle" />
   <Handle type="source" position={Position.Bottom} class="ghandle" />
-  <span class="neuron" style="width:{data.size}px;height:{data.size}px">
+  <span
+    class="neuron"
+    class:alive={!data.lite}
+    style="width:{data.size}px;height:{data.size}px; --bdur:{breatheDur}s; --bdelay:{breatheDelay}s"
+  >
     {#if icon && !data.lite}
       <span class="gicon" style="font-size:{Math.max(data.size * 0.55, 6)}px">{icon}</span>
     {/if}
@@ -98,6 +108,18 @@
     transition:
       transform 0.24s var(--ease-out, ease),
       box-shadow 0.24s var(--ease-out, ease);
+  }
+  /* respiração: escala sutil pulsando (propriedade `scale`, compõe com o
+     `transform` do hover). Fase/ritmo por nó -> grafo "vivo" sem física/lag. */
+  .neuron.alive {
+    animation: neuron-breathe var(--bdur, 4s) ease-in-out var(--bdelay, 0s) infinite;
+  }
+  @keyframes neuron-breathe {
+    0%, 100% { scale: 1; }
+    50% { scale: 1.07; }
+  }
+  :global(html.no-anim) .neuron.alive {
+    animation: none;
   }
   .gicon {
     position: relative;

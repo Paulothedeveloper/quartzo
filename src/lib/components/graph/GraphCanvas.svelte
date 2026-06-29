@@ -271,7 +271,15 @@
           width = 1.8;
         }
       } else {
-        opacity = 0.5;
+        opacity = 0.6;
+        // Arestas "energizadas" (as que têm cometa) ficam mais VIVAS: traço mais
+        // claro/grosso. Sem filtro (barato) e ESTÁVEL (data.pulse é fixo, não
+        // rotaciona) -> rede de neurônios vibrante, sem engasgo.
+        if ((e.data as any)?.pulse) {
+          stroke = "rgba(125,240,251,0.6)";
+          width = 1.2;
+          opacity = 0.72;
+        }
       }
       // Glow (filtro SVG) só nas arestas DESTACADAS (hover/filtro) — são poucas,
       // composita barato. O "neurônio piscando" vem do COMETA (data.pulse), que é
