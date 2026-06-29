@@ -3,6 +3,14 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.57.1 — 2026-06-29
+
+Correções pegas **testando no emulador Android real** + no app desktop:
+
+- **Android — barra de formatação acima do teclado:** `windowSoftInputMode="adjustResize"` no `AndroidManifest`. Sem isso a webview do Tauri não encolhe com o teclado e a barra (bottom:0) ficava **atrás** dele. Agora encolhe e a barra fica acima do teclado.
+- **Lista de notas vazia** mostrava `"Grafo vazio"` (chave i18n errada) → nova chave `mobile.emptyNotes` ("Nenhuma nota ainda. Toque em + para criar.") nos 5 idiomas.
+- **Desktop — arrastar pra reordenar:** funcionava no navegador mas não no app porque o Tauri intercepta o DnD HTML5 (`dragDropEnabled:true`). Setado `dragDropEnabled:false` no `tauri.conf.json` (também faz o drop de imagem no Canvas usar o evento web padrão). Ver lição no Manual.
+
 ## 0.57.0 — 2026-06-28
 
 - **Grafo — impulsos sinápticos (energia viajando pelas arestas):** novo custom edge `SynapseEdge` desenha, além do traço, um **impulso de luz** que viaja do nó de origem pro de destino via **SVG `animateMotion` (SMIL)** — animado pelo browser, fora da thread principal. **Anti-lag (a parte crítica):** só **~12-14 arestas pulsam por vez**, revezando a cada **~1.9s** (timer de baixa frequência); as demais ficam estáticas (zero repaint). Layout segue **congelado**. Duração/fase variam por hash do id (não sincronizam). Desliga no **modo leve** (grafos grandes) e com **"reduzir animações"** (`html.no-anim`). Medido (headless/software): **FPS ocioso COM os impulsos = 60** — não voltou ao loop. Visual base preservado.
