@@ -275,14 +275,17 @@
           width = 1.8;
         }
       } else {
-        opacity = 0.6;
+        // Teia neural um pouco mais presente (connectome) — sinapses ciano legíveis.
+        stroke = "rgba(103,232,249,0.5)";
+        width = 1.0;
+        opacity = 0.66;
         // Arestas "energizadas" (as que têm cometa) ficam mais VIVAS: traço mais
         // claro/grosso. Sem filtro (barato) e ESTÁVEL (data.pulse é fixo, não
         // rotaciona) -> rede de neurônios vibrante, sem engasgo.
         if ((e.data as any)?.pulse) {
-          stroke = "rgba(125,240,251,0.6)";
-          width = 1.2;
-          opacity = 0.72;
+          stroke = "rgba(140,242,252,0.66)";
+          width = 1.35;
+          opacity = 0.78;
         }
       }
       // Glow (filtro SVG) só nas arestas DESTACADAS (hover/filtro) — são poucas,
@@ -486,6 +489,29 @@
 </script>
 
 <div class="graph-wrap h-full w-full" class:graph-wrap--lite={liteMode}>
+  <!-- INTERIOR DO CRISTAL: facetas low-poly por trás da rede (você olha pra dentro
+       da pedra). Estático e na GPU (pointer-events:none) — não afeta pan/zoom. -->
+  <div class="graph-facets" aria-hidden="true">
+    <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+      <polygon points="430,420 859,1296 302,1591" fill="#67e8f9" fill-opacity="0.030" stroke="#67e8f9" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 302,1591 -246,1025" fill="#22d3ee" fill-opacity="0.039" stroke="#22d3ee" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 -246,1025 -664,234" fill="#818cf8" fill-opacity="0.049" stroke="#818cf8" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 -664,234 -145,-192" fill="#a78bfa" fill-opacity="0.058" stroke="#a78bfa" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 -145,-192 494,-621" fill="#38bdf8" fill-opacity="0.030" stroke="#38bdf8" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 494,-621 1159,-589" fill="#5eead4" fill-opacity="0.039" stroke="#5eead4" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 1159,-589 1383,213" fill="#7dd3fc" fill-opacity="0.049" stroke="#7dd3fc" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 1383,213 1342,1165" fill="#c4b5fd" fill-opacity="0.058" stroke="#c4b5fd" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="430,420 1342,1165 859,1296" fill="#67e8f9" fill-opacity="0.030" stroke="#67e8f9" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 146,1423 -478,1034" fill="#a78bfa" fill-opacity="0.039" stroke="#a78bfa" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 -478,1034 -219,168" fill="#38bdf8" fill-opacity="0.049" stroke="#38bdf8" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 -219,168 23,-389" fill="#5eead4" fill-opacity="0.058" stroke="#5eead4" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 23,-389 784,-260" fill="#7dd3fc" fill-opacity="0.030" stroke="#7dd3fc" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 784,-260 1562,158" fill="#c4b5fd" fill-opacity="0.039" stroke="#c4b5fd" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 1562,158 1798,900" fill="#67e8f9" fill-opacity="0.049" stroke="#67e8f9" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 1798,900 1009,1445" fill="#22d3ee" fill-opacity="0.058" stroke="#22d3ee" stroke-opacity="0.10" stroke-width="1.1"/>
+      <polygon points="600,560 1009,1445 146,1423" fill="#818cf8" fill-opacity="0.030" stroke="#818cf8" stroke-opacity="0.10" stroke-width="1.1"/>
+    </svg>
+  </div>
   <SvelteFlow
     bind:nodes
     bind:edges
@@ -506,7 +532,7 @@
     onnodedrag={({ targetNode }) => onDrag(targetNode)}
     onnodedragstop={({ targetNode }) => onDragStop(targetNode)}
   >
-    <Background bgColor="#0a0e1a" patternColor="#1a2a48" gap={26} size={1} />
+    <Background bgColor="transparent" patternColor="#1c2c4d" gap={26} size={1} />
     <Controls showLock={false} />
     <GraphFocus target={focusTarget} />
     {#if activeGroup !== null}
@@ -523,9 +549,37 @@
 <style>
   .graph-wrap {
     position: relative;
+    background: #0a0e1a; /* base do interior do cristal (facetas por cima) */
     /* animação de ENTRADA da tela do grafo: o "cérebro" desperta (fade + leve
        zoom). Roda ao abrir/montar a view. Respeita "reduzir animações". */
     animation: graph-wake 0.62s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+  /* facetas do cristal: cobrem o fundo, atrás da rede (z-0). Respiram bem de leve
+     (refração viva) — opacity/scale na GPU, custo desprezível. */
+  .graph-facets {
+    position: absolute;
+    inset: -8%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.9;
+    animation: facet-breathe 14s ease-in-out infinite;
+  }
+  .graph-facets svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  @keyframes facet-breathe {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.85; }
+    50% { transform: scale(1.04) rotate(0.6deg); opacity: 1; }
+  }
+  :global(html.no-anim) .graph-facets {
+    animation: none;
+  }
+  /* o SvelteFlow (rede) fica ACIMA das facetas */
+  .graph-wrap :global(.svelte-flow) {
+    position: relative;
+    z-index: 1;
   }
   @keyframes graph-wake {
     from {
@@ -639,7 +693,7 @@
     animation: none;
   }
   .graph-wrap :global(.svelte-flow) {
-    background-color: #0a0e1a;
+    background-color: transparent; /* deixa as facetas do cristal aparecerem atrás */
   }
   /* promove o viewport a uma camada própria de GPU: o pan vira um translate
      composto (sem repaint dos nós/arestas). Não muda nada visual. */
