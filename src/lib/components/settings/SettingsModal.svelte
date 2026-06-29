@@ -52,6 +52,7 @@
   import { loadQueryIndex } from "$lib/query";
   import { getVersion } from "@tauri-apps/api/app";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
+  import MobileScreen from "$lib/mobile/MobileScreen.svelte";
   import { t, tr, locale, setLocale, LOCALES } from "$lib/i18n";
 
   interface CssSnippet {
@@ -404,52 +405,27 @@
 
 <svelte:window onkeydown={onCaptureKey} />
 
-{#if open}
-  <div
-    class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-    transition:fade={{ duration: 150 }}
-    onclick={(e) => e.target === e.currentTarget && (open = false)}
-    onkeydown={(e) => e.key === "Escape" && (open = false)}
-    role="presentation"
-  >
-    <div
-      class="qmodal-panel qsettings flex h-[600px] max-h-[88vh] w-full max-w-[680px] overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
-      transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={$t("common.settings")}
-      tabindex="-1"
+{#snippet navTabs(mobile: boolean)}
+  {#each tabs as tab (tab.id)}
+    <button
+      class="flex shrink-0 items-center transition-colors {mobile
+        ? 'gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm'
+        : 'gap-2.5 rounded-lg px-3 py-2 text-left text-sm'} {section === tab.id
+        ? 'bg-accent/15 text-accent-light'
+        : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
+      onclick={() => (section = tab.id)}
     >
-      <!-- Rail de seções -->
-      <nav class="qsettings-nav flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-bg/40 px-3 py-3">
-        <div class="px-2 pb-2 pt-1 text-sm font-semibold">{$t("common.settings")}</div>
-        {#each tabs as tab (tab.id)}
-          <button
-            class="flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors {section ===
-            tab.id
-              ? 'bg-accent/15 text-accent-light'
-              : 'text-text-secondary hover:bg-elevated hover:text-text-primary'}"
-            onclick={() => (section = tab.id)}
-          >
-            <tab.icon size={16} />
-            {$t(`settings.tab.${tab.id}`)}
-          </button>
-        {/each}
-      </nav>
+      <tab.icon size={16} />
+      {$t(`settings.tab.${tab.id}`)}
+    </button>
+  {/each}
+{/snippet}
 
-      <!-- Conteúdo -->
-      <div class="flex min-w-0 flex-1 flex-col">
-        <div class="flex h-12 shrink-0 items-center justify-between border-b border-border px-5">
-          <span class="text-sm font-medium">{$t(`settings.tab.${section}`)}</span>
-          <button
-            onclick={() => (open = false)}
-            class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
-          >
-            <X size={16} />
-          </button>
-        </div>
+{#snippet settingsSub()}
+  <div class="flex gap-1 overflow-x-auto px-2 py-2">{@render navTabs(true)}</div>
+{/snippet}
 
-        <div class="flex-1 overflow-auto p-5">
+{#snippet sectionBody()}
           {#key section}
           <div in:fly={{ y: 10, duration: 220, easing: cubicOut }}>
           {#if section === "geral"}
@@ -1388,10 +1364,60 @@
           {/if}
           </div>
           {/key}
+{/snippet}
+
+{#if open}
+  {#if isMobile}
+    <MobileScreen
+      title={$t("common.settings")}
+      icon={Settings2}
+      onClose={() => (open = false)}
+      subbar={settingsSub}
+      pad={false}
+    >
+      <div class="p-4">{@render sectionBody()}</div>
+    </MobileScreen>
+  {:else}
+    <div
+      class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      transition:fade={{ duration: 150 }}
+      onclick={(e) => e.target === e.currentTarget && (open = false)}
+      onkeydown={(e) => e.key === "Escape" && (open = false)}
+      role="presentation"
+    >
+      <div
+        class="qmodal-panel qsettings flex h-[600px] max-h-[88vh] w-full max-w-[680px] overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+        transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={$t("common.settings")}
+        tabindex="-1"
+      >
+        <!-- Rail de seções -->
+        <nav class="qsettings-nav flex w-48 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-bg/40 px-3 py-3">
+          <div class="px-2 pb-2 pt-1 text-sm font-semibold">{$t("common.settings")}</div>
+          {@render navTabs(false)}
+        </nav>
+
+        <!-- Conteúdo -->
+        <div class="flex min-w-0 flex-1 flex-col">
+          <div class="flex h-12 shrink-0 items-center justify-between border-b border-border px-5">
+            <span class="text-sm font-medium">{$t(`settings.tab.${section}`)}</span>
+            <button
+              onclick={() => (open = false)}
+              class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div class="flex-1 overflow-auto p-5">
+            {@render sectionBody()}
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  {/if}
 {/if}
 
 <!-- ===== snippets de controles ===== -->

@@ -6,6 +6,7 @@
   import GraphCanvas from "./GraphCanvas.svelte";
   import EmptyState from "$lib/components/ui/EmptyState.svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
+  import { isMobile } from "$lib/platform";
   import { t } from "$lib/i18n";
 
   let { onOpenNote, onClose }: { onOpenNote?: (p: string) => void; onClose?: () => void } =
@@ -30,57 +31,104 @@
 </script>
 
 <div class="flex h-full flex-col">
-  <!-- Toolbar -->
-  <div class="gv-toolbar flex h-12 shrink-0 items-center gap-3 border-b border-border px-4">
-    <div class="gv-title flex items-center gap-2 text-sm font-medium">
-      <Share2 size={16} class="text-accent" />
-      {$t("graph.title")}
+  {#if isMobile}
+    <!-- Toolbar nativa mobile: cabeçalho próprio + linha de controles em largura total -->
+    <div class="shrink-0 border-b border-border bg-surface">
+      <div
+        class="flex items-center gap-2 px-4 pb-2"
+        style="padding-top: calc(env(safe-area-inset-top) + 10px)"
+      >
+        <Share2 size={17} class="text-accent" />
+        <span class="text-base font-bold tracking-tight">{$t("graph.title")}</span>
+        {#if $graphData}
+          <span class="ml-auto text-xs text-text-muted">
+            {$t("graph.notesLinks", {
+              notes: $graphData.nodes.length,
+              links: $graphData.edges.length,
+            })}
+          </span>
+        {/if}
+      </div>
+      <div class="flex items-center gap-2 px-3 pb-2.5">
+        <div class="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-elevated px-3 py-2">
+          <Search size={15} class="shrink-0 text-text-secondary" />
+          <input
+            bind:value={search}
+            placeholder={$t("graph.highlight")}
+            class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-text-secondary"
+          />
+        </div>
+        <select
+          bind:value={folder}
+          class="max-w-[26vw] shrink-0 rounded-xl bg-elevated px-2.5 py-2 text-sm text-text-primary outline-none"
+        >
+          <option value={null}>{$t("graph.allFolders")}</option>
+          {#each folders as f (f)}
+            <option value={f}>{f}</option>
+          {/each}
+        </select>
+        <button
+          onclick={reload}
+          aria-label={$t("graph.reindex")}
+          class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-elevated text-text-secondary active:scale-95"
+        >
+          <RefreshCw size={16} />
+        </button>
+      </div>
     </div>
-
-    {#if $graphData}
-      <span class="gv-count text-xs text-text-muted">
-        {$t("graph.notesLinks", { notes: $graphData.nodes.length, links: $graphData.edges.length })}
-      </span>
-    {/if}
-
-    <div class="gv-controls ml-auto flex items-center gap-2">
-      <!-- Busca -->
-      <div class="gv-search flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5">
-        <Search size={14} class="shrink-0 text-text-secondary" />
-        <input
-          bind:value={search}
-          placeholder={$t("graph.highlight")}
-          class="w-40 min-w-0 bg-transparent text-sm outline-none placeholder:text-text-secondary"
-        />
+  {:else}
+    <!-- Toolbar -->
+    <div class="gv-toolbar flex h-12 shrink-0 items-center gap-3 border-b border-border px-4">
+      <div class="gv-title flex items-center gap-2 text-sm font-medium">
+        <Share2 size={16} class="text-accent" />
+        {$t("graph.title")}
       </div>
 
-      <!-- Filtro de pasta -->
-      <select
-        bind:value={folder}
-        class="gv-folder min-w-0 rounded-lg bg-elevated px-2 py-1.5 text-sm text-text-primary outline-none"
-      >
-        <option value={null}>{$t("graph.allFolders")}</option>
-        {#each folders as f (f)}
-          <option value={f}>{f}</option>
-        {/each}
-      </select>
+      {#if $graphData}
+        <span class="gv-count text-xs text-text-muted">
+          {$t("graph.notesLinks", { notes: $graphData.nodes.length, links: $graphData.edges.length })}
+        </span>
+      {/if}
 
-      <button
-        onclick={reload}
-        title={$t("graph.reindex")}
-        class="shrink-0 rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
-      >
-        <RefreshCw size={15} />
-      </button>
-      <button
-        onclick={() => onClose?.()}
-        title={$t("graph.closeGraph")}
-        class="gv-close shrink-0 rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
-      >
-        <X size={16} />
-      </button>
+      <div class="gv-controls ml-auto flex items-center gap-2">
+        <!-- Busca -->
+        <div class="gv-search flex items-center gap-2 rounded-lg bg-elevated px-3 py-1.5">
+          <Search size={14} class="shrink-0 text-text-secondary" />
+          <input
+            bind:value={search}
+            placeholder={$t("graph.highlight")}
+            class="w-40 min-w-0 bg-transparent text-sm outline-none placeholder:text-text-secondary"
+          />
+        </div>
+
+        <!-- Filtro de pasta -->
+        <select
+          bind:value={folder}
+          class="gv-folder min-w-0 rounded-lg bg-elevated px-2 py-1.5 text-sm text-text-primary outline-none"
+        >
+          <option value={null}>{$t("graph.allFolders")}</option>
+          {#each folders as f (f)}
+            <option value={f}>{f}</option>
+          {/each}
+        </select>
+
+        <button
+          onclick={reload}
+          title={$t("graph.reindex")}
+          class="shrink-0 rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+        >
+          <RefreshCw size={15} />
+        </button>
+        <button
+          onclick={() => onClose?.()}
+          title={$t("graph.closeGraph")}
+          class="gv-close shrink-0 rounded-lg p-2 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+        >
+          <X size={16} />
+        </button>
+      </div>
     </div>
-  </div>
+  {/if}
 
   <!-- Canvas -->
   <div class="relative min-h-0 flex-1">

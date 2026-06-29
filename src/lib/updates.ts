@@ -12,6 +12,17 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.58.0",
+    date: "2026-06-29",
+    items: [
+      "Mobile 100% NATIVO: as telas que ainda tinham cara de \"desktop espremido\" foram refeitas como telas de verdade do celular — Configurações (cabeçalho próprio + abas que rolam na horizontal), Bases, Órfãs/Recentes, Notas duplicadas, Nova Memória e Gerenciar vaults. Mesma engine de conteúdo, casca de navegação nativa (botão voltar, tela cheia, área segura).",
+      "Grafo no celular: barra de ferramentas refeita pra caber na tela (título, busca, filtro de pasta e reindexar) — sem mais botões cortados ou escondidos.",
+      "Nova Memória: botão Salvar agora fica no topo, sempre alcançável mesmo com o teclado aberto.",
+      "Canvas e Rascunho: a barra de ferramentas desce abaixo da barra de status do Android (não fica mais atrás do relógio/bateria) e rola na horizontal quando não cabe.",
+      "Por baixo dos panos: removidos os \"remendos\" de CSS que espremiam o desktop no celular; os diálogos pequenos (confirmar/renomear) voltaram a ser cartões centrados, como deve ser. Tudo validado no emulador Android, tela por tela.",
+    ],
+  },
+  {
     version: "0.57.1",
     date: "2026-06-29",
     items: [

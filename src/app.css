@@ -1084,45 +1084,18 @@ html.mobile .app-body.nav-open .app-sidebar { transform: translateX(0); }
 /* Respiro pra barra de gestos embaixo. */
 html.mobile .q-view-in { padding-bottom: env(safe-area-inset-bottom); }
 
-/* ===== Modais em TELA CHEIA no mobile (não "desktop espremido") =====
-   Os modais (Configurações, Bases, Insights, Duplicadas, Memória) usam o mesmo
-   padrão de overlay+painel; no celular o painel ocupa a tela toda com safe-area. */
-html.mobile .qmodal-overlay { padding: 0 !important; }
-html.mobile .qmodal-panel {
-  width: 100% !important;
-  max-width: none !important;
-  height: 100dvh !important;
-  max-height: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-/* Configurações: o rail lateral (w-48) vira abas horizontais no topo,
-   liberando a largura toda pro conteúdo (toque-first). */
-html.mobile .qsettings { flex-direction: column !important; }
-html.mobile .qsettings-nav {
-  width: 100% !important;
-  flex-direction: row !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  border-right: none !important;
-  border-bottom: 1px solid var(--color-border) !important;
-  gap: 4px !important;
-  padding: 8px 10px !important;
-}
-html.mobile .qsettings-nav > div { display: none !important; } /* título "Configurações" */
-html.mobile .qsettings-nav button { white-space: nowrap; flex-shrink: 0; }
+/* Telas grandes no mobile (Configurações, Bases, Insights, Duplicadas, Memória,
+   Gerenciar vaults, Grafo) agora têm casca NATIVA própria (MobileScreen / toolbar
+   mobile dedicada) — não mais "desktop espremido" via !important. Os diálogos
+   pequenos que ainda usam .qmodal-panel (confirmar, prompt) ficam como cards
+   centrados, que é o comportamento correto no celular. */
 
-/* ===== Toolbar do GRAFO no mobile: cabe na largura (era a "aba grafo bugada",
-   a toolbar de desktop estourava pra fora da tela). Esconde título/contagem/
-   fechar (a navegação é pelas abas de baixo); busca ocupa o espaço; filtro
-   limitado. ===== */
-html.mobile .gv-toolbar { padding-left: 8px; padding-right: 8px; gap: 8px; }
-html.mobile .gv-title,
-html.mobile .gv-count,
-html.mobile .gv-close { display: none !important; }
-html.mobile .gv-controls { margin-left: 0 !important; width: 100%; gap: 6px; }
-html.mobile .gv-search { flex: 1; min-width: 0; }
-html.mobile .gv-search input { width: 100% !important; }
-html.mobile .gv-folder { max-width: 34vw; }
+/* Canvas e Rascunho reusam a engine de conteúdo do desktop; a barra de
+   ferramentas deles precisa descer abaixo da status bar do Android (a barra é
+   nativa do tool, não casca de janela). Acomoda o notch e deixa rolar na
+   horizontal se as ferramentas não couberem. */
+html.mobile .q-tooltop {
+  height: auto;
+  min-height: 3rem;
+  padding-top: calc(env(safe-area-inset-top) + 8px);
+}

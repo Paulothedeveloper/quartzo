@@ -7,6 +7,8 @@
   import { showToast } from "$lib/stores/toast";
   import { openNote } from "$lib/vault-actions";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
+  import MobileScreen from "$lib/mobile/MobileScreen.svelte";
+  import { isMobile } from "$lib/platform";
   import { t, tr } from "$lib/i18n";
   import type { FileNode } from "$lib/types";
 
@@ -90,41 +92,8 @@
   }
 </script>
 
-{#if open}
-  <div
-    class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-    transition:fade={{ duration: 150 }}
-    onclick={(e) => e.target === e.currentTarget && (open = false)}
-    onkeydown={(e) => e.key === "Escape" && (open = false)}
-    role="presentation"
-  >
-    <div
-      class="qmodal-panel flex max-h-[88vh] w-full max-w-[560px] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
-      transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={$t("memory.title")}
-      tabindex="-1"
-    >
-      <!-- Header -->
-      <div class="flex items-center gap-3 border-b border-border px-5 py-4">
-        <CrystalIllustration size={34} glow={0.5} float={false} />
-        <div class="flex-1">
-          <div class="flex items-center gap-1.5 text-sm font-semibold">
-            <Sparkles size={15} class="text-accent" /> Nova Memória do Claude
-          </div>
-          <div class="text-xs text-text-secondary">{today} · salva em “00 - Memórias do Claude”</div>
-        </div>
-        <button
-          onclick={() => (open = false)}
-          class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      <!-- Corpo -->
-      <div class="flex-1 space-y-4 overflow-auto p-5">
+{#snippet formBody()}
+  <div class="space-y-4">
         <!-- Título -->
         <div>
           <label for="mem-title" class="mb-1.5 block text-xs font-medium text-text-secondary"
@@ -182,24 +151,87 @@
           </div>
         </div>
       </div>
+{/snippet}
 
-      <!-- Footer -->
-      <div class="flex items-center justify-end gap-2 border-t border-border px-5 py-4">
-        <button
-          onclick={() => (open = false)}
-          class="rounded-lg px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
-        >
-          Cancelar
-        </button>
-        <button
-          onclick={save}
-          disabled={saving}
-          class="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg shadow-[0_2px_14px_rgba(103,232,249,0.25)] transition-all hover:bg-accent-hover active:scale-[0.98] disabled:opacity-60"
-        >
-          {#if saving}<Loader2 size={15} class="animate-spin" />{:else}<Save size={15} />{/if}
-          Salvar no Quartzo
-        </button>
+{#snippet footerBtns()}
+  <button
+    onclick={() => (open = false)}
+    class="rounded-lg px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+  >
+    Cancelar
+  </button>
+  <button
+    onclick={save}
+    disabled={saving}
+    class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg shadow-[0_2px_14px_rgba(103,232,249,0.25)] transition-all hover:bg-accent-hover active:scale-[0.98] disabled:opacity-60 sm:flex-none"
+  >
+    {#if saving}<Loader2 size={15} class="animate-spin" />{:else}<Save size={15} />{/if}
+    Salvar no Quartzo
+  </button>
+{/snippet}
+
+{#snippet headerSave()}
+  <button
+    onclick={save}
+    disabled={saving}
+    class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-bg active:scale-95 disabled:opacity-60"
+  >
+    {#if saving}<Loader2 size={14} class="animate-spin" />{:else}<Save size={14} />{/if}
+    {$t("common.save")}
+  </button>
+{/snippet}
+
+{#if open}
+  {#if isMobile}
+    <MobileScreen
+      title={$t("memory.title")}
+      icon={Sparkles}
+      onClose={() => (open = false)}
+      actions={headerSave}
+    >
+      <div class="mb-3 text-xs text-text-secondary">{today} · “00 - Memórias do Claude”</div>
+      {@render formBody()}
+    </MobileScreen>
+  {:else}
+    <div
+      class="qmodal-overlay fixed inset-0 z-[160] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      transition:fade={{ duration: 150 }}
+      onclick={(e) => e.target === e.currentTarget && (open = false)}
+      onkeydown={(e) => e.key === "Escape" && (open = false)}
+      role="presentation"
+    >
+      <div
+        class="qmodal-panel flex max-h-[88vh] w-full max-w-[560px] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+        transition:fly={{ y: 24, duration: 250, easing: cubicOut }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={$t("memory.title")}
+        tabindex="-1"
+      >
+        <!-- Header -->
+        <div class="flex items-center gap-3 border-b border-border px-5 py-4">
+          <CrystalIllustration size={34} glow={0.5} float={false} />
+          <div class="flex-1">
+            <div class="flex items-center gap-1.5 text-sm font-semibold">
+              <Sparkles size={15} class="text-accent" /> Nova Memória do Claude
+            </div>
+            <div class="text-xs text-text-secondary">{today} · salva em “00 - Memórias do Claude”</div>
+          </div>
+          <button
+            onclick={() => (open = false)}
+            class="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-auto p-5">{@render formBody()}</div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-2 border-t border-border px-5 py-4">
+          {@render footerBtns()}
+        </div>
       </div>
     </div>
-  </div>
+  {/if}
 {/if}

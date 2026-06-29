@@ -8,6 +8,8 @@
   import { openNote } from "$lib/vault-actions";
   import { queryIndex, loadQueryIndex, buildQueryView, type QueryView, type WhereOp } from "$lib/query";
   import { showToast } from "$lib/stores/toast";
+  import MobileScreen from "$lib/mobile/MobileScreen.svelte";
+  import { isMobile } from "$lib/platform";
   import { t, tr } from "$lib/i18n";
 
   interface Cfg {
@@ -142,31 +144,7 @@
   }
 </script>
 
-{#if $basesOpen}
-  <div
-    class="qmodal-overlay fixed inset-0 z-[170] flex items-start justify-center bg-black/55 pt-[7vh] backdrop-blur-sm"
-    transition:fade={{ duration: 150 }}
-    onclick={close}
-    role="presentation"
-  >
-    <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-    <div
-      class="qmodal-panel flex max-h-[84vh] w-full max-w-[860px] flex-col overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-2xl backdrop-blur-xl"
-      transition:fly={{ y: -18, duration: 230 }}
-      onclick={(e) => e.stopPropagation()}
-      role="dialog"
-      aria-modal="true"
-      aria-label={$t("bases.title")}
-      tabindex="-1"
-    >
-      <div class="flex items-center gap-2 border-b border-border px-4 py-3">
-        <Table2 size={16} class="text-accent" />
-        <span class="text-sm font-semibold">{$t("bases.title")}</span>
-        <button class="ml-auto rounded-lg p-1 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary" onclick={close} aria-label={$t("save.close")}>
-          <X size={15} />
-        </button>
-      </div>
-
+{#snippet body()}
       <!-- Bases salvas -->
       <div class="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
         <Bookmark size={13} class="text-text-muted" />
@@ -251,8 +229,42 @@
       <!-- Resultado -->
       <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
       <div class="q-prose min-h-0 flex-1 overflow-auto p-4" bind:this={host} onclick={onPreviewClick}></div>
+{/snippet}
+
+{#if $basesOpen}
+  {#if isMobile}
+    <MobileScreen title={$t("bases.title")} icon={Table2} onClose={close} pad={false}>
+      {@render body()}
+    </MobileScreen>
+  {:else}
+    <div
+      class="qmodal-overlay fixed inset-0 z-[170] flex items-start justify-center bg-black/55 pt-[7vh] backdrop-blur-sm"
+      transition:fade={{ duration: 150 }}
+      onclick={close}
+      role="presentation"
+    >
+      <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+      <div
+        class="qmodal-panel flex max-h-[84vh] w-full max-w-[860px] flex-col overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-2xl backdrop-blur-xl"
+        transition:fly={{ y: -18, duration: 230 }}
+        onclick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={$t("bases.title")}
+        tabindex="-1"
+      >
+        <div class="flex items-center gap-2 border-b border-border px-4 py-3">
+          <Table2 size={16} class="text-accent" />
+          <span class="text-sm font-semibold">{$t("bases.title")}</span>
+          <button class="ml-auto rounded-lg p-1 text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary" onclick={close} aria-label={$t("save.close")}>
+            <X size={15} />
+          </button>
+        </div>
+
+        {@render body()}
+      </div>
     </div>
-  </div>
+  {/if}
 {/if}
 
 <style>

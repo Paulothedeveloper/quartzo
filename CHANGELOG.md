@@ -3,6 +3,18 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.58.0 — 2026-06-29
+
+**Mobile 100% nativo** — o Paulo apontou que ainda existiam abas que eram só o desktop embrulhado com CSS (`html.mobile .qmodal-panel{inset:0}`, `qsettings-*`, `gv-*` escondendo coisas com `display:none`). Refeitas como telas nativas de verdade, com o **mesmo conteúdo** e **casca de navegação própria** (padrão: corpo em `{#snippet}` reusado nas duas cascas via `{#if isMobile}{:else}` — desktop intacto).
+
+- **`MobileScreen.svelte` (novo):** casca nativa reutilizável — header (voltar + título + ícone + ações), `subbar` opcional (tira de abas), `footer` opcional, body com scroll e safe-areas.
+- **Configurações:** header nativo + **abas horizontais roláveis** (13 seções reusadas via snippet `sectionBody` + `navTabs`), sem o rail lateral espremido por CSS.
+- **Bases, Órfãs/Recentes, Notas duplicadas, Nova Memória, Gerenciar vaults:** cada uma vira tela cheia nativa (corpo reusado; o render de DOM ao vivo do Bases e as abas do Insights funcionam dentro da casca nativa).
+- **Grafo (mobile):** toolbar nativa dedicada (cabeçalho + busca + filtro + reindexar) — fim da "aba grafo bugada"; o botão de reindexar não fica mais cortado.
+- **Nova Memória:** botão **Salvar no topo** (alcançável com o teclado aberto — o edge-to-edge do Tauri não repassa o inset do teclado).
+- **Canvas e Rascunho:** barra de ferramentas com **safe-area** (desce abaixo da status bar do Android) + scroll horizontal.
+- **Limpeza:** removidos os remendos `html.mobile` (`qmodal-panel` fullscreen, `qsettings-*`, `gv-*`); diálogos pequenos (confirmar/renomear) voltaram a ser cartões centrados. **Validado no emulador Android, tela por tela** (Settings, Bases, Insights, Duplicatas, Vaults, Memória, Grafo, Editor, Buscar) + troca de idioma pt/fr/de.
+
 ## 0.57.1 — 2026-06-29
 
 Correções pegas **testando no emulador Android real** + no app desktop:

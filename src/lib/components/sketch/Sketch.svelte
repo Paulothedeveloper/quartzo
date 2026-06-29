@@ -164,8 +164,8 @@
 
 <div class="flex h-full flex-col">
   <!-- Toolbar -->
-  <div class="flex h-12 shrink-0 items-center gap-3 border-b border-border px-4">
-    <div class="flex items-center gap-2 text-sm font-medium">
+  <div class="q-tooltop flex h-12 shrink-0 items-center gap-3 overflow-x-auto border-b border-border px-4">
+    <div class="flex shrink-0 items-center gap-2 text-sm font-medium">
       <Pencil size={16} class="text-accent" /> Rascunho
     </div>
     <div class="ml-2 flex items-center gap-1">

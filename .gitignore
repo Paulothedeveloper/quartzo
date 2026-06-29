@@ -27,3 +27,8 @@ vite.config.ts.timestamp-*
 key.properties
 *.jks
 *.keystore
+
+# artefatos de build movidos da Área de Trabalho (não publicar)
+/dist/
+# referências de design internas
+/_refs/
