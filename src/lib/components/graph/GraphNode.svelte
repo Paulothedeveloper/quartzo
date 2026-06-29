@@ -91,20 +91,24 @@
   }
 
   /* ===== NEURÔNIO: soma redonda com glow suave, cor por pasta ===== */
+  /* ===== NEURÔNIO: nó da rede do CRISTAL — núcleo BRANCO-QUENTE + bloom da cor
+     da pasta (espelha os nós acesos do ícone do app). ===== */
   .neuron {
     position: relative;
     display: grid;
     place-items: center;
     border-radius: 9999px;
     background: radial-gradient(
-      circle at 50% 38%,
-      color-mix(in srgb, var(--c) 78%, #1a2336) 0%,
-      color-mix(in srgb, var(--c) 30%, #0a1120) 96%
+      circle at 50% 40%,
+      #ffffff 0%,
+      color-mix(in srgb, var(--c) 88%, #ffffff) 24%,
+      color-mix(in srgb, var(--c) 72%, #0a1120) 62%,
+      color-mix(in srgb, var(--c) 30%, #0a1120) 100%
     );
     box-shadow:
-      0 0 5px color-mix(in srgb, var(--c) 60%, transparent),
-      0 0 13px color-mix(in srgb, var(--c) 28%, transparent),
-      inset 0 0 3px rgba(255, 255, 255, 0.28);
+      0 0 6px color-mix(in srgb, var(--c) 75%, transparent),
+      0 0 16px color-mix(in srgb, var(--c) 38%, transparent),
+      inset 0 0 4px rgba(255, 255, 255, 0.5);
     transition:
       transform 0.24s var(--ease-out, ease),
       box-shadow 0.24s var(--ease-out, ease);

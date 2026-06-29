@@ -42,14 +42,18 @@
     onOpenNote?: (path: string) => void;
   } = $props();
 
+  // Paleta restrita à família do CRISTAL (cyan -> teal -> azul -> violeta ->
+  // magenta) — nada de verde/âmbar/vermelho quente. Mantém distinção de pastas
+  // mas tudo "lê" como a rede neural dentro do cristal (o ícone do app).
   const PALETTE = [
-    "#67e8f9", "#818cf8", "#34d399", "#f472b6", "#fbbf24", "#a78bfa",
-    "#22d3ee", "#2dd4bf", "#f87171", "#a3e635", "#e879f9", "#38bdf8",
+    "#67e8f9", "#a5f3fc", "#22d3ee", "#38bdf8", "#7dd3fc",
+    "#818cf8", "#a78bfa", "#c4b5fd", "#60a5fa", "#5eead4",
+    "#e879f9", "#f0abfc",
   ];
   // Mapa pasta -> cor, por índice (garante cores distintas entre pastas).
   let groupColors = new Map<string, string>();
   function colorFor(group: string): string {
-    return groupColors.get(group) ?? "#94a3b8";
+    return groupColors.get(group) ?? "#8ba6d8"; // fallback frio (azul-violeta)
   }
 
   let nodes = $state.raw<Node[]>([]);
@@ -502,7 +506,7 @@
     onnodedrag={({ targetNode }) => onDrag(targetNode)}
     onnodedragstop={({ targetNode }) => onDragStop(targetNode)}
   >
-    <Background bgColor="#0a0f1c" patternColor="#16223a" gap={28} size={1.2} />
+    <Background bgColor="#0a0e1a" patternColor="#1a2a48" gap={26} size={1} />
     <Controls showLock={false} />
     <GraphFocus target={focusTarget} />
     {#if activeGroup !== null}
@@ -592,14 +596,32 @@
   .region-back:active {
     transform: scale(0.97);
   }
-  /* atmosfera cristalina: glow ciano sutil sobre o canvas */
+  /* atmosfera cristalina: como olhar pra DENTRO do cristal do ícone — bloom ciano
+     no topo + refração violeta embaixo + um facho diagonal de prisma (sutil).
+     pointer-events:none, na GPU, não atrapalha o pan/zoom. */
   .graph-wrap::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 5;
-    background: radial-gradient(ellipse at 50% 38%, rgba(103, 232, 249, 0.06), transparent 62%);
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 30%, rgba(103, 232, 249, 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 78% 88%, rgba(129, 140, 248, 0.07), transparent 60%),
+      linear-gradient(125deg, transparent 38%, rgba(165, 243, 252, 0.04) 48%, transparent 56%);
+  }
+  /* leve vinheta + facetas: bordas escurecem (sensação de estar dentro da pedra) */
+  .graph-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: radial-gradient(ellipse 96% 96% at 50% 50%, transparent 64%, rgba(5, 8, 16, 0.55) 100%);
+  }
+  :global(html.no-anim) .graph-wrap::after {
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 30%, rgba(103, 232, 249, 0.06), transparent 60%);
   }
   /* arestas surgem suavemente ao carregar */
   .graph-wrap :global(.svelte-flow__edges) {
@@ -617,7 +639,7 @@
     animation: none;
   }
   .graph-wrap :global(.svelte-flow) {
-    background-color: #0a0f1c;
+    background-color: #0a0e1a;
   }
   /* promove o viewport a uma camada própria de GPU: o pan vira um translate
      composto (sem repaint dos nós/arestas). Não muda nada visual. */

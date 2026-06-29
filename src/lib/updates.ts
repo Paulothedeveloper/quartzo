@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.61.0",
+    date: "2026-06-29",
+    items: [
+      "GRAFO redesenhado com a cara do app (cristal + neurônios): a rede agora parece a 'rede neural dentro do cristal' do ícone novo — neurônios BRANCO-QUENTES com brilho (bloom), paleta restrita ao cyan/violeta/magenta (saiu o arco-íris com verde/âmbar/vermelho), e atmosfera cristalina (poeira fina + glow cyan/violeta + vinheta, como olhar pra dentro da pedra). As sinapses continuam curvas com cometas fluindo. Mesma fluidez (layout congelado, zero lag).",
+    ],
+  },
+  {
     version: "0.60.0",
     date: "2026-06-29",
     items: [

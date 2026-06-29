@@ -3,6 +3,15 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.61.0 — 2026-06-29
+
+- **Grafo redesenhado pra identidade cristal+neurônios (pedido do Paulo: "tudo novo na aba de garfo"):** mantive o MOTOR (SvelteFlow + d3-force com **layout congelado** — a otimização que matou o lag, regra `simulacao-ao-vivo-congele-o-layout`) e reescrevi o VISUAL pra virar a "rede neural dentro do cristal" do ícone novo:
+  - **Paleta restrita à família do cristal** (`GraphCanvas` PALETTE): cyan → teal → azul → violeta → magenta. Saíram verde/âmbar/vermelho quentes (o arco-íris que destoava do ícone). Mantém distinção de pastas, mas tudo lê como neural/cristal. Fallback frio.
+  - **Neurônios branco-quentes** (`GraphNode .neuron`): núcleo branco → cor da pasta → escuro, com bloom mais forte (espelha os nós acesos do ícone).
+  - **Atmosfera cristalina** (`GraphCanvas`): fundo `#0a0e1a` (igual ao ícone) + poeira fina (Background dots cyan sutil) + glow cyan no topo / refração violeta embaixo + facho diagonal de prisma + vinheta nas bordas (sensação de estar DENTRO da pedra). `no-anim` simplifica.
+  - Sinapses seguem curvas (bezier) com **cometas** fluindo (já era). Lobos de pasta herdam a paleta fria.
+- Regra cumprida: redesign de visual reusa o motor que funciona (não reescrevi a física/perf), só a camada estética; validado vendo no aparelho.
+
 ## 0.60.0 — 2026-06-29
 
 - **Ícone + logo novos (cristal + neurônios):** o ícone foi refeito (processo: reli as regras de marca/vault do Manual, busquei referências reais, gerei conceitos via Pollinations e o Paulo escolheu o cristal com a rede neural acesa por dentro — amarra com o grafo do app). **Variação app vs PC** (pedido do Paulo): desktop usa o render rico e detalhado (`tauri icon` a partir do master V1); o **adaptive do Android** usa uma versão mais bold (`mob_555`) com poucos nós grandes que continuam legíveis em tamanho pequeno (foreground + cor de fundo `#0a0e1a` casada com a borda). Cascata aplicada: `src-tauri/icons/*` (desktop/ios), `gen/android/.../res/mipmap-*` (legacy + adaptive), `static/favicon.png` e `static/quartzo-crystal.png` (hero in-app via `CrystalIllustration`). Validei cada peça renderizando (círculo/squircle/pequeno), não confiando no "salvou". Kit salvo no vault.
