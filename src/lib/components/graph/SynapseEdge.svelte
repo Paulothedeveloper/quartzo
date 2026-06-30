@@ -41,15 +41,15 @@
 {#if data?.pulse}
   <!-- COMETA: cabeça brilhante + cauda (2 dots que ficam pra trás, opacidade
        decrescente) = rastro de energia fluindo pela sinapse. Tudo com easing. -->
-  <circle class="syn-tail" r="2.2" fill="#67e8f9">
+  <circle class="syn-tail" r="2.2" fill="#e879f9">
     <animateMotion dur="{dur}s" begin="{begin + 0.11}s" repeatCount="indefinite" path={path} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines={glide} />
     <animate attributeName="opacity" values="0;0.28;0.28;0" keyTimes="0;0.22;0.7;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin + 0.11}s" repeatCount="indefinite" />
   </circle>
-  <circle class="syn-tail" r="2.5" fill="#7df0fb">
+  <circle class="syn-tail" r="2.5" fill="#f5b8fc">
     <animateMotion dur="{dur}s" begin="{begin + 0.055}s" repeatCount="indefinite" path={path} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines={glide} />
     <animate attributeName="opacity" values="0;0.45;0.45;0" keyTimes="0;0.2;0.72;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin + 0.055}s" repeatCount="indefinite" />
   </circle>
-  <circle class="syn-head" r="2.8" fill="#eafdff">
+  <circle class="syn-head" r="2.8" fill="#fff0fe">
     <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" path={path} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines={glide} />
     <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.18;0.74;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin}s" repeatCount="indefinite" />
     <animate attributeName="r" values="1.4;3;3;1.4" keyTimes="0;0.18;0.74;1" calcMode="spline" keySplines={fade} dur="{dur}s" begin="{begin}s" repeatCount="indefinite" />
@@ -58,7 +58,7 @@
 
 <style>
   .syn-head {
-    filter: drop-shadow(0 0 5px rgba(180, 248, 255, 0.95));
+    filter: drop-shadow(0 0 5px rgba(240, 171, 252, 0.95));
     pointer-events: none;
   }
   .syn-tail {

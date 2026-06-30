@@ -256,7 +256,7 @@
     firstDraw = false;
     edges = baseEdges.map((e) => {
       let opacity: number;
-      let stroke = "rgba(103,232,249,0.38)"; // sinapse: ciano suave
+      let stroke = "rgba(232,121,249,0.40)"; // sinapse: magenta/rosa suave (rede da logo)
       let width = 0.9;
       // "strong" = aresta em destaque (incidente ao hover, ou dentro do filtro).
       let strong = false;
@@ -264,28 +264,28 @@
         strong = e.source === h || e.target === h;
         opacity = strong ? 1 : 0.04;
         if (strong) {
-          stroke = "#67e8f9";
+          stroke = "#f0abfc";
           width = 2.2;
         }
       } else if (matched) {
         strong = matched.has(e.source) && matched.has(e.target);
         opacity = strong ? 0.9 : 0.04;
         if (strong) {
-          stroke = "#67e8f9";
+          stroke = "#f0abfc";
           width = 1.8;
         }
       } else {
-        // Teia neural um pouco mais presente (connectome) — sinapses ciano legíveis.
-        stroke = "rgba(103,232,249,0.5)";
+        // Teia neural ROSA da logo (sinapses magenta firing) — legível sobre o navy.
+        stroke = "rgba(232,121,249,0.52)";
         width = 1.0;
         opacity = 0.66;
         // Arestas "energizadas" (as que têm cometa) ficam mais VIVAS: traço mais
         // claro/grosso. Sem filtro (barato) e ESTÁVEL (data.pulse é fixo, não
         // rotaciona) -> rede de neurônios vibrante, sem engasgo.
         if ((e.data as any)?.pulse) {
-          stroke = "rgba(140,242,252,0.66)";
+          stroke = "rgba(244,170,252,0.68)";
           width = 1.35;
-          opacity = 0.78;
+          opacity = 0.8;
         }
       }
       // Glow (filtro SVG) só nas arestas DESTACADAS (hover/filtro) — são poucas,
@@ -293,7 +293,7 @@
       // estável (definido no build) e animado por SMIL com easing — sem rebuild
       // periódico, então flui sem engasgar.
       const glow = strong
-        ? "filter:drop-shadow(0 0 3px rgba(103,232,249,0.9));"
+        ? "filter:drop-shadow(0 0 3px rgba(232,121,249,0.9));"
         : "";
       const draw =
         drawOnce && !liteMode
@@ -493,27 +493,162 @@
 </script>
 
 <div class="graph-wrap h-full w-full" class:graph-wrap--lite={liteMode}>
-  <!-- INTERIOR DO CRISTAL: facetas low-poly por trás da rede (você olha pra dentro
-       da pedra). Estático e na GPU (pointer-events:none) — não afeta pan/zoom. -->
-  <div class="graph-facets" aria-hidden="true">
-    <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-      <polygon points="430,420 859,1296 302,1591" fill="#67e8f9" fill-opacity="0.070" stroke="#67e8f9" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 302,1591 -246,1025" fill="#22d3ee" fill-opacity="0.090" stroke="#22d3ee" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 -246,1025 -664,234" fill="#818cf8" fill-opacity="0.110" stroke="#818cf8" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 -664,234 -145,-192" fill="#a78bfa" fill-opacity="0.130" stroke="#a78bfa" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 -145,-192 494,-621" fill="#38bdf8" fill-opacity="0.070" stroke="#38bdf8" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 494,-621 1159,-589" fill="#5eead4" fill-opacity="0.090" stroke="#5eead4" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 1159,-589 1383,213" fill="#7dd3fc" fill-opacity="0.110" stroke="#7dd3fc" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 1383,213 1342,1165" fill="#c4b5fd" fill-opacity="0.130" stroke="#c4b5fd" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="430,420 1342,1165 859,1296" fill="#67e8f9" fill-opacity="0.070" stroke="#67e8f9" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 146,1423 -478,1034" fill="#a78bfa" fill-opacity="0.090" stroke="#a78bfa" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 -478,1034 -219,168" fill="#38bdf8" fill-opacity="0.110" stroke="#38bdf8" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 -219,168 23,-389" fill="#5eead4" fill-opacity="0.130" stroke="#5eead4" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 23,-389 784,-260" fill="#7dd3fc" fill-opacity="0.070" stroke="#7dd3fc" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 784,-260 1562,158" fill="#c4b5fd" fill-opacity="0.090" stroke="#c4b5fd" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 1562,158 1798,900" fill="#67e8f9" fill-opacity="0.110" stroke="#67e8f9" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 1798,900 1009,1445" fill="#22d3ee" fill-opacity="0.130" stroke="#22d3ee" stroke-opacity="0.30" stroke-width="1.6"/>
-      <polygon points="600,560 1009,1445 146,1423" fill="#818cf8" fill-opacity="0.070" stroke="#818cf8" stroke-opacity="0.30" stroke-width="1.6"/>
+  <!-- FUNDO DE ESPAÇO: nebulosa (gradientes coloridos difusos) + campo de estrelas.
+       Estático/na GPU (pointer-events:none) — não afeta o pan/zoom da rede. -->
+  <div class="graph-space" aria-hidden="true">
+    <!-- zonas de cor da nebulosa -->
+    <div class="nebcolor"></div>
+    <!-- nuvem de gás PROCEDURAL (ruído Perlin / fractalNoise) modulando a cor via
+         blend -> nebulosa real estilo Hubble. Renderizada UMA vez (estática). -->
+    <svg class="nebnoise" viewBox="0 0 900 640" preserveAspectRatio="xMidYMid slice">
+      <filter id="qz-neb"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="4" seed="8" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+      <rect width="100%" height="100%" filter="url(#qz-neb)"/>
+    </svg>
+    <svg class="nebnoise2" viewBox="0 0 900 640" preserveAspectRatio="xMidYMid slice">
+      <filter id="qz-neb2"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+      <rect width="100%" height="100%" filter="url(#qz-neb2)"/>
+    </svg>
+    <svg class="starfield" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+        <circle class="st" cx="761.7" cy="28.6" r="1.16" fill="#ffffff" opacity="0.58"/>
+        <circle class="st" cx="539.2" cy="591.1" r="0.52" fill="#a5f3fc" opacity="0.57"/>
+        <circle class="st" cx="911.4" cy="829.3" r="1.24" fill="#ffffff" opacity="0.83"/>
+        <circle class="st" cx="750.3" cy="415.5" r="1.28" fill="#ffffff" opacity="0.27"/>
+        <circle class="st big" cx="573.6" cy="517.3" r="2.44" fill="#ffffff" opacity="0.43"/>
+        <circle class="st" cx="986.7" cy="705.1" r="0.56" fill="#a5f3fc" opacity="0.63"/>
+        <circle class="st big" cx="562.8" cy="402.5" r="1.62" fill="#ffffff" opacity="0.44"/>
+        <circle class="st big" cx="572.1" cy="244.2" r="1.78" fill="#ffffff" opacity="0.56"/>
+        <circle class="st tw" cx="426.8" cy="704.4" r="0.47" fill="#ffffff" opacity="0.74" style="animation-delay:-0.78s"/>
+        <circle class="st tw" cx="859.0" cy="821.9" r="0.67" fill="#ffffff" opacity="0.66" style="animation-delay:-2.48s"/>
+        <circle class="st tw" cx="462.7" cy="11.1" r="0.81" fill="#a5f3fc" opacity="0.84" style="animation-delay:-2.57s"/>
+        <circle class="st" cx="477.6" cy="695.2" r="0.73" fill="#a5f3fc" opacity="0.63"/>
+        <circle class="st tw" cx="506.2" cy="534.0" r="0.48" fill="#ffffff" opacity="0.40" style="animation-delay:-0.20s"/>
+        <circle class="st" cx="980.4" cy="656.4" r="1.21" fill="#ffffff" opacity="0.76"/>
+        <circle class="st" cx="823.4" cy="230.6" r="0.55" fill="#ffffff" opacity="0.61"/>
+        <circle class="st" cx="18.8" cy="997.7" r="1.13" fill="#a5f3fc" opacity="0.82"/>
+        <circle class="st tw" cx="740.8" cy="904.4" r="0.81" fill="#ffffff" opacity="0.40" style="animation-delay:-1.80s"/>
+        <circle class="st" cx="439.9" cy="251.9" r="1.20" fill="#ffffff" opacity="0.30"/>
+        <circle class="st big" cx="10.7" cy="573.3" r="2.33" fill="#c4b5fd" opacity="0.81"/>
+        <circle class="st" cx="304.7" cy="197.3" r="0.93" fill="#ffffff" opacity="0.45"/>
+        <circle class="st" cx="412.3" cy="690.8" r="0.61" fill="#ffffff" opacity="0.41"/>
+        <circle class="st" cx="408.2" cy="966.4" r="1.24" fill="#a5f3fc" opacity="0.41"/>
+        <circle class="st" cx="588.6" cy="922.5" r="0.47" fill="#a5f3fc" opacity="0.77"/>
+        <circle class="st big" cx="137.0" cy="754.2" r="2.03" fill="#ffffff" opacity="0.51"/>
+        <circle class="st" cx="523.8" cy="178.8" r="1.09" fill="#ffffff" opacity="0.35"/>
+        <circle class="st tw" cx="246.9" cy="740.8" r="0.79" fill="#ffffff" opacity="0.68" style="animation-delay:-0.54s"/>
+        <circle class="st" cx="852.2" cy="629.5" r="0.86" fill="#ffffff" opacity="0.60"/>
+        <circle class="st" cx="594.3" cy="670.3" r="0.46" fill="#a5f3fc" opacity="0.69"/>
+        <circle class="st" cx="313.2" cy="679.5" r="0.55" fill="#ffffff" opacity="0.68"/>
+        <circle class="st" cx="86.5" cy="955.8" r="1.02" fill="#ffffff" opacity="0.78"/>
+        <circle class="st" cx="266.4" cy="929.2" r="0.46" fill="#ffffff" opacity="0.28"/>
+        <circle class="st" cx="118.9" cy="442.8" r="0.72" fill="#c4b5fd" opacity="0.27"/>
+        <circle class="st tw" cx="506.2" cy="714.5" r="0.77" fill="#ffffff" opacity="0.29" style="animation-delay:-0.44s"/>
+        <circle class="st tw" cx="811.6" cy="211.7" r="0.64" fill="#ffffff" opacity="0.63" style="animation-delay:-0.40s"/>
+        <circle class="st tw" cx="589.1" cy="470.6" r="0.91" fill="#ffffff" opacity="0.46" style="animation-delay:-0.91s"/>
+        <circle class="st" cx="2.4" cy="232.7" r="1.08" fill="#ffffff" opacity="0.26"/>
+        <circle class="st" cx="979.9" cy="513.7" r="0.54" fill="#ffffff" opacity="0.32"/>
+        <circle class="st" cx="50.1" cy="477.2" r="1.16" fill="#ffffff" opacity="0.50"/>
+        <circle class="st" cx="385.8" cy="635.7" r="0.77" fill="#ffffff" opacity="0.63"/>
+        <circle class="st" cx="658.1" cy="646.5" r="0.58" fill="#ffffff" opacity="0.41"/>
+        <circle class="st" cx="629.5" cy="668.2" r="0.76" fill="#c4b5fd" opacity="0.35"/>
+        <circle class="st tw" cx="12.5" cy="908.1" r="0.49" fill="#ffffff" opacity="0.52" style="animation-delay:-2.61s"/>
+        <circle class="st" cx="247.8" cy="810.6" r="1.16" fill="#ffffff" opacity="0.85"/>
+        <circle class="st" cx="754.1" cy="709.6" r="0.96" fill="#ffffff" opacity="0.38"/>
+        <circle class="st tw" cx="292.2" cy="287.3" r="0.76" fill="#ffffff" opacity="0.60" style="animation-delay:-1.83s"/>
+        <circle class="st" cx="83.8" cy="366.9" r="0.46" fill="#ffffff" opacity="0.67"/>
+        <circle class="st" cx="30.5" cy="419.4" r="1.24" fill="#c4b5fd" opacity="0.61"/>
+        <circle class="st tw" cx="195.9" cy="17.3" r="0.61" fill="#ffffff" opacity="0.53" style="animation-delay:-2.87s"/>
+        <circle class="st tw" cx="251.1" cy="489.7" r="0.62" fill="#ffffff" opacity="0.67" style="animation-delay:-1.69s"/>
+        <circle class="st" cx="295.3" cy="838.4" r="0.73" fill="#a5f3fc" opacity="0.29"/>
+        <circle class="st" cx="271.8" cy="949.1" r="0.43" fill="#a5f3fc" opacity="0.78"/>
+        <circle class="st tw" cx="807.4" cy="352.6" r="0.64" fill="#a5f3fc" opacity="0.38" style="animation-delay:-2.88s"/>
+        <circle class="st" cx="999.3" cy="856.2" r="0.72" fill="#ffffff" opacity="0.32"/>
+        <circle class="st" cx="860.1" cy="149.4" r="1.26" fill="#f0abfc" opacity="0.84"/>
+        <circle class="st" cx="872.1" cy="359.6" r="1.14" fill="#a5f3fc" opacity="0.29"/>
+        <circle class="st" cx="403.5" cy="11.3" r="0.78" fill="#ffffff" opacity="0.32"/>
+        <circle class="st" cx="613.9" cy="508.5" r="1.11" fill="#ffffff" opacity="0.71"/>
+        <circle class="st" cx="655.7" cy="406.0" r="1.19" fill="#ffffff" opacity="0.30"/>
+        <circle class="st tw" cx="663.7" cy="705.5" r="0.62" fill="#ffffff" opacity="0.61" style="animation-delay:-2.22s"/>
+        <circle class="st" cx="852.6" cy="310.7" r="0.75" fill="#ffffff" opacity="0.29"/>
+        <circle class="st" cx="853.0" cy="4.6" r="0.46" fill="#ffffff" opacity="0.45"/>
+        <circle class="st tw" cx="530.3" cy="414.0" r="0.59" fill="#ffffff" opacity="0.28" style="animation-delay:-2.84s"/>
+        <circle class="st" cx="912.0" cy="842.3" r="0.79" fill="#f0abfc" opacity="0.65"/>
+        <circle class="st" cx="938.8" cy="778.5" r="1.23" fill="#ffffff" opacity="0.82"/>
+        <circle class="st" cx="896.3" cy="524.5" r="1.29" fill="#a5f3fc" opacity="0.84"/>
+        <circle class="st" cx="797.1" cy="832.2" r="1.19" fill="#ffffff" opacity="0.56"/>
+        <circle class="st tw" cx="130.1" cy="9.6" r="1.08" fill="#ffffff" opacity="0.49" style="animation-delay:-1.80s"/>
+        <circle class="st" cx="283.1" cy="205.7" r="0.96" fill="#ffffff" opacity="0.78"/>
+        <circle class="st" cx="122.5" cy="644.9" r="0.95" fill="#ffffff" opacity="0.54"/>
+        <circle class="st tw" cx="198.0" cy="947.3" r="0.40" fill="#ffffff" opacity="0.35" style="animation-delay:-0.19s"/>
+        <circle class="st" cx="719.8" cy="692.2" r="0.91" fill="#ffffff" opacity="0.61"/>
+        <circle class="st" cx="96.3" cy="357.8" r="0.54" fill="#ffffff" opacity="0.56"/>
+        <circle class="st" cx="58.3" cy="183.6" r="1.14" fill="#f0abfc" opacity="0.47"/>
+        <circle class="st" cx="25.0" cy="719.6" r="0.79" fill="#f0abfc" opacity="0.57"/>
+        <circle class="st tw" cx="762.7" cy="738.2" r="0.51" fill="#ffffff" opacity="0.55" style="animation-delay:-1.88s"/>
+        <circle class="st tw" cx="979.5" cy="497.8" r="0.94" fill="#ffffff" opacity="0.83" style="animation-delay:-0.51s"/>
+        <circle class="st tw" cx="704.3" cy="842.3" r="0.43" fill="#c4b5fd" opacity="0.33" style="animation-delay:-0.27s"/>
+        <circle class="st big" cx="95.0" cy="709.3" r="1.94" fill="#ffffff" opacity="0.27"/>
+        <circle class="st" cx="968.3" cy="885.2" r="0.90" fill="#ffffff" opacity="0.48"/>
+        <circle class="st" cx="494.5" cy="718.1" r="1.14" fill="#ffffff" opacity="0.37"/>
+        <circle class="st tw" cx="918.4" cy="605.2" r="0.55" fill="#ffffff" opacity="0.63" style="animation-delay:-2.64s"/>
+        <circle class="st" cx="791.3" cy="897.0" r="0.62" fill="#ffffff" opacity="0.50"/>
+        <circle class="st" cx="323.9" cy="570.9" r="0.49" fill="#ffffff" opacity="0.32"/>
+        <circle class="st" cx="526.6" cy="787.3" r="1.24" fill="#ffffff" opacity="0.26"/>
+        <circle class="st tw" cx="346.4" cy="222.6" r="0.82" fill="#a5f3fc" opacity="0.66" style="animation-delay:-0.11s"/>
+        <circle class="st" cx="692.9" cy="810.5" r="0.67" fill="#ffffff" opacity="0.73"/>
+        <circle class="st" cx="191.8" cy="602.1" r="1.25" fill="#a5f3fc" opacity="0.49"/>
+        <circle class="st tw" cx="427.1" cy="518.3" r="0.97" fill="#c4b5fd" opacity="0.77" style="animation-delay:-1.57s"/>
+        <circle class="st tw" cx="860.9" cy="384.0" r="1.19" fill="#ffffff" opacity="0.52" style="animation-delay:-2.85s"/>
+        <circle class="st" cx="965.4" cy="950.7" r="0.80" fill="#ffffff" opacity="0.61"/>
+        <circle class="st" cx="306.9" cy="641.5" r="0.99" fill="#a5f3fc" opacity="0.63"/>
+        <circle class="st" cx="580.3" cy="554.5" r="0.74" fill="#ffffff" opacity="0.40"/>
+        <circle class="st" cx="768.8" cy="69.7" r="0.76" fill="#a5f3fc" opacity="0.78"/>
+        <circle class="st" cx="911.2" cy="879.9" r="0.91" fill="#ffffff" opacity="0.35"/>
+        <circle class="st big" cx="911.3" cy="341.4" r="1.80" fill="#ffffff" opacity="0.45"/>
+        <circle class="st big" cx="900.2" cy="857.6" r="2.05" fill="#ffffff" opacity="0.27"/>
+        <circle class="st big" cx="540.9" cy="637.0" r="1.66" fill="#c4b5fd" opacity="0.84"/>
+        <circle class="st" cx="887.1" cy="395.0" r="1.19" fill="#ffffff" opacity="0.31"/>
+        <circle class="st tw" cx="174.7" cy="148.8" r="0.94" fill="#ffffff" opacity="0.78" style="animation-delay:-2.14s"/>
+        <circle class="st" cx="913.5" cy="46.1" r="0.91" fill="#ffffff" opacity="0.56"/>
+        <circle class="st tw" cx="433.2" cy="318.1" r="0.71" fill="#ffffff" opacity="0.39" style="animation-delay:-1.86s"/>
+        <circle class="st tw" cx="355.0" cy="901.9" r="1.17" fill="#ffffff" opacity="0.43" style="animation-delay:-1.72s"/>
+        <circle class="st" cx="512.9" cy="777.1" r="0.57" fill="#ffffff" opacity="0.30"/>
+        <circle class="st tw" cx="453.3" cy="555.6" r="0.86" fill="#ffffff" opacity="0.77" style="animation-delay:-1.55s"/>
+        <circle class="st tw" cx="696.1" cy="485.2" r="1.18" fill="#c4b5fd" opacity="0.47" style="animation-delay:-1.73s"/>
+        <circle class="st" cx="412.6" cy="408.0" r="0.58" fill="#ffffff" opacity="0.54"/>
+        <circle class="st" cx="732.6" cy="805.8" r="0.98" fill="#ffffff" opacity="0.61"/>
+        <circle class="st" cx="809.4" cy="96.2" r="0.96" fill="#ffffff" opacity="0.52"/>
+        <circle class="st" cx="83.1" cy="822.1" r="1.19" fill="#ffffff" opacity="0.50"/>
+        <circle class="st" cx="946.9" cy="163.9" r="1.23" fill="#c4b5fd" opacity="0.58"/>
+        <circle class="st tw" cx="35.6" cy="796.2" r="0.95" fill="#ffffff" opacity="0.69" style="animation-delay:-0.17s"/>
+        <circle class="st" cx="418.2" cy="3.1" r="1.28" fill="#ffffff" opacity="0.27"/>
+        <circle class="st tw" cx="510.1" cy="882.7" r="0.86" fill="#a5f3fc" opacity="0.61" style="animation-delay:-2.59s"/>
+        <circle class="st big" cx="361.1" cy="395.4" r="2.47" fill="#a5f3fc" opacity="0.35"/>
+        <circle class="st" cx="119.8" cy="108.7" r="0.77" fill="#f0abfc" opacity="0.46"/>
+        <circle class="st tw" cx="751.2" cy="932.2" r="1.20" fill="#a5f3fc" opacity="0.53" style="animation-delay:-0.20s"/>
+        <circle class="st" cx="833.9" cy="702.8" r="1.05" fill="#a5f3fc" opacity="0.43"/>
+        <circle class="st" cx="899.8" cy="857.3" r="1.18" fill="#ffffff" opacity="0.30"/>
+        <circle class="st" cx="740.9" cy="716.2" r="1.30" fill="#c4b5fd" opacity="0.77"/>
+        <circle class="st" cx="346.7" cy="976.9" r="0.54" fill="#ffffff" opacity="0.28"/>
+        <circle class="st" cx="611.9" cy="271.2" r="1.23" fill="#ffffff" opacity="0.40"/>
+        <circle class="st" cx="358.5" cy="149.9" r="0.79" fill="#ffffff" opacity="0.55"/>
+        <circle class="st tw" cx="911.4" cy="123.9" r="0.53" fill="#ffffff" opacity="0.55" style="animation-delay:-0.79s"/>
+        <circle class="st tw" cx="767.2" cy="235.5" r="0.96" fill="#ffffff" opacity="0.63" style="animation-delay:-1.49s"/>
+        <circle class="st" cx="496.0" cy="593.2" r="1.16" fill="#ffffff" opacity="0.73"/>
+        <circle class="st" cx="882.9" cy="655.9" r="0.71" fill="#ffffff" opacity="0.30"/>
+        <circle class="st" cx="827.6" cy="125.8" r="0.87" fill="#ffffff" opacity="0.52"/>
+        <circle class="st" cx="227.0" cy="232.2" r="1.26" fill="#ffffff" opacity="0.39"/>
+        <circle class="st" cx="586.2" cy="760.0" r="0.94" fill="#a5f3fc" opacity="0.61"/>
+        <circle class="st" cx="44.0" cy="992.5" r="0.92" fill="#c4b5fd" opacity="0.38"/>
+        <circle class="st tw" cx="632.4" cy="506.1" r="1.11" fill="#ffffff" opacity="0.40" style="animation-delay:-1.08s"/>
+        <circle class="st" cx="407.8" cy="196.4" r="0.69" fill="#a5f3fc" opacity="0.61"/>
+        <circle class="st tw" cx="314.8" cy="102.0" r="1.12" fill="#ffffff" opacity="0.50" style="animation-delay:-1.05s"/>
+        <circle class="st" cx="85.5" cy="926.0" r="1.25" fill="#ffffff" opacity="0.76"/>
+        <circle class="st" cx="75.5" cy="812.6" r="0.65" fill="#f0abfc" opacity="0.36"/>
+        <circle class="st tw" cx="145.7" cy="463.9" r="0.62" fill="#ffffff" opacity="0.50" style="animation-delay:-0.51s"/>
+        <circle class="st" cx="214.0" cy="614.6" r="0.98" fill="#ffffff" opacity="0.71"/>
+        <circle class="st" cx="953.1" cy="2.8" r="1.21" fill="#ffffff" opacity="0.72"/>
+        <circle class="st tw" cx="207.3" cy="793.9" r="0.59" fill="#ffffff" opacity="0.47" style="animation-delay:-2.57s"/>
+        <circle class="st" cx="137.1" cy="438.2" r="0.72" fill="#a5f3fc" opacity="0.30"/>
     </svg>
   </div>
   <SvelteFlow
@@ -536,7 +671,7 @@
     onnodedrag={({ targetNode }) => onDrag(targetNode)}
     onnodedragstop={({ targetNode }) => onDragStop(targetNode)}
   >
-    <Background bgColor="transparent" patternColor="#1c2c4d" gap={26} size={1} />
+    <Background bgColor="transparent" patternColor="transparent" gap={26} size={1} />
     <Controls showLock={false} />
     <GraphFocus target={focusTarget} />
     {#if activeGroup !== null}
@@ -553,34 +688,91 @@
 <style>
   .graph-wrap {
     position: relative;
-    background: #0a0e1a; /* base do interior do cristal (facetas por cima) */
+    /* FUNDO DE ESPAÇO PROFUNDO: gradiente do cosmos (toques de violeta/azul/magenta
+       sobre quase-preto) — a nebulosa e as estrelas vêm por cima (.graph-space). */
+    background:
+      radial-gradient(ellipse 120% 85% at 50% -10%, #1b1242 0%, transparent 55%),
+      radial-gradient(ellipse 110% 80% at 85% 105%, #0c1f4a 0%, transparent 55%),
+      radial-gradient(ellipse 80% 70% at 18% 88%, #2a103c 0%, transparent 52%),
+      #050310;
     /* animação de ENTRADA da tela do grafo: o "cérebro" desperta (fade + leve
        zoom). Roda ao abrir/montar a view. Respeita "reduzir animações". */
     animation: graph-wake 0.62s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
   }
-  /* facetas do cristal: cobrem o fundo, atrás da rede (z-0). Respiram bem de leve
-     (refração viva) — opacity/scale na GPU, custo desprezível. */
-  .graph-facets {
+  /* ===== FUNDO DE ESPAÇO: nebulosa + campo de estrelas (atrás da rede, z-0) ===== */
+  .graph-space {
     position: absolute;
     inset: -8%;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.9;
-    animation: facet-breathe 14s ease-in-out infinite;
   }
-  .graph-facets svg {
+  /* zonas de cor da nebulosa (magenta/violeta/azul/cyan) — respiram bem devagar.
+     O ruído Perlin (.nebnoise) por cima é que dá a textura de gás. */
+  .nebcolor {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 44% 38% at 28% 30%, rgba(217, 70, 239, 0.5), transparent 70%),
+      radial-gradient(ellipse 48% 42% at 72% 58%, rgba(56, 189, 248, 0.38), transparent 72%),
+      radial-gradient(ellipse 38% 34% at 54% 82%, rgba(129, 140, 248, 0.44), transparent 70%),
+      radial-gradient(ellipse 32% 30% at 84% 22%, rgba(103, 232, 249, 0.32), transparent 72%),
+      radial-gradient(ellipse 36% 32% at 12% 64%, rgba(168, 85, 247, 0.36), transparent 72%);
+    animation: nebula-drift 48s ease-in-out infinite;
+  }
+  /* nuvem Perlin grayscale, blend overlay/screen -> textura de gás real */
+  .nebnoise {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: overlay;
+    opacity: 0.82;
+  }
+  .nebnoise2 {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: screen;
+    opacity: 0.2;
+  }
+  @keyframes nebula-drift {
+    0%, 100% { transform: scale(1) translate3d(0, 0, 0); opacity: 0.9; }
+    50% { transform: scale(1.06) translate3d(1%, -0.8%, 0); opacity: 1; }
+  }
+  .starfield {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     display: block;
+    animation: stars-drift 60s linear infinite;
   }
-  @keyframes facet-breathe {
-    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.85; }
-    50% { transform: scale(1.04) rotate(0.6deg); opacity: 1; }
+  @keyframes stars-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-2%, -1.5%, 0); }
   }
-  :global(html.no-anim) .graph-facets {
+  .starfield .big {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+  }
+  .starfield .tw {
+    animation: twinkle 3.2s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  :global(html.no-anim) .nebcolor,
+  :global(html.no-anim) .starfield,
+  :global(html.no-anim) .starfield .tw {
     animation: none;
   }
-  /* o SvelteFlow (rede) fica ACIMA das facetas */
+  /* modo leve (vault grande): congela o twinkle/drift do espaço pra rolar liso */
+  .graph-wrap--lite .nebcolor,
+  .graph-wrap--lite .starfield,
+  .graph-wrap--lite .starfield .tw {
+    animation: none;
+  }
   .graph-wrap :global(.svelte-flow) {
     position: relative;
     z-index: 1;
@@ -603,22 +795,20 @@
   /* ===== MODO LEVE (grafos grandes): tira efeitos GPU-pesados que travam o
      pan/zoom — sombras, glow, blur e a animação de entrada. Cores e formas
      ficam (de longe é quase imperceptível), mas a fluidez melhora muito. ===== */
-  /* modo leve: nó CYAN branco-quente com glow ESTÁTICO (sem animação/halo pesado),
-     pra ficar igual ao ícone mesmo em vault grande, sem custar no pan/zoom. */
+  /* modo leve (vault grande): neurônio rosa branco-quente com glow ESTÁTICO (sem
+     animação/halo pulsante), pra manter a cor da logo sem custar no pan/zoom. */
   .graph-wrap--lite :global(.neuron) {
-    background: radial-gradient(circle at 50% 40%, #ffffff 0%, #c9f6fd 20%, #67e8f9 52%, #0a1120 100%) !important;
-    box-shadow: 0 0 5px rgba(103, 232, 249, 0.6), inset 0 0 2px rgba(255, 255, 255, 0.55) !important;
+    background: radial-gradient(circle at 50% 40%, #ffffff 0%, #fde9ff 20%, #f4abfc 52%, #b41fc9 78%, #2a0f33 100%) !important;
+    box-shadow: 0 0 5px rgba(232, 121, 249, 0.62), inset 0 0 2px rgba(255, 255, 255, 0.6) !important;
+    transition: none !important;
   }
   .graph-wrap--lite :global(.gnode.hovered .neuron),
   .graph-wrap--lite :global(.gnode.focused .neuron) {
-    box-shadow: 0 0 11px rgba(103, 232, 249, 0.95), 0 0 22px rgba(165, 243, 252, 0.5),
+    box-shadow: 0 0 11px rgba(240, 171, 252, 0.95), 0 0 22px rgba(217, 70, 239, 0.5),
       inset 0 0 3px rgba(255, 255, 255, 0.5) !important;
   }
   .graph-wrap--lite :global(.gnode) {
     animation: none !important;
-    transition: none !important;
-  }
-  .graph-wrap--lite :global(.neuron) {
     transition: none !important;
   }
   .graph-wrap--lite :global(.glabel) {
@@ -656,9 +846,8 @@
   .region-back:active {
     transform: scale(0.97);
   }
-  /* atmosfera cristalina: como olhar pra DENTRO do cristal do ícone — bloom ciano
-     no topo + refração violeta embaixo + um facho diagonal de prisma (sutil).
-     pointer-events:none, na GPU, não atrapalha o pan/zoom. */
+  /* atmosfera neural suave: bloom rosa no centro (rede acesa) + um toque cyan no
+     topo. SÓ glows radiais — sem linhas/facetas. pointer-events:none, na GPU. */
   .graph-wrap::after {
     content: "";
     position: absolute;
@@ -666,9 +855,8 @@
     pointer-events: none;
     z-index: 5;
     background:
-      radial-gradient(ellipse 70% 55% at 50% 30%, rgba(103, 232, 249, 0.08), transparent 60%),
-      radial-gradient(ellipse 60% 50% at 78% 88%, rgba(129, 140, 248, 0.07), transparent 60%),
-      linear-gradient(125deg, transparent 38%, rgba(165, 243, 252, 0.04) 48%, transparent 56%);
+      radial-gradient(ellipse 70% 55% at 50% 32%, rgba(103, 232, 249, 0.06), transparent 60%),
+      radial-gradient(ellipse 55% 50% at 50% 52%, rgba(217, 70, 239, 0.07), transparent 64%);
   }
   /* leve vinheta + facetas: bordas escurecem (sensação de estar dentro da pedra) */
   .graph-wrap::before {
@@ -711,7 +899,7 @@
      no zoom ativo, o que é aceitável. No modo leve (grafos grandes) fica sem
      filtro (regra acima). As arestas DISPARANDO/destacadas acendem mais (inline). */
   .graph-wrap :global(.svelte-flow__edge-path) {
-    filter: drop-shadow(0 0 1.5px rgba(103, 232, 249, 0.4));
+    filter: drop-shadow(0 0 1.5px rgba(232, 121, 249, 0.42));
     transition: stroke 0.22s var(--ease-out, ease), stroke-width 0.22s var(--ease-out, ease);
   }
   .graph-wrap :global(.svelte-flow__minimap) {

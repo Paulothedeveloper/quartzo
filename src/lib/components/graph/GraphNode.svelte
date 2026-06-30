@@ -26,9 +26,8 @@
 
   const delay = $derived(Math.min(data.index * 6, 480));
   // "Vida" sem física: cada neurônio RESPIRA (escala sutil pulsando), com fase e
-  // ritmo variando por índice — dá o movimento orgânico das primeiras versões
-  // (quando a física ao vivo travava) SEM lag: anima a propriedade `scale` na GPU,
-  // mantém o nó centrado no ponto da aresta (não desconecta) e não recalcula layout.
+  // ritmo variando por índice — movimento orgânico SEM lag (anima `scale` na GPU,
+  // mantém o nó centrado no ponto da aresta e não recalcula layout).
   const breatheDur = $derived(3.6 + (data.index % 7) * 0.5); // 3.6–6.6s
   const breatheDelay = $derived(-((data.index % 9) * 0.5)); // fases diferentes
   const icon = $derived(
@@ -90,34 +89,30 @@
     animation: none;
   }
 
-  /* ===== NEURÔNIO: soma redonda com glow suave, cor por pasta ===== */
-  /* ===== NEURÔNIO: nó da rede do CRISTAL — núcleo BRANCO-QUENTE + bloom da cor
-     da pasta (espelha os nós acesos do ícone do app). ===== */
+  /* ===== NEURÔNIO: soma redonda, núcleo branco-quente -> MAGENTA/ROSA (sinapse da
+     logo), com glow. A cor da PASTA vira só uma aura sutil (::after) + os balões. ===== */
   .neuron {
     position: relative;
     display: grid;
     place-items: center;
     border-radius: 9999px;
-    /* NÓ = célula-neurônio CYAN branco-quente (como os nós do ícone), independente
-       da pasta. A cor da pasta vira só uma aura sutil (::after) + os lobos. */
     background: radial-gradient(
       circle at 50% 38%,
       #ffffff 0%,
-      #c9f6fd 18%,
-      #67e8f9 44%,
-      #1a6f93 74%,
-      #0a1120 100%
+      #fde9ff 16%,
+      #f4abfc 40%,
+      #d946ef 70%,
+      #2a0f33 100%
     );
     box-shadow:
-      0 0 7px rgba(103, 232, 249, 0.85),
-      0 0 18px rgba(103, 232, 249, 0.5),
-      inset 0 0 4px rgba(255, 255, 255, 0.6);
+      0 0 7px rgba(232, 121, 249, 0.9),
+      0 0 18px rgba(217, 70, 239, 0.5),
+      inset 0 0 4px rgba(255, 255, 255, 0.65);
     transition:
       transform 0.24s var(--ease-out, ease),
       box-shadow 0.24s var(--ease-out, ease);
   }
-  /* respiração: escala sutil pulsando (propriedade `scale`, compõe com o
-     `transform` do hover). Fase/ritmo por nó -> grafo "vivo" sem física/lag. */
+  /* respiração: escala sutil pulsando (compõe com o transform do hover) */
   .neuron.alive {
     animation: neuron-breathe var(--bdur, 4s) ease-in-out var(--bdelay, 0s) infinite;
   }
@@ -125,8 +120,8 @@
     0%, 100% { scale: 1; }
     50% { scale: 1.07; }
   }
-  /* halo de glow PULSANDO (a "pulsação de luz" do neurônio, das refs de motion
-     design). opacity+scale = GPU, barato. radial bright em fundo escuro = bloom. */
+  /* halo de glow PULSANDO tingido pela cor da PASTA (alguns nós ganham aura
+     cyan/violeta, igual à mistura da logo). opacity+scale = GPU, barato. */
   .neuron.alive::after {
     content: "";
     position: absolute;
@@ -158,8 +153,7 @@
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
   }
 
-  /* rótulo flutuante: aparece SÓ no nó sob o cursor, como um pill limpo
-     (antes apareciam todos os vizinhos e o texto se sobrepunha) */
+  /* rótulo flutuante: aparece SÓ no nó sob o cursor */
   .glabel {
     position: absolute;
     top: calc(100% + 6px);
@@ -191,6 +185,7 @@
   .gnode.hovered .glabel {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+    color: #f0f9ff;
   }
 
   .gnode.dim {
@@ -202,18 +197,15 @@
   .gnode.hovered .neuron {
     transform: scale(1.5);
     box-shadow:
-      0 0 14px rgba(103, 232, 249, 0.95),
-      0 0 30px rgba(165, 243, 252, 0.55),
-      inset 0 0 4px rgba(255, 255, 255, 0.4);
+      0 0 14px rgba(240, 171, 252, 0.95),
+      0 0 30px rgba(217, 70, 239, 0.55),
+      inset 0 0 4px rgba(255, 255, 255, 0.45);
   }
   .gnode.focused .neuron {
     box-shadow:
-      0 0 10px rgba(103, 232, 249, 0.85),
-      0 0 20px rgba(103, 232, 249, 0.4),
-      inset 0 0 3px rgba(255, 255, 255, 0.32);
-  }
-  .gnode.hovered .glabel {
-    color: #f0f9ff;
+      0 0 10px rgba(232, 121, 249, 0.85),
+      0 0 20px rgba(217, 70, 239, 0.4),
+      inset 0 0 3px rgba(255, 255, 255, 0.34);
   }
 
   :global(.svelte-flow__node.selected) .neuron {
@@ -221,10 +213,10 @@
   }
   @keyframes gpulse {
     0%, 100% {
-      box-shadow: 0 0 7px rgba(103, 232, 249, 0.55), inset 0 0 3px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 7px rgba(232, 121, 249, 0.55), inset 0 0 3px rgba(255, 255, 255, 0.3);
     }
     50% {
-      box-shadow: 0 0 18px rgba(103, 232, 249, 0.95), 0 0 30px rgba(165, 243, 252, 0.5), inset 0 0 4px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 18px rgba(240, 171, 252, 0.95), 0 0 30px rgba(217, 70, 239, 0.5), inset 0 0 4px rgba(255, 255, 255, 0.4);
     }
   }
 

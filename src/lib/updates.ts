@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.63.0",
+    date: "2026-06-29",
+    items: [
+      "GRAFO NO ESPAÇO: o fundo agora é um cosmos de verdade — NEBULOSA procedural (nuvem de gás estilo Hubble, gerada por ruído Perlin), CAMPO DE ESTRELAS (com algumas piscando) e gradiente de espaço profundo (violeta/azul/magenta). As pastas viram BALÕES que 'acendem' (bloom dos clusters).",
+      "Os nós são NEURÔNIOS rosa/magenta (núcleo branco-quente, brilho) e as sinapses são curvas — a rede neural da logo, flutuando no espaço. Saíram as linhas/facetas que cruzavam a tela.",
+      "Tudo na GPU e estático (a nebulosa é renderizada uma vez) — sem custo no arrastar/zoom; o modo leve dos vaults grandes congela as animações do espaço pra rolar liso.",
+    ],
+  },
+  {
     version: "0.62.0",
     date: "2026-06-29",
     items: [

@@ -47,6 +47,22 @@
       opacity 0.25s var(--ease-out, ease),
       transform 0.25s var(--ease-out, ease);
   }
+  /* BLOOM do cluster: brilho branco-quente atrás do aglomerado (clusters densos
+     "acendem", como nos renderizadores de galáxia). Estático/GPU, atrás da névoa. */
+  .region::before {
+    content: "";
+    position: absolute;
+    inset: 8%;
+    z-index: -1;
+    border-radius: 9999px;
+    pointer-events: none;
+    background: radial-gradient(
+      circle,
+      rgba(255, 240, 255, 0.14) 0%,
+      rgba(244, 170, 252, 0.09) 36%,
+      transparent 68%
+    );
+  }
   .region:hover {
     background: radial-gradient(
       ellipse at 50% 45%,

@@ -3,6 +3,15 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.63.0 — 2026-06-29
+
+- **Grafo no ESPAÇO (caminho escolhido pelo Paulo após pesquisa de referências):** a saga passou por recolor (rejeitado: "só mudando a cor") → redesign de gemas hexagonais + lattice (rejeitado em uso: facetas viraram linhas cruzando a tela) → Paulo pediu "muda só a cor, mantém os balões de pasta, remove essas linhas" e depois "fundo com aspecto de espaço: universo, estrela, gradiente, nebulosa". Pesquisei o estado da arte (Obsidian *Galaxy View*/*Akasha*/renderer 3D do D'Arcy Norman usam galáxia com bloom + nebulosa, mas em WebGL/Three.js — pesado demais pro PC do Paulo c/ térmica) e recomendei o **caminho 2D estático/GPU** (aprovado):
+  - **Fundo de espaço** (`GraphCanvas .graph-space`): gradiente de cosmos no `.graph-wrap` + **nebulosa PROCEDURAL** (`feTurbulence type="fractalNoise"` baseFrequency 0.012/0.03, `feColorMatrix saturate 0`) em 2 camadas com `mix-blend-mode: overlay/screen` sobre zonas de cor (`.nebcolor`) → nuvem de gás estilo Hubble, **renderizada 1x** (estática). **Campo de estrelas** (`.starfield`, 140 círculos SVG determinísticos, ~32% com twinkle). Fontes: [Codrops feTurbulence], [MDN], [Obsidian Galaxy View], [Akasha].
+  - **Nós = neurônios redondos rosa/magenta** (`GraphNode .neuron`: núcleo branco-quente → `#d946ef`, glow rosa; halo da cor da pasta no `::after`). **Sinapses curvas** (`SynapseEdge` voltou a `getBezierPath`) com cometas branco-rosa. **Facetas/linhas removidas** (eram o que o Paulo odiou).
+  - **Balões de pasta mantidos** (`RegionNode`) + **bloom de cluster** (`.region::before`, glow branco-quente atrás do aglomerado — os clusters "acendem", como nos renderizadores de galáxia).
+  - **Perf:** nebulosa estática (feTurbulence 1x), estrelas estáticas (twinkle só num subconjunto), tudo composição GPU; modo leve (vault grande) congela drift/twinkle. Layout segue CONGELADO (regra `simulacao-ao-vivo-congele-o-layout`).
+  - Validado: neurônios redondos + sem-linhas no app REAL instalado (PrintWindow); fundo espacial (nebulosa procedural + bloom) em mock headless fiel ao CSS — previews no vault do projeto.
+
 ## 0.62.0 — 2026-06-29
 
 - **Grafo — redesign que REALMENTE aparece (a 0.61 era sutil demais):** a causa de "continua igual" era o **modo leve** (liga acima de 120 nós / 250 links), que sobrescrevia os nós com cor-de-pasta chapada e desligava o glow — então em vault grande (caso do Paulo, 179 notas) nada do redesign aparecia. Corrigido:
