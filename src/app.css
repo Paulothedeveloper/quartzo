@@ -278,7 +278,7 @@ html.theme-light .callout-quote .callout-title { color: #475569; }
 
 /* Animação de ENTRADA das views (Grafo, Canvas, nota, etc.) */
 .q-view-in {
-  animation: q-view-in 0.3s var(--ease-out, ease) both;
+  animation: q-view-in 0.34s var(--ease-expo, var(--ease-out, ease)) both;
 }
 @keyframes q-view-in {
   from {

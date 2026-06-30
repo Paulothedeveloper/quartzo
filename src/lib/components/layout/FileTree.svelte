@@ -174,7 +174,7 @@
     </div>
   {:else}
     <button
-      class="group flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-left text-sm transition-all duration-150 ease-out hover:bg-elevated active:scale-[0.99] {$activeTabPath ===
+      class="group flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-left text-sm transition-all duration-150 ease-out hover:translate-x-[2px] hover:bg-elevated active:scale-[0.99] {$activeTabPath ===
       node.path
         ? 'bg-accent/12 text-accent-light'
         : 'text-text-primary/90 hover:text-text-primary'} {overPath === node.path && dragPath

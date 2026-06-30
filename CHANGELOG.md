@@ -3,6 +3,15 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.65.0 — 2026-06-30
+
+Onda 3 — motion premium (direção aprovada pelo Paulo no build de validação).
+
+- **Command palette (Ctrl+K)**: entrada trocada de `fly` para `scale` (start 0.96 + `backOut`, 220ms) + `backdrop-blur` — "pop" estilo Linear/Raycast.
+- **Micro-lift nas listas**: linhas da `FileTree` e dos atalhos da `Sidebar` (fixadas/favoritas) com `hover:translate-x-[2px]` + `transition-all` (antes só `transition-colors`).
+- **Troca de view** (`q-view-in`): easing elevado pra `--ease-expo`, 0.34s.
+- `GraphNotePeek` já entra com spring (0.64.1). Tudo sob o guard global `prefers-reduced-motion`/`html.no-anim`.
+
 ## 0.64.1 — 2026-06-30
 
 - **FIX: a miniatura da nota do grafo não abria.** Diagnóstico: o picking + `onNodePick` sempre funcionaram (provado por HUD instrumentado: `near=3px`, callback dispara), mas o popover `GraphNotePeek` (`position:fixed`) vivia dentro de um container da view do grafo com `transform`/`overflow`, que quebrava o fixed e/ou recortava o popover → "abria mas não aparecia". Correção: **portar a miniatura pro `document.body`** (`use:portal`), renderizar imediatamente (removido o gate `placed`), `z-index: 2000` e borda ciano + animação de entrada (spring). Validado pelo Paulo no app real.

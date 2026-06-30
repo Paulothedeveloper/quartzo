@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.65.0",
+    date: "2026-06-30",
+    items: [
+      "Mais FLUIDEZ (motion premium): o command palette (Ctrl+K) agora abre com um 'pop' suave (escala + leve overshoot + desfoque do fundo), estilo Linear/Raycast.",
+      "Micro-interações nas listas: as linhas da árvore de arquivos e dos atalhos (fixadas/favoritas) deslizam de leve ao passar o mouse — resposta tátil sutil.",
+      "Troca de tela (welcome ↔ editor ↔ grafo ↔ canvas) com transição mais suave (curva 'expo'). Tudo respeita o 'reduzir movimento' do sistema.",
+    ],
+  },
+  {
     version: "0.64.1",
     date: "2026-06-30",
     items: [

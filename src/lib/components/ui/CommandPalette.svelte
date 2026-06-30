@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { fade, fly } from "svelte/transition";
+  import { fade, scale } from "svelte/transition";
+  import { backOut } from "svelte/easing";
   import { t, tr } from "$lib/i18n";
   import { fuzzyMatch, highlightParts } from "$lib/fuzzy";
 
@@ -88,7 +89,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
     <div
       class="w-full max-w-[520px] overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-2xl backdrop-blur-xl"
-      transition:fly={{ y: -20, duration: 250 }}
+      transition:scale={{ start: 0.96, opacity: 0, duration: 220, easing: backOut }}
       onclick={(e) => e.stopPropagation()}
       role="dialog"
       aria-modal="true"
