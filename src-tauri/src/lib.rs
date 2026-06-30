@@ -77,14 +77,24 @@ fn percent_decode(s: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // FIX tela branca do WebView2 ao minimizar/restaurar/trocar de foco
-    // (Chromium "native window occlusion" suspende o render e volta em branco).
-    // Desligar o cálculo de occlusion resolve. Só Windows. — regra do Manual.
-    #[cfg(target_os = "windows")]
-    std::env::set_var(
-        "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
-        "--disable-features=CalculateNativeWinOcclusion",
-    );
+    // FIX DEFINITIVO tela PRETA/branca do WebView2 (minimizar após muito tempo) — lição
+    // PRISMA 0.9.47 no Manual. A causa real é o GPUCache/shader cache do WebView2 corromper.
+    // Camada 1 (config): `additionalBrowserArgs` desliga o shader-disk-cache + occlusion
+    // (NÃO via env WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS — o Tauri sobrescreve).
+    // Camada 2 (aqui): purga os caches de GPU no BOOT, antes de criar a janela. Não toca
+    // em Local Storage/IndexedDB (preserva vault/config). Idempotente, só Windows.
+    #[cfg(windows)]
+    {
+        if let Ok(local) = std::env::var("LOCALAPPDATA") {
+            let base = std::path::Path::new(&local)
+                .join("com.quartzo.app")
+                .join("EBWebView")
+                .join("Default");
+            for sub in ["GPUCache", "Code Cache", "GrShaderCache", "ShaderCache"] {
+                let _ = std::fs::remove_dir_all(base.join(sub));
+            }
+        }
+    }
 
     let builder = tauri::Builder::default();
 
@@ -104,6 +114,38 @@ pub fn run() {
     }));
 
     builder
+        .on_window_event(|_window, _event| {
+            // 3ª camada anti-tela-preta: ao RESTAURAR de minimizado, dá um nudge de 1px no
+            // tamanho da janela -> força o WebView2 a recriar a surface e repintar, sem
+            // reload (não perde estado). Cobre o caso "surface descartada após muito tempo".
+            #[cfg(desktop)]
+            {
+                use std::sync::atomic::{AtomicBool, Ordering};
+                use std::sync::OnceLock;
+                static WAS_MIN: OnceLock<AtomicBool> = OnceLock::new();
+                let was_min = WAS_MIN.get_or_init(|| AtomicBool::new(false));
+                match _event {
+                    tauri::WindowEvent::Resized(s) if s.width == 0 || s.height == 0 => {
+                        was_min.store(true, Ordering::Relaxed);
+                    }
+                    tauri::WindowEvent::Focused(true)
+                        if was_min.swap(false, Ordering::Relaxed) =>
+                    {
+                        let w = _window.clone();
+                        std::thread::spawn(move || {
+                            std::thread::sleep(std::time::Duration::from_millis(70));
+                            if let Ok(sz) = w.inner_size() {
+                                let _ =
+                                    w.set_size(tauri::PhysicalSize::new(sz.width + 1, sz.height));
+                                std::thread::sleep(std::time::Duration::from_millis(20));
+                                let _ = w.set_size(sz);
+                            }
+                        });
+                    }
+                    _ => {}
+                }
+            }
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_deep_link::init())

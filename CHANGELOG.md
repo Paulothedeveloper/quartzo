@@ -3,6 +3,14 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.65.1 — 2026-06-30
+
+- **FIX DEFINITIVO: tela PRETA ao minimizar após muito tempo aberto.** Causa real (lição PRISMA 0.9.47 no Manual): GPUCache/shader cache do WebView2 corrompe; meu fix anterior (env `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`) **não pegava** — o Tauri sobrescreve com o próprio `additionalBrowserArgs`. Correção em 3 camadas:
+  1. **Config** (`tauri.conf.json` › `app.windows[0].additionalBrowserArgs`): `--disable-features=msSmartScreenProtection,CalculateNativeWinOcclusion --disable-backgrounding-occluded-windows --disable-gpu-shader-disk-cache --disable-gpu-program-cache` (preserva o default `msSmartScreenProtection`; desliga occlusion + escrita do shader cache em disco).
+  2. **Purga no boot** (`lib.rs`, antes do Builder, `#[cfg(windows)]`): apaga `EBWebView/Default/{GPUCache,Code Cache,GrShaderCache,ShaderCache}` (não toca em Local Storage/IndexedDB).
+  3. **Nudge de repaint** (`.on_window_event`): ao restaurar de minimizado, redimensiona 1px e volta → WebView2 recria a surface sem reload.
+- A verificar no processo (`Get-CimInstance Win32_Process msedgewebview2` → `CalculateNativeWinOcclusion` no CommandLine).
+
 ## 0.65.0 — 2026-06-30
 
 Onda 3 — motion premium (direção aprovada pelo Paulo no build de validação).

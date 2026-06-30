@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.65.1",
+    date: "2026-06-30",
+    items: [
+      "Correção definitiva da TELA PRETA que aparecia ao deixar o app aberto muito tempo e minimizar. A causa era o cache de GPU (shaders) do WebView2 corromper; agora o app não grava esse cache em disco, limpa qualquer resíduo na abertura e, ao restaurar da bandeja, força um repintar. (Lição trazida do PRISMA.)",
+    ],
+  },
+  {
     version: "0.65.0",
     date: "2026-06-30",
     items: [
