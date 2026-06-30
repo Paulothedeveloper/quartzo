@@ -65,7 +65,7 @@
   import { syncAutoSnapshot } from "$lib/git-auto";
   import { recordNav, navBack, navForward, loadBookmarks, toggleBookmark, loadPinned } from "$lib/stores/nav";
   import { COMMAND_DEFS } from "$lib/commands";
-  import { graphData } from "$lib/stores/graph";
+  import { graphData, graphLoading, loadGraph } from "$lib/stores/graph";
   import { loadQueryIndex } from "$lib/query";
   import { loadAliasIndex } from "$lib/stores/aliases";
   import { clearBacklinkCache } from "$lib/backlink-cache";
@@ -228,7 +228,8 @@
     untrack(syncAutoSnapshot);
   });
 
-  // File watcher: refaz árvore (e invalida grafo) quando o vault muda no disco.
+  // File watcher: refaz árvore (e reindexa grafo) quando o vault muda no disco.
+  let lastGraphReindex = 0; // timestamp do último reindex do grafo (throttle)
   $effect(() => {
     let unlisten: (() => void) | undefined;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -259,7 +260,17 @@
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         refreshTree();
-        graphData.set(null); // força reindexar o grafo
+        // Reindexa o grafo EM SEGUNDO PLANO (sem zerar): mantém o grafo atual na
+        // tela até o novo chegar -> não pisca e não desmonta a miniatura aberta.
+        // Só recarrega se já existe um índice e não há outro load em curso.
+        // Throttle: vaults no Google Drive disparam eventos em rajada no sync;
+        // reindexar o grafo no máx. 1x a cada 4s evita martelar CPU (PC térmico).
+        const vp = get(currentVaultPath);
+        const now = Date.now();
+        if (vp && get(graphData) && !get(graphLoading) && now - lastGraphReindex > 4000) {
+          lastGraphReindex = now;
+          loadGraph(vp);
+        }
         loadQueryIndex(get(currentVaultPath), true); // atualiza as views ```query
         loadAliasIndex(get(currentVaultPath)); // atualiza aliases (front-matter)
         clearBacklinkCache(); // invalida cache de backlinks (arquivos mudaram)
@@ -552,6 +563,32 @@
       }
     }
   }
+
+  // TOOLTIP AUTOMÁTICO DE TEXTO TRUNCADO (cobre o app inteiro):
+  // ao passar o mouse em QUALQUER elemento com reticências (texto que não coube),
+  // injeta o conteúdo completo como title nativo — assim nada fica escondido,
+  // sem precisar anotar componente por componente. Não sobrescreve title já posto.
+  $effect(() => {
+    function onOver(e: MouseEvent) {
+      const t = e.target as HTMLElement | null;
+      if (!t || typeof t.closest !== "function") return;
+      const el = t.closest<HTMLElement>(".truncate, [class*='line-clamp']");
+      if (!el) return;
+      const cut = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+      const txt = (el.textContent || "").trim();
+      if (cut && txt) {
+        if (!el.title || el.dataset.autotitle === "1") {
+          el.title = txt;
+          el.dataset.autotitle = "1";
+        }
+      } else if (el.dataset.autotitle === "1") {
+        el.removeAttribute("title");
+        delete el.dataset.autotitle;
+      }
+    }
+    document.addEventListener("mouseover", onOver, true);
+    return () => document.removeEventListener("mouseover", onOver, true);
+  });
 </script>
 
 <svelte:window

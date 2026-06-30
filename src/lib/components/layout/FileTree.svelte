@@ -181,6 +181,7 @@
         ? 'drop-target'
         : ''} {dragPath === node.path ? 'opacity-50' : ''}"
       style="padding-left: {depth * 14 + 6}px"
+      title={node.name}
       draggable={$sortMode === "manual" && $renamingPath !== node.path}
       onclick={() => pick(node)}
       oncontextmenu={(e) => openMenu(e, node)}
@@ -200,7 +201,7 @@
         <span class="w-[14px] shrink-0"></span>
       {/if}
       <Icon size={16} class="shrink-0 {node.is_dir ? 'text-accent' : 'text-text-secondary'}" />
-      <span class="truncate">{node.name}</span>
+      <span class="min-w-0 truncate">{node.name}</span>
     </button>
   {/if}
 

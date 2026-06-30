@@ -77,6 +77,15 @@ fn percent_decode(s: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // FIX tela branca do WebView2 ao minimizar/restaurar/trocar de foco
+    // (Chromium "native window occlusion" suspende o render e volta em branco).
+    // Desligar o cálculo de occlusion resolve. Só Windows. — regra do Manual.
+    #[cfg(target_os = "windows")]
+    std::env::set_var(
+        "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
+        "--disable-features=CalculateNativeWinOcclusion",
+    );
+
     let builder = tauri::Builder::default();
 
     // single-instance é SÓ desktop: se já há um Quartzo aberto e clicam um

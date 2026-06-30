@@ -3,6 +3,19 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.64.0 — 2026-06-30
+
+Onda de redesign premium (autônoma, após pesquisa de concorrência + leitura do Manual). O fundo de nebulosa procedural da 0.63 (rejeitado pelo Paulo) foi **substituído pela GALÁXIA WebGL**.
+
+- **Grafo = GALÁXIA WebGL/Three.js** (`Graph3D.svelte`, novo): nós-neurônio luminosos (sprites aditivos + `UnrealBloomPass`), sinapses rosa, nebulosas (sprites coloridos ao fundo) e campo de 1400 estrelas. Layout 3D **congelado** (`d3-force-3d` roda N ticks e para — sem física ao vivo, seguro pra térmica). `autoRotate` ambiente que **para na 1ª interação** (o nó não foge do clique).
+- **Clique do nó → miniatura interativa** (`GraphNotePeek.svelte`, novo): popover rolável + arrastável (barra de título) + redimensionável (`resize:both`) + botões abrir/tela-cheia/fechar. **Picking em espaço de tela** (projeta cada nó pra 2D, raio de acerto 38px) — o raycaster de Sprite ignora threshold, então com nós pequenos o acerto virava pixel-perfect; resolvido. **Causa do "clique não abria" diagnosticada com HUD** (medição, não achismo): o picking sempre funcionou (`near=3px`, `onNodePick` disparava) — o que falhava era o auto-giro afastar a bolinha; corrigido com pausa-na-interação + raio maior. Hover acende o nó e pausa o giro.
+- **Grafo não PISCA mais no sync (Google Drive):** o watcher reindexava zerando o grafo (`graphData.set(null)`) a cada evento de arquivo → loop. Agora reindexa **em segundo plano** (mantém o grafo na tela), só se os dados mudaram (assinatura), no máximo **1x/4s** (throttle pra não martelar CPU). Overlay de "indexando" só no 1º load.
+- **TEXTO NUNCA MAIS ESCONDIDO** (dor #1 do Paulo): tooltip automático global — listener delegado detecta qualquer elemento truncado (`scrollWidth>clientWidth`) e injeta o texto completo como `title` (cobre abas, árvore, favoritos, git, settings, modais, mobile, e futuros). + `title`/`min-w-0` explícitos em abas/árvore/sidebar. + `overflow-wrap`/`text-wrap: balance|pretty` global no conteúdo (`.q-prose`) e `[data-textsafe]`.
+- **Fonte Inter EMBUTIDA** (`@fontsource-variable/inter`): antes caía no Segoe UI do Windows. Token `--font-sans` atualizado.
+- **Fim da TELA BRANCA** ao minimizar/restaurar/trocar foco: `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--disable-features=CalculateNativeWinOcclusion` no `lib.rs` (Windows).
+- **Fundação de motion premium:** tokens `--ease-spring`/`--ease-expo`/`--dur-fast|base|slow`; guard global `@media (prefers-reduced-motion: reduce)` (respeita o SO, além do toggle no-anim).
+- Validação por **medição** (`getBoundingClientRect`, regra do Manual — o screenshot do WebView2 via PrintWindow mente pra layout): welcome medido sem overflow (content 577..1077 em viewport 1280).
+
 ## 0.63.0 — 2026-06-29
 
 - **Grafo no ESPAÇO (caminho escolhido pelo Paulo após pesquisa de referências):** a saga passou por recolor (rejeitado: "só mudando a cor") → redesign de gemas hexagonais + lattice (rejeitado em uso: facetas viraram linhas cruzando a tela) → Paulo pediu "muda só a cor, mantém os balões de pasta, remove essas linhas" e depois "fundo com aspecto de espaço: universo, estrela, gradiente, nebulosa". Pesquisei o estado da arte (Obsidian *Galaxy View*/*Akasha*/renderer 3D do D'Arcy Norman usam galáxia com bloom + nebulosa, mas em WebGL/Three.js — pesado demais pro PC do Paulo c/ térmica) e recomendei o **caminho 2D estático/GPU** (aprovado):

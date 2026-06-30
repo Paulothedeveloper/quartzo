@@ -62,6 +62,7 @@
         : 'border-t-transparent text-text-secondary hover:bg-elevated'}"
       onclick={() => switchTo(tab.path)}
       oncontextmenu={(e) => tabMenu(e, tab.path)}
+      title={tab.name}
       transition:fade={{ duration: 130 }}
       animate:flip={{ duration: 200 }}
     >

@@ -183,6 +183,8 @@
     color: #f0f9ff;
     line-height: 1.18; /* >1.1 senão o texto em degradê corta os descendentes */
     padding-bottom: 0.08em;
+    text-wrap: balance;
+    overflow-wrap: break-word; /* nunca vaza, mesmo em idioma/tela extremos */
   }
   .grad {
     background: linear-gradient(115deg, #a5f3fc 0%, #67e8f9 45%, #818cf8 100%);

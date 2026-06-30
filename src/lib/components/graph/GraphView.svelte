@@ -3,7 +3,8 @@
   import { Search, RefreshCw, Loader2, X, Share2 } from "@lucide/svelte";
   import { graphData, graphLoading, loadGraph } from "$lib/stores/graph";
   import { currentVaultPath } from "$lib/stores/vault";
-  import GraphCanvas from "./GraphCanvas.svelte";
+  import Graph3D from "./Graph3D.svelte";
+  import GraphNotePeek from "./GraphNotePeek.svelte";
   import EmptyState from "$lib/components/ui/EmptyState.svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { isMobile } from "$lib/platform";
@@ -14,6 +15,8 @@
 
   let search = $state("");
   let folder = $state<string | null>(null);
+  // miniatura interativa da nota ao clicar num neurônio (rolável/arrastável/redimensionável)
+  let peek = $state<{ path: string; x: number; y: number } | null>(null);
 
   // Carrega o grafo ao abrir (se ainda não carregado).
   $effect(() => {
@@ -132,7 +135,8 @@
 
   <!-- Canvas -->
   <div class="relative min-h-0 flex-1">
-    {#if $graphLoading}
+    {#if $graphLoading && !$graphData}
+      <!-- overlay cheio SÓ no 1º carregamento; reindexações não desmontam/piscam o grafo -->
       <div
         class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 bg-bg/50 backdrop-blur-sm"
       >
@@ -146,13 +150,26 @@
     {:else if $graphData && $graphData.nodes.length === 0}
       <EmptyState title={$t("graph.emptyTitle")} subtitle={$t("graph.emptySub")} />
     {:else if $graphData}
-      <GraphCanvas
+      <Graph3D
         rawNodes={$graphData.nodes}
         rawEdges={$graphData.edges}
         {search}
         {folder}
         {onOpenNote}
+        onNodePick={(path, x, y) => (peek = path ? { path, x, y } : null)}
       />
+      {#if peek}
+        <GraphNotePeek
+          path={peek.path}
+          x={peek.x}
+          y={peek.y}
+          onOpen={(p) => {
+            peek = null;
+            onOpenNote?.(p);
+          }}
+          onClose={() => (peek = null)}
+        />
+      {/if}
     {/if}
   </div>
 </div>

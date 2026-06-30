@@ -389,7 +389,7 @@
           {#each $pinned as p (p)}
             <div class="group flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors hover:bg-elevated">
               <Pin size={12} class="shrink-0 text-accent-light" fill="currentColor" />
-              <button class="min-w-0 flex-1 truncate text-left text-text-secondary hover:text-text-primary" onclick={() => openNote(p)}>
+              <button class="min-w-0 flex-1 truncate text-left text-text-secondary hover:text-text-primary" title={p} onclick={() => openNote(p)}>
                 {p.split(/[\\/]/).pop()?.replace(/\.md$/i, "")}
               </button>
               <button
@@ -416,7 +416,7 @@
           {#each $bookmarks as b (b)}
             <div class="group flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors hover:bg-elevated">
               <Star size={12} class="shrink-0 text-accent-light" fill="currentColor" />
-              <button class="min-w-0 flex-1 truncate text-left text-text-secondary hover:text-text-primary" onclick={() => openNote(b)}>
+              <button class="min-w-0 flex-1 truncate text-left text-text-secondary hover:text-text-primary" title={b} onclick={() => openNote(b)}>
                 {b.split(/[\\/]/).pop()?.replace(/\.md$/i, "")}
               </button>
               <button

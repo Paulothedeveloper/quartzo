@@ -12,12 +12,16 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "0.63.0",
-    date: "2026-06-29",
+    version: "0.64.0",
+    date: "2026-06-30",
     items: [
-      "GRAFO NO ESPAÇO: o fundo agora é um cosmos de verdade — NEBULOSA procedural (nuvem de gás estilo Hubble, gerada por ruído Perlin), CAMPO DE ESTRELAS (com algumas piscando) e gradiente de espaço profundo (violeta/azul/magenta). As pastas viram BALÕES que 'acendem' (bloom dos clusters).",
-      "Os nós são NEURÔNIOS rosa/magenta (núcleo branco-quente, brilho) e as sinapses são curvas — a rede neural da logo, flutuando no espaço. Saíram as linhas/facetas que cruzavam a tela.",
-      "Tudo na GPU e estático (a nebulosa é renderizada uma vez) — sem custo no arrastar/zoom; o modo leve dos vaults grandes congela as animações do espaço pra rolar liso.",
+      "GRAFO GALÁXIA (WebGL/Three.js): a rede agora é uma galáxia 3D de verdade — nós-neurônio luminosos com bloom, sinapses rosa, nebulosas coloridas e campo de estrelas ao fundo. Gira sozinho de leve e PARA assim que você interage (a bolinha não foge mais do clique).",
+      "Clicar num neurônio abre uma MINIATURA da nota: dá pra rolar, arrastar pela barra de título, redimensionar pelo canto e abrir em tela cheia. Passar o mouse acende o nó (cursor vira ponteiro).",
+      "TEXTO NUNCA MAIS ESCONDIDO: qualquer nome cortado com '…' mostra o texto completo ao passar o mouse (tooltip automático em todo o app — abas, árvore, favoritos, etc.); palavras/links gigantes quebram em vez de vazar; títulos com quebra equilibrada.",
+      "Fonte Inter embutida no app (antes caía no Segoe UI do Windows) — tipografia consistente.",
+      "Fim da TELA BRANCA ao minimizar/restaurar a janela (corrigido o occlusion do WebView2 no Windows).",
+      "Base de animação premium (curvas de easing + durações padronizadas) e respeito automático ao 'reduzir movimento' do sistema.",
+      "O grafo não PISCA mais quando o vault sincroniza na nuvem (Google Drive): reindexação em segundo plano, no máximo 1x a cada 4s — sem martelar a CPU.",
     ],
   },
   {
