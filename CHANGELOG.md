@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.64.1 — 2026-06-30
+
+- **FIX: a miniatura da nota do grafo não abria.** Diagnóstico: o picking + `onNodePick` sempre funcionaram (provado por HUD instrumentado: `near=3px`, callback dispara), mas o popover `GraphNotePeek` (`position:fixed`) vivia dentro de um container da view do grafo com `transform`/`overflow`, que quebrava o fixed e/ou recortava o popover → "abria mas não aparecia". Correção: **portar a miniatura pro `document.body`** (`use:portal`), renderizar imediatamente (removido o gate `placed`), `z-index: 2000` e borda ciano + animação de entrada (spring). Validado pelo Paulo no app real.
+- Processo de teste passou a ser **limpo**: desinstala (NSIS `/S`) → instala do zero → abre. E o fechamento do app virou **graceful** (WM_CLOSE) em vez de `Stop-Process -Force` — o force-kill corrompia o GPUCache do WebView2 e causava tela preta/branca (registrado no Manual do PC do Paulo).
+
 ## 0.64.0 — 2026-06-30
 
 Onda de redesign premium (autônoma, após pesquisa de concorrência + leitura do Manual). O fundo de nebulosa procedural da 0.63 (rejeitado pelo Paulo) foi **substituído pela GALÁXIA WebGL**.

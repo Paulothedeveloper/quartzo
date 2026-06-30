@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.64.1",
+    date: "2026-06-30",
+    items: [
+      "Correção: a MINIATURA da nota (ao clicar num neurônio do grafo) agora abre de verdade. Ela é renderizada no topo da janela (fora de qualquer container que a recortava) — abre com borda ciano e animação suave, e continua rolável/arrastável/redimensionável.",
+    ],
+  },
+  {
     version: "0.64.0",
     date: "2026-06-30",
     items: [

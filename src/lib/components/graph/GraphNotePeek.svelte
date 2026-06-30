@@ -21,14 +21,25 @@
   let content = $state<string | null>(null);
   let loadingPath = "";
 
-  // posição/tamanho da janelinha (arrastável + redimensionável)
-  let left = $state(0);
-  let top = $state(0);
+  // posição/tamanho da janelinha (arrastável + redimensionável).
+  // Inicializa JÁ na posição do clique (sem gate "placed" que atrasava/escondia).
+  let left = $state(typeof window !== "undefined" ? Math.min(x + 18, window.innerWidth - 460) : x + 18);
+  let top = $state(typeof window !== "undefined" ? Math.min(y + 18, window.innerHeight - 400) : y + 18);
   let w = $state(440);
   let h = $state(380);
-  let placed = false;
 
   const cache = new Map<string, string>();
+
+  // PORTAL: move a janelinha pro <body> — assim NENHUM container do grafo
+  // (com transform/overflow) quebra o position:fixed nem recorta o popover.
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        node.remove();
+      },
+    };
+  }
 
   $effect(() => {
     const p = path;
@@ -46,18 +57,17 @@
       .catch(() => {});
   });
 
-  // posiciona perto do clique, presa à tela — recalcula quando o alvo muda
+  // reposiciona perto do clique quando o alvo muda (presa à tela)
   $effect(() => {
-    x;
-    y;
+    const cx = x;
+    const cy = y;
     if (typeof window === "undefined") return;
-    let l = x + 18;
-    let tp = y + 18;
-    if (l + w > window.innerWidth - 10) l = x - w - 18;
+    let l = cx + 18;
+    let tp = cy + 18;
+    if (l + w > window.innerWidth - 10) l = cx - w - 18;
     if (tp + h > window.innerHeight - 10) tp = window.innerHeight - h - 10;
     left = Math.max(10, l);
     top = Math.max(10, tp);
-    placed = true;
   });
 
   const title = $derived(path.split(/[\\/]/).pop()?.replace(/\.md$/i, "") ?? "");
@@ -92,49 +102,43 @@
   }}
 />
 
-{#if placed}
-  <div class="peek" style="left:{left}px; top:{top}px; width:{w}px; height:{h}px">
-    <div
-      class="peek-head"
-      onpointerdown={onHeaderPointerDown}
-      onpointermove={onHeaderPointerMove}
-      onpointerup={onHeaderPointerUp}
-    >
-      <span class="peek-title" title={title}>{title}</span>
-      <div class="peek-actions">
-        <button
-          class="peek-btn"
-          title={$t("graph.openNote") ?? "Abrir"}
-          onclick={() => onOpen?.(path)}
-        >
-          <Pencil size={14} />
-        </button>
-        <button
-          class="peek-btn"
-          title={$t("graph.openFull") ?? "Abrir em tela cheia"}
-          onclick={() => onOpen?.(path)}
-        >
-          <Maximize2 size={14} />
-        </button>
-        <button class="peek-btn" title={$t("graph.closePeek") ?? "Fechar"} onclick={() => onClose?.()}>
-          <X size={15} />
-        </button>
-      </div>
-    </div>
-    <div class="peek-body">
-      {#if content !== null}
-        <MarkdownPreview {content} notePath={path} />
-      {:else}
-        <div class="peek-loading">…</div>
-      {/if}
+<div use:portal class="peek" style="left:{left}px; top:{top}px; width:{w}px; height:{h}px">
+  <div
+    class="peek-head"
+    onpointerdown={onHeaderPointerDown}
+    onpointermove={onHeaderPointerMove}
+    onpointerup={onHeaderPointerUp}
+  >
+    <span class="peek-title" title={title}>{title}</span>
+    <div class="peek-actions">
+      <button class="peek-btn" title={$t("graph.openNote") ?? "Abrir"} onclick={() => onOpen?.(path)}>
+        <Pencil size={14} />
+      </button>
+      <button
+        class="peek-btn"
+        title={$t("graph.openFull") ?? "Abrir em tela cheia"}
+        onclick={() => onOpen?.(path)}
+      >
+        <Maximize2 size={14} />
+      </button>
+      <button class="peek-btn" title={$t("graph.closePeek") ?? "Fechar"} onclick={() => onClose?.()}>
+        <X size={15} />
+      </button>
     </div>
   </div>
-{/if}
+  <div class="peek-body">
+    {#if content !== null}
+      <MarkdownPreview {content} notePath={path} />
+    {:else}
+      <div class="peek-loading">…</div>
+    {/if}
+  </div>
+</div>
 
 <style>
   .peek {
     position: fixed;
-    z-index: 160;
+    z-index: 2000; /* acima de tudo (toasts/modais do app ficam abaixo) */
     display: flex;
     flex-direction: column;
     min-width: 300px;
@@ -142,12 +146,28 @@
     max-width: 92vw;
     max-height: 88vh;
     border-radius: 14px;
-    border: 1px solid var(--color-border);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
     background: var(--color-surface, #0e1525);
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+    box-shadow:
+      0 0 0 1px rgba(103, 232, 249, 0.15),
+      0 22px 60px rgba(0, 0, 0, 0.65);
     overflow: hidden;
     /* REDIMENSIONÁVEL: alça no canto inferior-direito */
     resize: both;
+    animation: peek-in 0.18s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes peek-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  :global(html.no-anim) .peek {
+    animation: none;
   }
   .peek-head {
     flex-shrink: 0;
