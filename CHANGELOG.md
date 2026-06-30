@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.65.3 — 2026-06-30
+
+- **WATCHDOG anti-tela-preta (lição PRISMA `tauri-tela-preta-webview-morto-por-fora-watchdog-heartbeat`):** resiliência contra o webview ser morto POR FORA (ex.: `taskkill /IM msedgewebview2` system-wide de outra sessão/app). Front pinga `invoke("heartbeat")` a cada 2s; thread no Rust guarda o último ping. Se >6s sem ping E janela não-minimizada → recupera **escalonado**: (1) `nudge` 1px + `webview.navigate(boot_url)` recria o render sem reiniciar; (2) se não curar / janela sumiu → `app_handle.restart()` (ambiente WebView2 limpo; vault re-lido do banco). Grace 8s no boot; ignora tempo minimizado; guarda `boot_url` de `window.url()`.
+- **Regra de processo (dev):** nunca `taskkill /IM msedgewebview2` (mata o WebView de TODOS os apps). Matar só a árvore do app: `taskkill /F /T /PID <host>`. (Já adotado nos meus scripts: fecho só o lumina graceful.)
+
 ## 0.65.2 — 2026-06-30
 
 - **Tela preta/branca "após muito tempo" — causa MAIS FUNDA (específica do Quartzo, que o PRISMA não tinha):** o `Graph3D` rodava `requestAnimationFrame` → `composer.render()` (WebGL + UnrealBloom) **todo frame, continuamente, mesmo minimizado/parado**. Em GPU térmica (RTX 4070 8GB), horas de bloom à toa desestabilizam o compositor → branco. Fix:

@@ -564,6 +564,17 @@
     }
   }
 
+  // WATCHDOG anti-tela-preta: pinga o Rust a cada 2s. Se parar de chegar (webview
+  // morto por fora / preto), o thread no Rust recupera (navigate/restart). Lição PRISMA.
+  $effect(() => {
+    const ping = () => {
+      invoke("heartbeat").catch(() => {});
+    };
+    ping();
+    const id = setInterval(ping, 2000);
+    return () => clearInterval(id);
+  });
+
   // TOOLTIP AUTOMÁTICO DE TEXTO TRUNCADO (cobre o app inteiro):
   // ao passar o mouse em QUALQUER elemento com reticências (texto que não coube),
   // injeta o conteúdo completo como title nativo — assim nada fica escondido,

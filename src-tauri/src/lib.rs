@@ -32,8 +32,23 @@ use commands::{
     WatchState,
 };
 use std::sync::Mutex;
+use std::sync::Arc;
+use std::time::Instant;
 #[cfg(desktop)]
 use tauri::{Emitter, Manager};
+
+/// Último "batimento" recebido do front (watchdog anti-tela-preta).
+struct Heartbeat(Arc<Mutex<Instant>>);
+
+/// O front chama isto a cada ~2s. Se parar de chegar (>6s) com a janela visível,
+/// o webview morreu (ex.: foi morto por fora) e o watchdog recupera. Lição PRISMA
+/// [[tauri-tela-preta-webview-morto-por-fora-watchdog-heartbeat]].
+#[tauri::command]
+fn heartbeat(state: tauri::State<Heartbeat>) {
+    if let Ok(mut t) = state.0.lock() {
+        *t = Instant::now();
+    }
+}
 
 /// Trata um quartzo://note/<caminho-relativo> — foca a janela e manda o front abrir a nota.
 /// Só desktop: usa métodos de janela (unminimize/set_focus) que não existem no mobile.
@@ -156,8 +171,62 @@ pub fn run() {
                     }
                 });
             }
+            // WATCHDOG anti-tela-preta (lição PRISMA): se o front parar de pingar
+            // (>6s) com a janela visível, o webview morreu (ex.: morto por fora) —
+            // recupera escalonado: 1) nudge + navigate(boot_url) recria o render;
+            // 2) se não curar / janela sumiu -> restart() com ambiente limpo.
+            #[cfg(desktop)]
+            {
+                let app_handle = app.handle().clone();
+                let hb = app.state::<Heartbeat>().0.clone();
+                let boot_url = app.get_webview_window("main").and_then(|w| w.url().ok());
+                std::thread::spawn(move || {
+                    use std::time::Duration;
+                    std::thread::sleep(Duration::from_secs(8)); // grace pro front montar
+                    let mut tried_navigate = false;
+                    loop {
+                        std::thread::sleep(Duration::from_secs(2));
+                        let since = hb
+                            .lock()
+                            .map(|t| t.elapsed())
+                            .unwrap_or(Duration::ZERO);
+                        match app_handle.get_webview_window("main") {
+                            // janela sumiu (ambiente destruído) -> processo novo
+                            None => app_handle.restart(),
+                            Some(w) => {
+                                let minimized = w.is_minimized().unwrap_or(false);
+                                // minimizado: o Windows suspende o JS (sem ping) — NÃO é morte
+                                if minimized || since <= Duration::from_secs(6) {
+                                    tried_navigate = false;
+                                    continue;
+                                }
+                                if !tried_navigate {
+                                    // 1ª tentativa barata: recria a surface sem reiniciar
+                                    tried_navigate = true;
+                                    if let Ok(sz) = w.inner_size() {
+                                        if sz.width > 200 && sz.height > 200 {
+                                            let _ = w.set_size(tauri::PhysicalSize::new(
+                                                sz.width + 1,
+                                                sz.height,
+                                            ));
+                                            let _ = w.set_size(sz);
+                                        }
+                                    }
+                                    if let Some(u) = boot_url.clone() {
+                                        let _ = w.navigate(u);
+                                    }
+                                } else {
+                                    // navigate não curou (ambiente envenenado) -> restart
+                                    app_handle.restart();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             Ok(())
         })
+        .manage(Heartbeat(Arc::new(Mutex::new(Instant::now()))))
         .manage(WatchState(Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![
             read_directory,
@@ -209,6 +278,7 @@ pub fn run() {
             load_bases,
             save_bases,
             export_docx,
+            heartbeat,
             google_drive_pick
         ])
         .run(tauri::generate_context!())

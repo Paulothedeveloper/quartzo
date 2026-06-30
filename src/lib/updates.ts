@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.65.3",
+    date: "2026-06-30",
+    items: [
+      "Blindagem definitiva contra tela preta: um 'watchdog' agora monitora o app — se a tela travar/morrer (inclusive se algo de fora encerrar o motor de exibição), ele se recupera sozinho em segundos (recria a tela ou reinicia limpo, sem perder suas notas). Lição trazida do PRISMA.",
+    ],
+  },
+  {
     version: "0.65.2",
     date: "2026-06-30",
     items: [
