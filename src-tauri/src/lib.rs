@@ -114,38 +114,6 @@ pub fn run() {
     }));
 
     builder
-        .on_window_event(|_window, _event| {
-            // 3ª camada anti-tela-preta: ao RESTAURAR de minimizado, dá um nudge de 1px no
-            // tamanho da janela -> força o WebView2 a recriar a surface e repintar, sem
-            // reload (não perde estado). Cobre o caso "surface descartada após muito tempo".
-            #[cfg(desktop)]
-            {
-                use std::sync::atomic::{AtomicBool, Ordering};
-                use std::sync::OnceLock;
-                static WAS_MIN: OnceLock<AtomicBool> = OnceLock::new();
-                let was_min = WAS_MIN.get_or_init(|| AtomicBool::new(false));
-                match _event {
-                    tauri::WindowEvent::Resized(s) if s.width == 0 || s.height == 0 => {
-                        was_min.store(true, Ordering::Relaxed);
-                    }
-                    tauri::WindowEvent::Focused(true)
-                        if was_min.swap(false, Ordering::Relaxed) =>
-                    {
-                        let w = _window.clone();
-                        std::thread::spawn(move || {
-                            std::thread::sleep(std::time::Duration::from_millis(70));
-                            if let Ok(sz) = w.inner_size() {
-                                let _ =
-                                    w.set_size(tauri::PhysicalSize::new(sz.width + 1, sz.height));
-                                std::thread::sleep(std::time::Duration::from_millis(20));
-                                let _ = w.set_size(sz);
-                            }
-                        });
-                    }
-                    _ => {}
-                }
-            }
-        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_deep_link::init())

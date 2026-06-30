@@ -3,6 +3,17 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.65.2 — 2026-06-30
+
+- **Tela preta/branca "após muito tempo" — causa MAIS FUNDA (específica do Quartzo, que o PRISMA não tinha):** o `Graph3D` rodava `requestAnimationFrame` → `composer.render()` (WebGL + UnrealBloom) **todo frame, continuamente, mesmo minimizado/parado**. Em GPU térmica (RTX 4070 8GB), horas de bloom à toa desestabilizam o compositor → branco. Fix:
+  - **Render-on-demand**: só renderiza quando há mudança (`needsRender`/`invalidate()` em hover, filtro, resize, build; listener `controls "change"` cobre órbita/zoom/damping/autoRotate). Em idle (autoRotate parou após interação) → 0 render.
+  - **Pausa quando oculto**: `if (document.hidden) return` no loop (não renderiza minimizado); `visibilitychange` → `invalidate()` repinta ao voltar.
+  - **Libera o contexto WebGL** ao sair do grafo (`forceContextLoss()`), poupa VRAM/calor.
+- **Flag extra**: `--disable-renderer-backgrounding` (não suspende o renderer em 2º plano) somado aos de 0.65.1.
+- **REMOVIDO o "nudge" de resize no restore** (era a 3ª camada da 0.65.1): ele lia `inner_size()` no meio do restore e **fixava a janela em 14×14** (decorations:false). Causava "app sumiu/preto". Restaura no tamanho cheio agora.
+- **INTERFERÊNCIA ENTRE APPS descoberta (process-level, no fluxo de dev/Claude):** `Stop-Process msedgewebview2 -Force` mata o WebView2 de TODOS os apps por nome (PRISMA, Quartzo, Google Drive, widgets do Windows) → corrompe o GPUCache deles → tela preta. PRISMA e Quartzo se derrubavam mutuamente nos builds. Correção no processo: nunca matar `msedgewebview2` por nome; fechar só o próprio app (graceful). (Registrar no Manual.)
+- Mantidas as camadas de 0.65.1 úteis (occlusion off + shader-disk-cache off + boot purge). Validado por captura REAL (CopyFromScreen; PrintWindow mente com WebView2): após minimizar 30s e restaurar → janela 1294×840, branco%=0, preto%=0; PRISMA saudável na mesma tela.
+
 ## 0.65.1 — 2026-06-30
 
 - **FIX DEFINITIVO: tela PRETA ao minimizar após muito tempo aberto.** Causa real (lição PRISMA 0.9.47 no Manual): GPUCache/shader cache do WebView2 corrompe; meu fix anterior (env `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`) **não pegava** — o Tauri sobrescreve com o próprio `additionalBrowserArgs`. Correção em 3 camadas:

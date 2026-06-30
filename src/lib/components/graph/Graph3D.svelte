@@ -59,6 +59,10 @@
   let downXY = { x: 0, y: 0 };
   let hovered: THREE.Sprite | null = null; // nó sob o cursor
   let downSprite: THREE.Sprite | null = null; // nó pressionado (pra clique = abrir)
+  let needsRender = true; // render-on-demand: só desenha quando muda (poupa GPU em idle)
+  function invalidate() {
+    needsRender = true;
+  }
   let lastSig = ""; // assinatura dos dados — evita reconstruir o WebGL à toa
 
   // assinatura barata do grafo (ids dos nós + pares das arestas). Se não mudou,
@@ -244,6 +248,7 @@
       m.opacity = on ? 1 : 0.08;
     }
     if (edgeLines) (edgeLines.material as THREE.LineBasicMaterial).opacity = has ? 0.05 : 0.22;
+    invalidate();
   }
 
   function onResize() {
@@ -254,6 +259,7 @@
     composer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    invalidate();
   }
 
   // PICKING EM ESPAÇO DE TELA: projeta cada nó pra 2D e pega o mais próximo do
@@ -309,6 +315,7 @@
     if (renderer) renderer.domElement.style.cursor = s ? "pointer" : "grab";
     // pausa o giro automático enquanto o cursor está sobre um nó (não foge do clique)
     if (controls) controls.autoRotate = autoRotateWanted && !s;
+    invalidate(); // o hover mudou um material -> precisa repintar 1 frame
   }
 
   function onPointerMove(e: PointerEvent) {
@@ -377,6 +384,7 @@
     autoRotateWanted = !reduce;
     controls.autoRotate = autoRotateWanted;
     controls.autoRotateSpeed = 0.35;
+    controls.addEventListener("change", invalidate); // órbita/zoom/damping -> repinta
 
     // ---- NEBULOSA: nuvens coloridas (sprites grandes, aditivos, ao fundo) ----
     const cloudTex = makeCloudTexture();
@@ -458,14 +466,27 @@
     ro = new ResizeObserver(onResize);
     ro.observe(host);
 
+    document.addEventListener("visibilitychange", onVisibility);
+
     const loop = () => {
       if (disposed) return;
       raf = requestAnimationFrame(loop);
-      controls.update();
-      composer.render();
+      // OCULTO/MINIMIZADO: não renderiza nada (poupa GPU; evita o compositor branquear
+      // "após muito tempo" rodando bloom WebGL à toa). Retoma ao voltar (visibilitychange).
+      if (document.hidden) return;
+      controls.update(); // dispara "change" -> invalidate() quando há órbita/damping/giro
+      if (needsRender) {
+        needsRender = false;
+        composer.render();
+      }
     };
     loop();
   });
+
+  // ao voltar a ficar visível, força 1 repaint (a surface pode ter sido descartada)
+  function onVisibility() {
+    if (!document.hidden) invalidate();
+  }
 
   // reage a busca/filtro
   $effect(() => {
@@ -489,12 +510,17 @@
     disposed = true;
     cancelAnimationFrame(raf);
     ro?.disconnect();
+    document.removeEventListener("visibilitychange", onVisibility);
     renderer?.domElement.removeEventListener("pointerdown", onPointerDown);
     renderer?.domElement.removeEventListener("pointerup", onPointerUp);
     renderer?.domElement.removeEventListener("pointermove", onPointerMove);
     renderer?.domElement.removeEventListener("pointerleave", onPointerLeave);
     renderer?.domElement.removeEventListener("dblclick", onDblClick);
     controls?.dispose();
+    // libera o contexto WebGL da GPU ao sair do grafo (poupa VRAM/calor)
+    try {
+      renderer?.forceContextLoss();
+    } catch {}
     renderer?.dispose();
     glowTex?.dispose();
   });

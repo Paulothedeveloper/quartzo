@@ -12,6 +12,15 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.65.2",
+    date: "2026-06-30",
+    items: [
+      "Tela preta/branca 'após muito tempo aberto': causa mais funda encontrada — o GRAFO ficava redesenhando a galáxia (WebGL + brilho) a cada quadro, SEM PARAR, mesmo minimizado ou parado, fritando a GPU com o tempo. Agora o grafo só desenha quando algo muda (gira/interage/filtra) e PARA totalmente quando a janela está minimizada/oculta — bem mais leve e estável. Ao voltar, repinta sozinho.",
+      "Reforço extra anti-tela-preta: o renderer não é mais suspenso em segundo plano (flag --disable-renderer-backgrounding) e o contexto de GPU é liberado ao sair do grafo.",
+      "Corrigido também um bug que encolhia a janela ao restaurar de minimizada. Agora restaura sempre no tamanho cheio.",
+    ],
+  },
+  {
     version: "0.65.1",
     date: "2026-06-30",
     items: [
