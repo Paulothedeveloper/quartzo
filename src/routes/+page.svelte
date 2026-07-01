@@ -79,6 +79,8 @@
   import { createTypedNote, loadNoteTypes, type NoteType } from "$lib/types-notes";
   import { sfx } from "$lib/sfx";
   import { t, tr } from "$lib/i18n";
+  import Coachmark from "$lib/components/ui/Coachmark.svelte";
+  import { showCoachmark } from "$lib/stores/coachmarks";
   import { untrack } from "svelte";
   import { get } from "svelte/store";
   import { fly } from "svelte/transition";
@@ -184,16 +186,18 @@
     });
   });
 
-  // Tutorial na 1ª abertura (uma vez; depois só pelo comando "Ver tutorial").
+  // Onboarding CONTEXTUAL (regra do Manual: coachmarks 1x ao chegar na feature, NÃO
+  // slideshow inicial). 1ª dica na Home; as outras disparam ao abrir grafo/editor.
+  // O slideshow completo (TutorialOverlay) fica só sob demanda (comando "Ver tutorial").
   $effect(() => {
     untrack(() => {
-      try {
-        if (!localStorage.getItem("quartzo:tutorialDone")) {
-          setTimeout(() => tutorialOpen.set(true), 700);
-        }
-      } catch {
-        /* ignora */
-      }
+      setTimeout(() => {
+        showCoachmark({
+          id: "welcome",
+          title: tr("tut.step2Title"),
+          body: tr("tut.step2Body"),
+        });
+      }, 900);
     });
   });
 
@@ -757,6 +761,7 @@
 {/if}
 
 <Toast />
+<Coachmark />
 {#if lightboxSrc}
   <ImageLightbox src={lightboxSrc} alt={lightboxAlt} onClose={() => (lightboxSrc = null)} />
 {/if}

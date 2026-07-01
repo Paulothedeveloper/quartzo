@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.69.0 — 2026-06-30
+
+- **Onboarding: slideshow → COACHMARKS CONTEXTUAIS (regra do Manual `tutorial-interativo-coachmarks-contextuais`).** O `TutorialOverlay` (slideshow de 8 passos auto-aberto na 1ª vez) violava a regra ("não tudo de uma vez"). Agora: `coachmarks.ts` (seen-set + `skipAll` persistidos em localStorage) + `Coachmark.svelte` (card não-modal, glass, canto inferior) + gatilhos contextuais 1x: **welcome** na Home (`+page.svelte`), **graph** ao montar `GraphView`, **editor** ao montar `MarkdownEditor` — reaproveitando as chaves `tut.stepN`. `coach.got`/`coach.skipAll` i18n nos 5 idiomas. O slideshow completo fica só sob demanda (comando "Ver tutorial"). Removido o auto-open do slideshow na 1ª abertura.
+- **Fix (validado rodando):** o card do coachmark vazava para baixo da janela porque `position:fixed` se ancorava num ancestral transformado (`.app-body`/`q-view-in`), não na viewport. Portado para `document.body` (`use:portal`, mesma correção do `GraphNotePeek`). Confirmado por captura `PrintWindow(PW_RENDERFULLCONTENT)` em 1ª execução real.
+
 ## 0.68.1 — 2026-06-30
 
 - **Animação ao redimensionar/restaurar a JANELA (parte possível):** a moldura do SO é do Windows (app não controla); o CONTEÚDO agora "assenta" com fade+leve escala (Web Animations API na `.app-body`, debounce 130ms no `resize`, respeita `no-anim`). Fecha o único item que faltava da lista do Paulo.

@@ -17,7 +17,14 @@
   import { backlinksOpen, outlineOpen, relinkOpen } from "$lib/stores/ui";
   import { openWikilink, openNote } from "$lib/vault-actions";
   import { t, tr } from "$lib/i18n";
+  import { onMount } from "svelte";
+  import { showCoachmark } from "$lib/stores/coachmarks";
   import CodeMirror from "./CodeMirror.svelte";
+
+  // Coachmark contextual: 1ª vez no editor, ensina wikilinks/backlinks.
+  onMount(() => {
+    setTimeout(() => showCoachmark({ id: "editor", title: tr("tut.step3Title"), body: tr("tut.step3Body") }), 900);
+  });
   import MarkdownPreview from "./MarkdownPreview.svelte";
   import PropertiesPanel from "./PropertiesPanel.svelte";
 

@@ -8,7 +8,14 @@
   import EmptyState from "$lib/components/ui/EmptyState.svelte";
   import CrystalIllustration from "$lib/components/ui/CrystalIllustration.svelte";
   import { isMobile } from "$lib/platform";
-  import { t } from "$lib/i18n";
+  import { onMount } from "svelte";
+  import { t, tr } from "$lib/i18n";
+  import { showCoachmark } from "$lib/stores/coachmarks";
+
+  // Coachmark contextual: 1ª vez que o usuário ABRE o grafo, explica zoom + clique no nó.
+  onMount(() => {
+    setTimeout(() => showCoachmark({ id: "graph", title: tr("tut.step5Title"), body: tr("tut.step5Body") }), 700);
+  });
 
   let { onOpenNote, onClose }: { onOpenNote?: (p: string) => void; onClose?: () => void } =
     $props();

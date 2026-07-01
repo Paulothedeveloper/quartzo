@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.69.0",
+    date: "2026-06-30",
+    items: [
+      "Tutorial repensado: em vez de um slideshow de 8 telas logo na abertura, agora são DICAS CONTEXTUAIS — aparecem uma vez, no momento em que você chega em cada parte (ex.: a dica do grafo surge ao abrir o Grafo; a de links, ao abrir uma nota). Menos fricção, ensina na hora certa. O tour completo continua disponível no menu (Ver tutorial).",
+    ],
+  },
+  {
     version: "0.68.1",
     date: "2026-06-30",
     items: [
