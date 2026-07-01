@@ -273,18 +273,27 @@
   }
 
   function fitCamera() {
-    const box = new THREE.Box3();
-    for (const s of nodeSprites) box.expandByPoint(s.position);
     if (nodeSprites.length === 0) return;
-    const sphere = box.getBoundingSphere(new THREE.Sphere());
-    const r = Math.max(sphere.radius, 40);
-    const dist = r / Math.sin((camera.fov * Math.PI) / 360) * 1.15;
-    controls.target.copy(sphere.center);
-    camera.position.set(sphere.center.x, sphere.center.y, sphere.center.z + dist);
+    // CENTRÓIDE (robusto) — não usa caixa englobante crua (um nó outlier jogava a
+    // câmera pra longe -> grafo minúsculo "lá em cima"). Enquadra o miolo (percentil 85).
+    const c = new THREE.Vector3();
+    for (const s of nodeSprites) c.add(s.position);
+    c.multiplyScalar(1 / nodeSprites.length);
+    const dists = nodeSprites.map((s) => s.position.distanceTo(c)).sort((a, b) => a - b);
+    const p85 = dists[Math.min(dists.length - 1, Math.floor(dists.length * 0.85))] ?? 40;
+    const r = Math.max(p85 * 1.1, 30);
+    // considera o ASPECTO: cabe pelo menor campo de visão (vertical vs horizontal)
+    const vFov = (camera.fov * Math.PI) / 180;
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * Math.max(camera.aspect, 0.0001));
+    const fit = Math.min(vFov, hFov);
+    const dist = (r / Math.sin(fit / 2)) * 1.15;
+    controls.target.copy(c);
+    camera.position.set(c.x, c.y, c.z + dist);
     camera.near = Math.max(dist / 100, 0.5);
     camera.far = dist * 6 + r * 4;
     camera.updateProjectionMatrix();
     controls.update();
+    invalidate();
   }
 
   // ---- ZOOM por botões (chamado pela toolbar do GraphView) — dolly animado suave ----
@@ -339,6 +348,7 @@
     invalidate();
   }
 
+  let firstFit = true; // re-enquadra 1x quando o canvas ganha o tamanho REAL
   function onResize() {
     if (!host || !renderer) return;
     const w = host.clientWidth || 1;
@@ -347,6 +357,12 @@
     composer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    // o build inicial pode ter enquadrado com tamanho/aspecto errado (canvas ainda
+    // sem layout) -> ao chegar o tamanho real, enquadra de novo pra abrir certinho.
+    if (firstFit && nodeSprites.length && w > 2 && h > 2) {
+      firstFit = false;
+      fitCamera();
+    }
     invalidate();
   }
 

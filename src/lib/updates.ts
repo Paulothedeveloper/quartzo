@@ -16,6 +16,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-06-30",
     items: [
       "GRAFO VIVO de um jeito novo: em vez de luz piscando à toa, agora rolam DISPAROS NEURAIS — pulsos de luz correm pelas sinapses de um nó pro outro e ACENDEM cada nó ao chegar, disparando em cascata (ondas de atividade percorrendo a rede, como um cérebro). Os nós ficam parados (clicar continua fácil) e o giro lento volta sozinho quando você para de mexer. Leve na GPU (limitado a 30fps + pausa quando minimizado).",
+      "Correção: o grafo agora abre JÁ ENQUADRADO no centro da tela (antes abria minúsculo lá em cima e você tinha que dar zoom).",
     ],
   },
   {

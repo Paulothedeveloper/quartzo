@@ -7,6 +7,7 @@ Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 
 - **Grafo animado de um jeito NOVO e com sentido — DISPAROS NEURAIS (signal propagation):** o pedido do Paulo era "não pulso uniforme sem sentido; algo criativo". Solução: impulsos (pontos brilhantes, `THREE.Points` aditivo) viajam pelas SINAPSES de nó→vizinho; ao chegar, o nó ACENDE (activation=1, decai) e re-dispara em **cascata amortecida** (gen<2, prob 0.45) → ondas de atividade percorrem a rede, como potenciais de ação. Semeia ~1 disparo/1.1s. Nós ficam PARADOS (clique fácil); giro lento (`autoRotate` 0.28) volta após 2.5s ociosos e pausa no hover. Respiro base sutil.
 - **Térmica (não repetir a tela preta):** loop capado a **~30fps** (metade do custo do bloom) + **pausa total quando `document.hidden`** (minimizado) + `forceContextLoss` ao sair + modo `no-anim` desliga tudo (render sob demanda). Buffer de impulsos fixo (MAX 64). Cobre-se ainda no watchdog (0.65.3).
+- **FIX enquadramento inicial:** `fitCamera` reescrito — abria "lá em cima"/minúsculo porque a caixa englobante crua era inflada por 1 nó outlier. Agora usa **centróide + raio no percentil 85** (ignora outliers) + considera o **aspecto** (menor fov vertical/horizontal) + **re-enquadra no 1º resize real** (`firstFit`, canvas já com layout). Abre centrado.
 
 ## 0.67.0 — 2026-06-30
 
