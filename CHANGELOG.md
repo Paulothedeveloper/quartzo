@@ -3,6 +3,19 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.66.0 — 2026-06-30
+
+Onda "nível Eagle" (pesquisa do Eagle + auditoria completa de animação/mídia/tema; mantém identidade cristal cyan). Auditoria confirmou que a maioria das animações de abrir/fechar (abas/pastas/painéis/modais/troca de view) já é premium — foco no que faltava:
+
+- **Zoom no grafo:** botões `+ / − / ajustar` (`GraphView`) numa pílula **glass** (backdrop-filter), chamando `zoomIn/zoomOut/fitView` exportados do `Graph3D` (dolly animado easeOutCubic 200ms + `fitCamera`). i18n 5 idiomas. Antes só havia zoom por scroll (não descobrível).
+- **Troca de TEMA animada:** `applySettings` envolve a troca de `theme-light` em `document.startViewTransition` → cross-fade da tela inteira (fallback direto se sem suporte/reduced-motion/anim off). CSS `::view-transition-*(root)` 0.32s. Antes a troca de cores era seca.
+- **Lightbox de mídia (`ImageLightbox.svelte`, novo):** clicar imagem do `.q-prose` → overlay fullscreen com **zoom (roda), pan (arraste), duplo-clique alterna, +/−/reset, Esc**; portal pro body, glass nos controles. Listener delegado em `+page.svelte` (cobre qualquer nota). `.q-prose img` ganha `cursor:zoom-in` + hover. Antes não havia lightbox/zoom de imagem.
+- Verificado (regra "subagente superestima"): o chevron das pastas JÁ tinha `transition-transform` (não era seco); abas/painéis/modais já premium — não mexido.
+
+## 0.65.4 — 2026-06-30
+
+- **Animação das abas (EditorTabs) refeita — estava "seca/grosseira":** (1) abrir/fechar agora usa transição custom que anima **largura+padding+opacidade+escala** (`expoOut`) → a aba DESLIZA e as vizinhas reflowam suave, em vez de "pipocar" com `fade 130ms`; (2) trocado `transition-all` por `transition-[background-color,color,border-color,box-shadow]` → some o **jank** (antes o `transition-all` animava o `transform` do flip/transição, brigando); (3) `animate:flip` 200ms→**280ms `quintOut`** (reorder macio); (4) aba ativa ganha glow sutil do accent + transição suave de cor/borda.
+
 ## 0.65.3 — 2026-06-30
 
 - **WATCHDOG anti-tela-preta (lição PRISMA `tauri-tela-preta-webview-morto-por-fora-watchdog-heartbeat`):** resiliência contra o webview ser morto POR FORA (ex.: `taskkill /IM msedgewebview2` system-wide de outra sessão/app). Front pinga `invoke("heartbeat")` a cada 2s; thread no Rust guarda o último ping. Se >6s sem ping E janela não-minimizada → recupera **escalonado**: (1) `nudge` 1px + `webview.navigate(boot_url)` recria o render sem reiniciar; (2) se não curar / janela sumiu → `app_handle.restart()` (ambiente WebView2 limpo; vault re-lido do banco). Grace 8s no boot; ignora tempo minimizado; guarda `boot_url` de `window.url()`.

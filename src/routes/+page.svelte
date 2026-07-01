@@ -19,6 +19,7 @@
   import ConfirmDialog from "$lib/components/ui/ConfirmDialog.svelte";
   import PromptDialog from "$lib/components/ui/PromptDialog.svelte";
   import HoverPreview from "$lib/components/ui/HoverPreview.svelte";
+  import ImageLightbox from "$lib/components/ui/ImageLightbox.svelte";
   import PrismaPicker from "$lib/components/ui/PrismaPicker.svelte";
   import VaultManager from "$lib/components/ui/VaultManager.svelte";
   import RelinkModal from "$lib/components/ui/RelinkModal.svelte";
@@ -575,6 +576,25 @@
     return () => clearInterval(id);
   });
 
+  // LIGHTBOX DE MÍDIA (estilo Eagle): clicar numa imagem do preview de markdown abre
+  // em tela cheia com zoom/pan. Listener delegado — cobre qualquer nota renderizada.
+  let lightboxSrc = $state<string | null>(null);
+  let lightboxAlt = $state("");
+  $effect(() => {
+    function onImgClick(e: MouseEvent) {
+      const t = e.target as HTMLElement;
+      if (!(t instanceof HTMLImageElement)) return;
+      if (!t.closest(".q-prose")) return; // só imagens do conteúdo da nota
+      if (t.naturalWidth && t.naturalWidth < 48) return; // ignora ícones/emoji-img
+      e.preventDefault();
+      e.stopPropagation();
+      lightboxAlt = t.alt || "";
+      lightboxSrc = t.currentSrc || t.src;
+    }
+    document.addEventListener("click", onImgClick, true);
+    return () => document.removeEventListener("click", onImgClick, true);
+  });
+
   // TOOLTIP AUTOMÁTICO DE TEXTO TRUNCADO (cobre o app inteiro):
   // ao passar o mouse em QUALQUER elemento com reticências (texto que não coube),
   // injeta o conteúdo completo como title nativo — assim nada fica escondido,
@@ -710,6 +730,9 @@
 {/if}
 
 <Toast />
+{#if lightboxSrc}
+  <ImageLightbox src={lightboxSrc} alt={lightboxAlt} onClose={() => (lightboxSrc = null)} />
+{/if}
 <CommandPalette bind:open={paletteOpen} {commands} />
 <CommandPalette
   bind:open={quickOpen}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from "svelte";
-  import { Search, RefreshCw, Loader2, X, Share2 } from "@lucide/svelte";
+  import { Search, RefreshCw, Loader2, X, Share2, Plus, Minus, Maximize } from "@lucide/svelte";
   import { graphData, graphLoading, loadGraph } from "$lib/stores/graph";
   import { currentVaultPath } from "$lib/stores/vault";
   import Graph3D from "./Graph3D.svelte";
@@ -17,6 +17,8 @@
   let folder = $state<string | null>(null);
   // miniatura interativa da nota ao clicar num neurônio (rolável/arrastável/redimensionável)
   let peek = $state<{ path: string; x: number; y: number } | null>(null);
+  // ref do Graph3D p/ os botões de zoom (+/−/ajustar) da toolbar flutuante
+  let graph3d = $state<{ zoomIn: () => void; zoomOut: () => void; fitView: () => void } | null>(null);
 
   // Carrega o grafo ao abrir (se ainda não carregado).
   $effect(() => {
@@ -151,6 +153,7 @@
       <EmptyState title={$t("graph.emptyTitle")} subtitle={$t("graph.emptySub")} />
     {:else if $graphData}
       <Graph3D
+        bind:this={graph3d}
         rawNodes={$graphData.nodes}
         rawEdges={$graphData.edges}
         {search}
@@ -158,6 +161,18 @@
         {onOpenNote}
         onNodePick={(path, x, y) => (peek = path ? { path, x, y } : null)}
       />
+      <!-- Controle de zoom flutuante (estilo Eagle): +/−/ajustar, glass no canto -->
+      <div class="gv-zoom">
+        <button onclick={() => graph3d?.zoomIn()} title={$t("graph.zoomIn") ?? "Aproximar"} aria-label="zoom in">
+          <Plus size={16} />
+        </button>
+        <button onclick={() => graph3d?.zoomOut()} title={$t("graph.zoomOut") ?? "Afastar"} aria-label="zoom out">
+          <Minus size={16} />
+        </button>
+        <button onclick={() => graph3d?.fitView()} title={$t("graph.fitView") ?? "Ajustar à tela"} aria-label="fit">
+          <Maximize size={15} />
+        </button>
+      </div>
       {#if peek}
         <GraphNotePeek
           path={peek.path}
@@ -173,3 +188,44 @@
     {/if}
   </div>
 </div>
+
+<style>
+  /* Controle de zoom flutuante do grafo — pílula glass (estilo Eagle), canto inf. direito */
+  .gv-zoom {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 8px 28px rgba(0, 0, 0, 0.42);
+  }
+  .gv-zoom button {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 34px;
+    color: var(--color-text-secondary);
+    transition:
+      background 0.15s var(--ease-out, ease),
+      color 0.15s var(--ease-out, ease),
+      transform 0.12s var(--ease-out, ease);
+  }
+  .gv-zoom button:not(:last-child) {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  }
+  .gv-zoom button:hover {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent-light);
+  }
+  .gv-zoom button:active {
+    transform: scale(0.9);
+  }
+</style>

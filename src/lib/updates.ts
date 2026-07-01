@@ -12,6 +12,22 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.66.0",
+    date: "2026-06-30",
+    items: [
+      "Mais fluidez e capricho (referência: Eagle), mantendo a identidade cristal: botões de ZOOM (+ / − / ajustar à tela) no grafo, numa pílula de vidro fosco no canto.",
+      "Trocar o tema (claro/escuro) agora faz um cross-fade suave da tela inteira, em vez da mudança de cor seca.",
+      "Clicar numa imagem da nota abre um LIGHTBOX em tela cheia: roda do mouse dá zoom, arrasta move, duplo-clique alterna, Esc fecha — com controles em vidro fosco.",
+    ],
+  },
+  {
+    version: "0.65.4",
+    date: "2026-06-30",
+    items: [
+      "Abas do editor com animação mais fluida: ao abrir/fechar, a aba DESLIZA (largura cresce/encolhe e as vizinhas acompanham) em vez do efeito seco; reordenar é mais macio; e a troca de aba ativa transiciona suave (sem o 'salto' anterior).",
+    ],
+  },
+  {
     version: "0.65.3",
     date: "2026-06-30",
     items: [

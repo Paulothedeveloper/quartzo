@@ -188,12 +188,28 @@ function shade(hex: string, amt: number): string {
 }
 
 /** Aplica efeitos colaterais globais (tema, densidade, animações, accent, zoom, fonte). */
+let _lastTheme: Theme | undefined;
 export function applySettings(s: Settings) {
   if (typeof document === "undefined") return;
   const html = document.documentElement;
   html.classList.toggle("density-compact", s.density === "compact");
   html.classList.toggle("no-anim", !s.animations);
-  html.classList.toggle("theme-light", s.theme === "light");
+
+  // TEMA com transição suave: cross-fade da tela inteira (View Transitions API) ao
+  // trocar claro/escuro — em vez da troca de cores "seca". Fallback direto se não houver
+  // suporte / reduced-motion / animações off. (1ª aplicação no load não anima.)
+  const themeChanged = _lastTheme !== undefined && _lastTheme !== s.theme;
+  _lastTheme = s.theme;
+  const applyTheme = () => html.classList.toggle("theme-light", s.theme === "light");
+  const vt = (document as Document & { startViewTransition?: (cb: () => void) => unknown })
+    .startViewTransition;
+  const reduce =
+    typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (themeChanged && s.animations && !reduce && typeof vt === "function") {
+    vt.call(document, applyTheme);
+  } else {
+    applyTheme();
+  }
 
   // Cor de destaque customizável (cascateia pelos var(--color-accent*) do Tailwind v4).
   if (s.accentColor && /^#?[0-9a-fA-F]{3,6}$/.test(s.accentColor)) {

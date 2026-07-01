@@ -1,10 +1,29 @@
 <script lang="ts">
   import { X, XCircle, ListX, Columns2 } from "@lucide/svelte";
-  import { fade } from "svelte/transition";
   import { flip } from "svelte/animate";
+  import { expoOut, quintOut } from "svelte/easing";
   import { openTabs, activeTabPath } from "$lib/stores/tabs";
   import { ctxMenu, rightPane } from "$lib/stores/ui";
   import { t, tr } from "$lib/i18n";
+
+  // Transição premium das abas: em vez de "pipocar" (fade seco), a aba DESLIZA —
+  // largura/padding animam (vizinhas reflowam suave) + leve sobe/escala com expo.
+  function tabMotion(node: HTMLElement, { duration = 240 }: { duration?: number } = {}) {
+    const w = node.offsetWidth;
+    const cs = getComputedStyle(node);
+    const pl = parseFloat(cs.paddingLeft) || 0;
+    const pr = parseFloat(cs.paddingRight) || 0;
+    return {
+      duration,
+      easing: expoOut,
+      css: (t: number) =>
+        `opacity:${t};` +
+        `max-width:${t * w}px; min-width:0;` +
+        `padding-left:${t * pl}px; padding-right:${t * pr}px;` +
+        `transform:translateY(${(1 - t) * -5}px) scale(${0.965 + t * 0.035});` +
+        `overflow:hidden; white-space:nowrap;`,
+    };
+  }
 
   function switchTo(path: string) {
     activeTabPath.set(path);
@@ -56,15 +75,15 @@
 <div class="q-editor-tabs flex overflow-x-auto border-b border-border bg-surface">
   {#each $openTabs as tab (tab.path)}
     <button
-      class="group flex min-w-[140px] max-w-[220px] items-center gap-2 border-r border-t-2 border-border px-4 py-2 text-sm transition-all duration-150 ease-out {$activeTabPath ===
+      class="group relative flex min-w-[140px] max-w-[220px] items-center gap-2 border-r border-t-2 border-border px-4 py-2 text-sm transition-[background-color,color,border-color,box-shadow] duration-200 ease-out {$activeTabPath ===
       tab.path
-        ? 'border-t-accent bg-bg text-text-primary'
-        : 'border-t-transparent text-text-secondary hover:bg-elevated'}"
+        ? 'border-t-accent bg-bg text-text-primary shadow-[0_3px_16px_-10px_var(--color-accent)]'
+        : 'border-t-transparent text-text-secondary hover:bg-elevated hover:text-text-primary'}"
       onclick={() => switchTo(tab.path)}
       oncontextmenu={(e) => tabMenu(e, tab.path)}
       title={tab.name}
-      transition:fade={{ duration: 130 }}
-      animate:flip={{ duration: 200 }}
+      transition:tabMotion={{ duration: 240 }}
+      animate:flip={{ duration: 280, easing: quintOut }}
     >
       <span class="truncate">{tab.name}</span>
       {#if tab.dirty}

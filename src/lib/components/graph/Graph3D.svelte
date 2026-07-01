@@ -229,6 +229,36 @@
     controls.update();
   }
 
+  // ---- ZOOM por botões (chamado pela toolbar do GraphView) — dolly animado suave ----
+  function animateZoom(factor: number) {
+    if (!camera || !controls) return;
+    const target = controls.target.clone();
+    const start = camera.position.clone();
+    const end = target.clone().add(start.clone().sub(target).multiplyScalar(factor));
+    const t0 = performance.now();
+    const dur = 200;
+    const step = () => {
+      if (disposed) return;
+      const k = Math.min(1, (performance.now() - t0) / dur);
+      const e = 1 - Math.pow(1 - k, 3); // easeOutCubic
+      camera.position.lerpVectors(start, end, e);
+      controls.update();
+      invalidate();
+      if (k < 1) requestAnimationFrame(step);
+    };
+    step();
+  }
+  export function zoomIn() {
+    animateZoom(0.78);
+  }
+  export function zoomOut() {
+    animateZoom(1.28);
+  }
+  export function fitView() {
+    fitCamera();
+    invalidate();
+  }
+
   // busca/filtro -> acende os que casam, apaga o resto
   function applyFilter() {
     const q = search.trim().toLowerCase();

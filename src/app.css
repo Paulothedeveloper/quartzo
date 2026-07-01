@@ -344,6 +344,22 @@ html.no-anim summary:active {
   }
 }
 
+/* Cross-fade suave da tela inteira ao TROCAR DE TEMA (claro/escuro) — View Transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.32s;
+  animation-timing-function: var(--ease-out, ease);
+}
+
+/* Imagens do conteúdo da nota são clicáveis (abrem no lightbox com zoom) */
+.q-prose img {
+  cursor: zoom-in;
+  transition: filter 0.15s var(--ease-out, ease);
+}
+.q-prose img:hover {
+  filter: brightness(1.04);
+}
+
 /* ===== SEGURANÇA DE TEXTO GLOBAL: nada estoura o container =====
    Causa #3 do Manual (texto não cabe / encosta na borda). Palavras imensas
    (URLs, caminhos, IDs, tokens) QUEBRAM em vez de vazar pela borda. */
