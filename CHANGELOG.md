@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.67.0 — 2026-06-30
+
+- **Sistema de TEMAS (variações) — referência Eagle, identidade Quartzo (gemas):** 7 temas selecionáveis em Configurações › Aparência via grade de swatches (preview bg+acento): `dark` (Cristal/cyan, padrão), `light` (Claro), `ametista` (violeta), `rosa` (Quartzo Rosa), `esmeralda` (verde), `ambar` (dourado), `onix` (preto neutro/cyan). Cada tema é uma paleta completa (`html[data-theme=...]` sobrescreve `--color-*` + acento do CodeMirror); os temas-gema são família escura (texto claro base preservado). Troca com o cross-fade de View Transitions (0.66). `settings.ts` aplica `html.dataset.theme` + classe `theme-light` só nos claros. Retrocompat: valores `dark`/`light` mantidos.
+
 ## 0.66.0 — 2026-06-30
 
 Onda "nível Eagle" (pesquisa do Eagle + auditoria completa de animação/mídia/tema; mantém identidade cristal cyan). Auditoria confirmou que a maioria das animações de abrir/fechar (abas/pastas/painéis/modais/troca de view) já é premium — foco no que faltava:

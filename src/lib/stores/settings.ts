@@ -3,7 +3,9 @@ import { COMMAND_DEFS, DEFAULT_SHORTCUTS } from "$lib/commands";
 
 export type EditorFont = "JetBrains Mono" | "Fira Code" | "Cascadia Code" | "Consolas";
 export type Density = "compact" | "comfortable";
-export type Theme = "dark" | "light";
+// Temas (gemas — identidade Quartzo). "dark"=Cristal (cyan, padrão), "light"=Claro.
+export type Theme = "dark" | "light" | "ametista" | "rosa" | "esmeralda" | "ambar" | "onix";
+export const THEME_IDS: Theme[] = ["dark", "light", "ametista", "rosa", "esmeralda", "ambar", "onix"];
 export type ViewMode = "edit" | "split" | "read";
 
 export interface Settings {
@@ -200,7 +202,12 @@ export function applySettings(s: Settings) {
   // suporte / reduced-motion / animações off. (1ª aplicação no load não anima.)
   const themeChanged = _lastTheme !== undefined && _lastTheme !== s.theme;
   _lastTheme = s.theme;
-  const applyTheme = () => html.classList.toggle("theme-light", s.theme === "light");
+  const applyTheme = () => {
+    // data-theme controla a paleta (CSS [data-theme=...]); a classe theme-light só
+    // pros temas claros (ajusta prose/CodeMirror). Os temas-gema são família escura.
+    html.dataset.theme = s.theme;
+    html.classList.toggle("theme-light", s.theme === "light");
+  };
   const vt = (document as Document & { startViewTransition?: (cb: () => void) => unknown })
     .startViewTransition;
   const reduce =

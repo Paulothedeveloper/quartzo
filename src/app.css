@@ -90,6 +90,79 @@ html.theme-light {
   --cm-meta: #64748b;
 }
 
+/* ==================== TEMAS-GEMA (família escura, identidade Quartzo) ==================== */
+/* Só sobrescrevem bg/superfícies/acento/borda + acento do CodeMirror; o texto claro do
+   tema escuro base permanece (alto contraste). Trocam via html[data-theme=...]. */
+html[data-theme="ametista"] {
+  --color-bg: #120a20;
+  --color-surface: #1e1330;
+  --color-elevated: #2c1e46;
+  --color-accent: #a78bfa;
+  --color-accent-hover: #8b5cf6;
+  --color-accent-light: #c4b5fd;
+  --color-border: #3a2a55;
+  --cm-caret: #a78bfa;
+  --cm-sel: rgba(167, 139, 250, 0.22);
+  --cm-activeline-bg: rgba(167, 139, 250, 0.06);
+  --cm-activeline-bar: rgba(167, 139, 250, 0.4);
+  --cm-link: #c4b5fd;
+  --cm-mono: #c4b5fd;
+}
+html[data-theme="rosa"] {
+  --color-bg: #1a0e15;
+  --color-surface: #291721;
+  --color-elevated: #3a2130;
+  --color-accent: #f472b6;
+  --color-accent-hover: #ec4899;
+  --color-accent-light: #f9a8d4;
+  --color-border: #4a2a3a;
+  --cm-caret: #f472b6;
+  --cm-sel: rgba(244, 114, 182, 0.22);
+  --cm-activeline-bg: rgba(244, 114, 182, 0.06);
+  --cm-activeline-bar: rgba(244, 114, 182, 0.4);
+  --cm-link: #f9a8d4;
+  --cm-mono: #f9a8d4;
+}
+html[data-theme="esmeralda"] {
+  --color-bg: #06140f;
+  --color-surface: #0e2019;
+  --color-elevated: #163026;
+  --color-accent: #34d399;
+  --color-accent-hover: #10b981;
+  --color-accent-light: #6ee7b7;
+  --color-border: #204a3a;
+  --cm-caret: #34d399;
+  --cm-sel: rgba(52, 211, 153, 0.2);
+  --cm-activeline-bg: rgba(52, 211, 153, 0.06);
+  --cm-activeline-bar: rgba(52, 211, 153, 0.4);
+  --cm-link: #6ee7b7;
+  --cm-mono: #6ee7b7;
+}
+html[data-theme="ambar"] {
+  --color-bg: #170f04;
+  --color-surface: #251a0b;
+  --color-elevated: #362713;
+  --color-accent: #fbbf24;
+  --color-accent-hover: #f59e0b;
+  --color-accent-light: #fcd34d;
+  --color-border: #4a3718;
+  --cm-caret: #fbbf24;
+  --cm-sel: rgba(251, 191, 36, 0.2);
+  --cm-activeline-bg: rgba(251, 191, 36, 0.06);
+  --cm-activeline-bar: rgba(251, 191, 36, 0.4);
+  --cm-link: #fcd34d;
+  --cm-mono: #fcd34d;
+}
+html[data-theme="onix"] {
+  --color-bg: #0a0a0c;
+  --color-surface: #16161b;
+  --color-elevated: #232329;
+  --color-accent: #67e8f9;
+  --color-accent-hover: #22d3ee;
+  --color-accent-light: #a5f3fc;
+  --color-border: #2c2c34;
+}
+
 /* Sidebar (gradiente fixo escuro no markup) */
 html.theme-light .app-sidebar {
   background: linear-gradient(to bottom, #ffffff, #eef2f7) !important;

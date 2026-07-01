@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.67.0",
+    date: "2026-06-30",
+    items: [
+      "TEMAS! Agora dá pra escolher entre 7 variações (Configurações › Aparência): Cristal (cyan, padrão), Claro, Ametista (roxo), Quartzo Rosa, Esmeralda (verde), Âmbar (dourado) e Ônix (preto). Cada um muda a paleta inteira mantendo a identidade cristal, com aquela transição suave (cross-fade) ao trocar.",
+    ],
+  },
+  {
     version: "0.66.0",
     date: "2026-06-30",
     items: [

@@ -94,6 +94,17 @@
     }
   }
 
+  // Temas (gemas — identidade Quartzo). bg+accent só pro swatch de preview.
+  const THEMES = [
+    { id: "dark", label: "Cristal", bg: "#0a0f1c", accent: "#67e8f9" },
+    { id: "light", label: "Claro", bg: "#f6f8fb", accent: "#0891b2" },
+    { id: "ametista", label: "Ametista", bg: "#120a20", accent: "#a78bfa" },
+    { id: "rosa", label: "Quartzo Rosa", bg: "#1a0e15", accent: "#f472b6" },
+    { id: "esmeralda", label: "Esmeralda", bg: "#06140f", accent: "#34d399" },
+    { id: "ambar", label: "Âmbar", bg: "#170f04", accent: "#fbbf24" },
+    { id: "onix", label: "Ônix", bg: "#0a0a0c", accent: "#67e8f9" },
+  ] as const;
+
   // Carrega os snippets ao abrir a aba Aparência.
   $effect(() => {
     const v = $currentVaultPath;
@@ -761,25 +772,29 @@
             <div class="space-y-3">
               <div class="card">
                 <div class="mb-2.5 text-sm">{$t("set.theme")}</div>
-                <div class="flex gap-2">
-                  <button
-                    onclick={() => set("theme", "dark")}
-                    class="flex-1 rounded-lg border px-3 py-2.5 text-sm transition-colors {$settings.theme ===
-                    'dark'
-                      ? 'border-accent bg-accent/15 text-accent-light'
-                      : 'border-border text-text-secondary hover:bg-elevated'}"
-                  >
-                    {#if $settings.theme === "dark"}<Check size={14} class="mb-0.5 inline" />{/if} {$t("set.themeDark")}
-                  </button>
-                  <button
-                    onclick={() => set("theme", "light")}
-                    class="flex-1 rounded-lg border px-3 py-2.5 text-sm transition-colors {$settings.theme ===
-                    'light'
-                      ? 'border-accent bg-accent/15 text-accent-light'
-                      : 'border-border text-text-secondary hover:bg-elevated'}"
-                  >
-                    {#if $settings.theme === "light"}<Check size={14} class="mb-0.5 inline" />{/if} {$t("set.themeLight")}
-                  </button>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {#each THEMES as th (th.id)}
+                    <button
+                      onclick={() => set("theme", th.id)}
+                      title={th.label}
+                      class="group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left text-sm transition-all duration-150 ease-out hover:-translate-y-px {$settings.theme ===
+                      th.id
+                        ? 'border-accent bg-accent/12 text-text-primary'
+                        : 'border-border text-text-secondary hover:bg-elevated'}"
+                    >
+                      <span
+                        class="relative grid h-6 w-6 shrink-0 place-items-center rounded-full"
+                        style="background:{th.bg}; box-shadow: inset 0 0 0 1.5px {th.accent}66;"
+                      >
+                        <span
+                          class="h-2.5 w-2.5 rounded-full"
+                          style="background:{th.accent}; box-shadow:0 0 8px {th.accent}"
+                        ></span>
+                      </span>
+                      <span class="min-w-0 flex-1 truncate">{th.label}</span>
+                      {#if $settings.theme === th.id}<Check size={14} class="shrink-0 text-accent-light" />{/if}
+                    </button>
+                  {/each}
                 </div>
               </div>
 
