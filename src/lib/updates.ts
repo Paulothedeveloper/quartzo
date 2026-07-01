@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.68.1",
+    date: "2026-06-30",
+    items: [
+      "Ao redimensionar/restaurar a janela, o conteúdo agora 'assenta' com um fade suave (em vez de reaparecer seco). A moldura da janela em si continua sob controle do Windows.",
+    ],
+  },
+  {
     version: "0.68.0",
     date: "2026-06-30",
     items: [

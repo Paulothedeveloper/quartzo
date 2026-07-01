@@ -565,6 +565,33 @@
     }
   }
 
+  // ANIMAÇÃO ao redimensionar/restaurar a JANELA: a moldura quem anima é o Windows;
+  // aqui o CONTEÚDO "assenta" suave (fade + leve escala) quando a janela muda de
+  // tamanho (min/max/restore/soltar o resize) — em vez de reaparecer seco. Debounce
+  // pra rodar 1x quando o resize termina. Respeita "reduzir movimento".
+  $effect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        if (document.documentElement.classList.contains("no-anim")) return;
+        const el = document.querySelector(".app-body") as HTMLElement | null;
+        el?.animate(
+          [
+            { opacity: 0.9, transform: "scale(0.996)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 240, easing: "cubic-bezier(0.16,1,0.3,1)" }
+        );
+      }, 130);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      clearTimeout(t);
+    };
+  });
+
   // WATCHDOG anti-tela-preta: pinga o Rust a cada 2s. Se parar de chegar (webview
   // morto por fora / preto), o thread no Rust recupera (navigate/restart). Lição PRISMA.
   $effect(() => {

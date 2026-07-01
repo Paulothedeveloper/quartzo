@@ -3,6 +3,10 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.68.1 — 2026-06-30
+
+- **Animação ao redimensionar/restaurar a JANELA (parte possível):** a moldura do SO é do Windows (app não controla); o CONTEÚDO agora "assenta" com fade+leve escala (Web Animations API na `.app-body`, debounce 130ms no `resize`, respeita `no-anim`). Fecha o único item que faltava da lista do Paulo.
+
 ## 0.68.0 — 2026-06-30
 
 - **Grafo animado de um jeito NOVO e com sentido — DISPAROS NEURAIS (signal propagation):** o pedido do Paulo era "não pulso uniforme sem sentido; algo criativo". Solução: impulsos (pontos brilhantes, `THREE.Points` aditivo) viajam pelas SINAPSES de nó→vizinho; ao chegar, o nó ACENDE (activation=1, decai) e re-dispara em **cascata amortecida** (gen<2, prob 0.45) → ondas de atividade percorrem a rede, como potenciais de ação. Semeia ~1 disparo/1.1s. Nós ficam PARADOS (clique fácil); giro lento (`autoRotate` 0.28) volta após 2.5s ociosos e pausa no hover. Respiro base sutil.
