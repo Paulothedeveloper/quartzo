@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do Quartzo. Formato: mais recente primeiro.
 (Regra do projeto: **toda mudança**, pequena ou grande, é registrada aqui, nas Notas de atualização do app, e na release do GitHub.)
 
+## 0.68.0 — 2026-06-30
+
+- **Grafo animado de um jeito NOVO e com sentido — DISPAROS NEURAIS (signal propagation):** o pedido do Paulo era "não pulso uniforme sem sentido; algo criativo". Solução: impulsos (pontos brilhantes, `THREE.Points` aditivo) viajam pelas SINAPSES de nó→vizinho; ao chegar, o nó ACENDE (activation=1, decai) e re-dispara em **cascata amortecida** (gen<2, prob 0.45) → ondas de atividade percorrem a rede, como potenciais de ação. Semeia ~1 disparo/1.1s. Nós ficam PARADOS (clique fácil); giro lento (`autoRotate` 0.28) volta após 2.5s ociosos e pausa no hover. Respiro base sutil.
+- **Térmica (não repetir a tela preta):** loop capado a **~30fps** (metade do custo do bloom) + **pausa total quando `document.hidden`** (minimizado) + `forceContextLoss` ao sair + modo `no-anim` desliga tudo (render sob demanda). Buffer de impulsos fixo (MAX 64). Cobre-se ainda no watchdog (0.65.3).
+
 ## 0.67.0 — 2026-06-30
 
 - **Sistema de TEMAS (variações) — referência Eagle, identidade Quartzo (gemas):** 7 temas selecionáveis em Configurações › Aparência via grade de swatches (preview bg+acento): `dark` (Cristal/cyan, padrão), `light` (Claro), `ametista` (violeta), `rosa` (Quartzo Rosa), `esmeralda` (verde), `ambar` (dourado), `onix` (preto neutro/cyan). Cada tema é uma paleta completa (`html[data-theme=...]` sobrescreve `--color-*` + acento do CodeMirror); os temas-gema são família escura (texto claro base preservado). Troca com o cross-fade de View Transitions (0.66). `settings.ts` aplica `html.dataset.theme` + classe `theme-light` só nos claros. Retrocompat: valores `dark`/`light` mantidos.

@@ -59,9 +59,35 @@
   let downXY = { x: 0, y: 0 };
   let hovered: THREE.Sprite | null = null; // nó sob o cursor
   let downSprite: THREE.Sprite | null = null; // nó pressionado (pra clique = abrir)
-  let needsRender = true; // render-on-demand: só desenha quando muda (poupa GPU em idle)
+  let needsRender = true; // render-on-demand (usado no modo reduzido)
   function invalidate() {
     needsRender = true;
+  }
+
+  // ===== DISPAROS NEURAIS: impulsos viajam pelas sinapses e ACENDEM os nós ao chegar
+  // (cascata amortecida) — atividade cerebral, não pulso uniforme. Nós ficam parados.
+  type Impulse = { from: THREE.Vector3; to: THREE.Vector3; toId: string; t: number; speed: number; gen: number };
+  let impulses: Impulse[] = [];
+  const activation = new Map<string, number>(); // id -> 0..1 (decai; acende o nó)
+  const nodePos = new Map<string, THREE.Vector3>(); // id -> posição do nó
+  let impulsePts: THREE.Points | null = null; // pontos brilhantes que viajam
+  const MAX_IMPULSES = 64;
+  let lastSeed = 0;
+  let lastFrame = 0;
+  let lastInteract = 0;
+  let reduceMotion = false;
+
+  function fireFrom(id: string, gen: number) {
+    const from = nodePos.get(id);
+    const ns = neighbors.get(id);
+    if (!from || !ns) return;
+    activation.set(id, 1);
+    for (const nid of ns) {
+      if (impulses.length >= MAX_IMPULSES) break;
+      const to = nodePos.get(nid);
+      if (!to) continue;
+      impulses.push({ from, to, toId: nid, t: 0, speed: 0.9 + Math.random() * 0.7, gen });
+    }
   }
   let lastSig = ""; // assinatura dos dados — evita reconstruir o WebGL à toa
 
@@ -119,6 +145,16 @@
     nodeById = new Map();
     hovered = null;
     downSprite = null;
+    // reset do sistema de disparos
+    impulses = [];
+    activation.clear();
+    nodePos.clear();
+    if (impulsePts) {
+      scene.remove(impulsePts);
+      impulsePts.geometry.dispose();
+      (impulsePts.material as THREE.Material).dispose();
+      impulsePts = null;
+    }
     if (edgeLines) {
       scene.remove(edgeLines);
       edgeLines.geometry.dispose();
@@ -181,10 +217,13 @@
       const size = 3.6 + Math.min(n.deg, 12) * 1.0; // tamanho por grau
       sp.scale.set(size, size, 1);
       sp.position.set(n.x ?? 0, n.y ?? 0, n.z ?? 0);
-      sp.userData = { id: n.id, path: n.path, base: size };
+      // phase: fase da "respiração neural" espalhada pela posição -> onda de atividade
+      const phase = ((n.x ?? 0) + (n.y ?? 0) * 0.7) * 0.05;
+      sp.userData = { id: n.id, path: n.path, base: size, phase };
       scene.add(sp);
       nodeSprites.push(sp);
       nodeById.set(n.id, { sprite: sp, sim: n, base: col.getHex() });
+      nodePos.set(n.id, sp.position); // posição p/ os impulsos viajarem
     }
 
     // ---- ARESTAS = linhas (sinapses) aditivas, com leve gradiente p/ cor da pasta ----
@@ -209,6 +248,25 @@
     });
     edgeLines = new THREE.LineSegments(geom, lmat);
     scene.add(edgeLines);
+
+    // ---- IMPULSOS = pontos brilhantes que correm pelas sinapses (buffer fixo) ----
+    const ipGeom = new THREE.BufferGeometry();
+    ipGeom.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(MAX_IMPULSES * 3), 3));
+    ipGeom.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(MAX_IMPULSES * 3), 3));
+    const ipMat = new THREE.PointsMaterial({
+      size: 7,
+      sizeAttenuation: true,
+      map: glowTex,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    impulsePts = new THREE.Points(ipGeom, ipMat);
+    impulsePts.frustumCulled = false;
+    impulsePts.geometry.setDrawRange(0, 0);
+    scene.add(impulsePts);
 
     fitCamera();
     applyFilter();
@@ -343,9 +401,12 @@
       s.scale.set(b * 1.35, b * 1.35, 1); // cresce de leve
     }
     if (renderer) renderer.domElement.style.cursor = s ? "pointer" : "grab";
-    // pausa o giro automático enquanto o cursor está sobre um nó (não foge do clique)
-    if (controls) controls.autoRotate = autoRotateWanted && !s;
-    invalidate(); // o hover mudou um material -> precisa repintar 1 frame
+    if (s) {
+      const id = (s.userData as any).id as string;
+      activation.set(id, Math.max(activation.get(id) ?? 0, 0.7)); // acende no hover
+    }
+    // (o giro automático é controlado pelo loop com base em `hovered` + ociosidade)
+    invalidate(); // necessário no modo reduzido (render-on-demand)
   }
 
   function onPointerMove(e: PointerEvent) {
@@ -358,9 +419,8 @@
   function onPointerDown(e: PointerEvent) {
     downXY = { x: e.clientX, y: e.clientY };
     downSprite = pickSprite(e);
-    // o usuário assumiu o controle -> para o giro automático de vez (nó não "foge"
-    // do clique). Fica parado até ele recarregar/reabrir o grafo.
-    autoRotateWanted = false;
+    // interação pausa o giro automático TEMPORARIAMENTE (volta sozinho após ocioso).
+    lastInteract = performance.now();
     if (controls) controls.autoRotate = false;
     // pressionou EM CIMA de um nó -> não orbita (o gesto é "clicar")
     if (downSprite && controls) controls.enableRotate = false;
@@ -409,11 +469,11 @@
     controls.dampingFactor = 0.08;
     controls.rotateSpeed = 0.6;
     controls.zoomSpeed = 0.9;
-    const reduce =
+    reduceMotion =
       typeof document !== "undefined" && document.documentElement.classList.contains("no-anim");
-    autoRotateWanted = !reduce;
+    autoRotateWanted = !reduceMotion;
     controls.autoRotate = autoRotateWanted;
-    controls.autoRotateSpeed = 0.35;
+    controls.autoRotateSpeed = 0.28;
     controls.addEventListener("change", invalidate); // órbita/zoom/damping -> repinta
 
     // ---- NEBULOSA: nuvens coloridas (sprites grandes, aditivos, ao fundo) ----
@@ -498,17 +558,86 @@
 
     document.addEventListener("visibilitychange", onVisibility);
 
+    const _imp = new THREE.Vector3();
     const loop = () => {
       if (disposed) return;
       raf = requestAnimationFrame(loop);
-      // OCULTO/MINIMIZADO: não renderiza nada (poupa GPU; evita o compositor branquear
-      // "após muito tempo" rodando bloom WebGL à toa). Retoma ao voltar (visibilitychange).
+      // OCULTO/MINIMIZADO: não renderiza (térmica + anti-tela-preta).
       if (document.hidden) return;
-      controls.update(); // dispara "change" -> invalidate() quando há órbita/damping/giro
-      if (needsRender) {
-        needsRender = false;
-        composer.render();
+      const now = performance.now();
+      if (now - lastFrame < 33) return; // ~30fps (metade do custo do bloom)
+      const dt = Math.min(0.05, (now - lastFrame) / 1000);
+      lastFrame = now;
+
+      // MODO REDUZIDO (no-anim): sem animação ambiente — repinta só sob demanda.
+      if (reduceMotion) {
+        controls.update();
+        if (needsRender) {
+          needsRender = false;
+          composer.render();
+        }
+        return;
       }
+
+      // giro lento volta após ~2.5s ociosos; pausa sobre um nó (clique fácil).
+      controls.autoRotate = autoRotateWanted && !hovered && now - lastInteract > 2500;
+      controls.update();
+
+      // SEMEIA disparos: a cada ~1.1s um (ou 2) nós "disparam" pelas sinapses.
+      if (nodeSprites.length && now - lastSeed > 1100) {
+        lastSeed = now;
+        const seeds = nodeSprites.length > 120 ? 2 : 1;
+        for (let k = 0; k < seeds; k++) {
+          const sp = nodeSprites[(Math.random() * nodeSprites.length) | 0];
+          fireFrom((sp.userData as any).id, 0);
+        }
+      }
+
+      // avança os impulsos e escreve o buffer dos pontos brilhantes
+      const posAttr = impulsePts?.geometry.getAttribute("position") as THREE.BufferAttribute | undefined;
+      const colAttr = impulsePts?.geometry.getAttribute("color") as THREE.BufferAttribute | undefined;
+      let w = 0;
+      for (const imp of impulses) {
+        imp.t += imp.speed * dt;
+        if (imp.t >= 1) {
+          activation.set(imp.toId, 1); // sinal chegou -> o nó ACENDE
+          if (imp.gen < 2 && impulses.length < MAX_IMPULSES && Math.random() < 0.45)
+            fireFrom(imp.toId, imp.gen + 1); // cascata amortecida
+          continue;
+        }
+        if (posAttr && w < MAX_IMPULSES) {
+          _imp.lerpVectors(imp.from, imp.to, imp.t);
+          posAttr.setXYZ(w, _imp.x, _imp.y, _imp.z);
+          const f = Math.sin(Math.PI * imp.t); // brilha no meio, some nas pontas
+          colAttr!.setXYZ(w, 0.55 * f + 0.15, 0.95 * f + 0.05, f);
+          w++;
+        }
+      }
+      impulses = impulses.filter((i) => i.t < 1);
+      if (posAttr) {
+        posAttr.needsUpdate = true;
+        colAttr!.needsUpdate = true;
+        impulsePts!.geometry.setDrawRange(0, w);
+      }
+
+      // NÓS: escala/brilho pela ATIVAÇÃO (decai) + realce do hover + respiro sutil.
+      const tt = now * 0.001;
+      for (let i = 0; i < nodeSprites.length; i++) {
+        const sp = nodeSprites[i];
+        const m = sp.material as THREE.SpriteMaterial;
+        if (m.opacity < 0.12) continue; // apagado pelo filtro
+        const ud = sp.userData as any;
+        let a = (activation.get(ud.id) ?? 0) * 0.9;
+        if (a < 0.01) a = 0;
+        activation.set(ud.id, a);
+        const isHover = sp === hovered;
+        const breath = 1 + 0.035 * Math.sin(tt * 1.1 + ud.phase);
+        const mul = (isHover ? 1.35 : 1) * breath * (1 + a * 0.8);
+        sp.scale.set(ud.base * mul, ud.base * mul, 1);
+        m.opacity = Math.min(1, (isHover ? 1 : 0.78) + a * 0.55);
+      }
+
+      composer.render();
     };
     loop();
   });
@@ -547,6 +676,10 @@
     renderer?.domElement.removeEventListener("pointerleave", onPointerLeave);
     renderer?.domElement.removeEventListener("dblclick", onDblClick);
     controls?.dispose();
+    if (impulsePts) {
+      impulsePts.geometry.dispose();
+      (impulsePts.material as THREE.Material).dispose();
+    }
     // libera o contexto WebGL da GPU ao sair do grafo (poupa VRAM/calor)
     try {
       renderer?.forceContextLoss();

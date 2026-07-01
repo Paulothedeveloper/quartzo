@@ -12,6 +12,13 @@ export interface ChangelogEntry {
 /** Notas de atualização exibidas em Configurações > Atualizações (mais novo primeiro). */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "0.68.0",
+    date: "2026-06-30",
+    items: [
+      "GRAFO VIVO de um jeito novo: em vez de luz piscando à toa, agora rolam DISPAROS NEURAIS — pulsos de luz correm pelas sinapses de um nó pro outro e ACENDEM cada nó ao chegar, disparando em cascata (ondas de atividade percorrendo a rede, como um cérebro). Os nós ficam parados (clicar continua fácil) e o giro lento volta sozinho quando você para de mexer. Leve na GPU (limitado a 30fps + pausa quando minimizado).",
+    ],
+  },
+  {
     version: "0.67.0",
     date: "2026-06-30",
     items: [
